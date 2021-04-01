@@ -1,0 +1,719 @@
+C51 COMPILER V9.60.0.0   ADC                                                               03/02/2020 10:38:12 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE ADC
+OBJECT MODULE PLACED IN .\Output\adc.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE adc.c LARGE OPTIMIZE(9,SIZE) BROWSE INCDIR(C:\Projects\FPGA-51\8816FW_re
+                    -v0\Source\;.\Include\) DEBUG OBJECTEXTEND CODE LISTINCLUDE SYMBOLS PRINT(.\Source\adc.lst) TABS(2) OBJECT(.\Output\adc.o
+                    -bj)
+
+line level    source
+
+   1          #include "Config.h"
+   1      =1  /*****************************************************************************/
+   2      =1  /*                           System Configurations                           */
+   3      =1  /*              rev 0.10 include auto test             */
+   4      =1  // 0.11 change DTV, PC input initial download data correct for Charge Pump
+   5      =1  // 0.12 correct phase measurement routine '>>3'
+   6      =1  // 0.13 enable function for SPI control... only EXT MCU case
+   7      =1  // 0.14 corrected PC measurement......
+   8      =1  // 0.0a test function only for CVBS, SVIDEO
+   9      =1  // 0.15 corrected DTV scaler setting for panel resolutions
+  10      =1  // 0.0b panel for AND 640x480 TICON panel
+  11      =1  // 0.16 corrected COMPONENT scaler setting for panel resolutions  11/21/2007
+  12      =1  // 0.0c automatic chip test
+  13      =1  // 0.17 add monitor function, osd grid for writing grid
+  14      =1  // 0.18 add component, dtv pc for analogpanel, 12/06/2007
+  15      =1  // 0.19 correct pal input for CES, 12/20/2007
+  16      =1  // 0.1a CCFL control, 12/28/2007
+  17      =1  // 0.19 Multi Grid for Banking on Internal MCU  01/17/2008
+  18      =1  // 0.20 CCFL contol for backlight brightness  01/21/2008
+  19      =1  // 0.21 CCFL contol for backlight brightness  01/25/2008
+  20      =1  // 0.22 phase setting 02/07/2008
+  21      =1  // 0.221 display input correction 04/03/2008
+  22      =1  // 0.23 PC, DTV mode, no signal display
+  23      =1  // 0.24 PC Auto Color adjustment
+  24      =1  // 0.25 revised PC Auto Clock adjustment - find divide number and phase
+  25      =1  // 0.26 Digital RGB for TW8826
+  26      =1  // 0.27 Correct LVDS control          08/22/2008
+  27      =1  // 0.28 Add WSVGA resolution          10/23/2008
+  28      =1  // 0.29 Add NEW GRID              11/14/2008
+  29      =1  // 0.30 Fix DTV input             12/10/2008
+  30      =1  // 0.31 Add 1080i23, 24, 25A, 25B       01/20/2009
+  31      =1  // 0.32 TCON setting FIX all mode       01/22/2009
+  32      =1  // 0.33 autodetect is auto on/off by dip sw1  02/02/2009
+  33      =1  // 0.34 Fix autocolor function and clamp position 02/08/2009
+  34      =1  /*****************************************************************************/
+  35      =1  #ifndef __CONFIG_H__
+  36      =1  #define __CONFIG_H__
+  37      =1  
+  38      =1  //#define INTERNAL_MCU -- defined by Project Compiler session
+  39      =1  //#define   HS      
+  40      =1  //#define   E_Wintek  
+  41      =1  //#define   AWT 
+  42      =1  //#define Holtz
+  43      =1  
+  44      =1  
+  45      =1  
+  46      =1  //#define QUAD
+  47      =1  
+  48      =1  #ifdef QUAD
+           =1   #define AWT_ML072Q
+           =1 #else
+  51      =1    #define AWT_ML072S
+  52      =1  #endif
+C51 COMPILER V9.60.0.0   ADC                                                               03/02/2020 10:38:12 PAGE 2   
+
+  53      =1  
+  54      =1  //#define SUPPORT_SVIDEO                     //andy Awt 20090914
+  55      =1  //#define SUPPORT_COMPONENT     // support component analog to decoder//andy Awt 20090914
+  56      =1  
+  57      =1  //#define SUPPORT_DTV           // support DTV input through component( to ADC ).//andy Awt 20090914
+  58      =1  //#define SUPPORT_PC          // support PC function
+  59      =1  //#define SUPPORT_DVI       // support DVI input
+  60      =1  //#define SUPPORT_SDCARD
+  61      =1  
+  62      =1  //#define SUPPORT_RS485
+  63      =1  //-----------------------------------------------------------------------------
+  64      =1  //    Firmware Version
+  65      =1  //-----------------------------------------------------------------------------
+  66      =1  #define FWVER     0x0001      // Rev 0001
+  67      =1  
+  68      =1  #define MCU_FW_Major      0x00      
+  69      =1  #define MCU_FW_Sub0     0x00      
+  70      =1  #define MCU_FW_Sub1     0x01      
+  71      =1  //-----------------------------------------------------------------------------
+  72      =1  //    Compiler
+  73      =1  //-----------------------------------------------------------------------------
+  74      =1  #define KEILC           // Keil C 5.0
+  75      =1  //-----------------------------------------------------------------------------
+  76      =1  //    MPU Clock
+  77      =1  //-----------------------------------------------------------------------------
+  78      =1  #ifndef INTERNAL_MCU
+  79      =1  //#define CLOCK_11M         // 11.0592MHz
+  80      =1  #define CLOCK_22M         // 22.1184MHz
+  81      =1  #else                 // INTERNAL_MCU
+           =1 #define CLOCK_27M         // 27MHz
+           =1 #define REG_START_ADDRESS 0xc000    // register start 0xc000, for page0, 0xc100-page1 
+           =1 #endif
+  85      =1  //-----------------------------------------------------------------------------
+  86      =1  //    TW88 Version
+  87      =1  //-----------------------------------------------------------------------------
+  88      =1  #define TW8816
+  89      =1  //-----------------------------------------------------------------------------
+  90      =1  //    Options for Backlight control
+  91      =1  //-----------------------------------------------------------------------------
+  92      =1  //#define BACKLIGHT_CCFL
+  93      =1  //#define BACKLIGHT_LED
+  94      =1  #define BACKLIGHT_PWM
+  95      =1  
+  96      =1  //-----------------------------------------------------------------------------
+  97      =1  //    Panel Resolution
+  98      =1  //-----------------------------------------------------------------------------
+  99      =1  // ---- Select Default Panel
+ 100      =1  //
+ 101      =1  //#define UXGA            // 1600 x 1200
+ 102      =1  //#define SXGA              // 1280 x 1024
+ 103      =1  //#define XGA  // 1024 x 768
+ 104      =1  #ifdef XGA
+           =1   #define LVDS          
+           =1   #define PWIDTH  1024
+           =1   #define PHEIGHT 768
+           =1 #endif
+ 109      =1  //#define SVGA            //  800 x 600
+ 110      =1  #define VGA             //  640 x 480
+ 111      =1  #ifdef VGA
+ 112      =1    #define PWIDTH  640
+ 113      =1    #define PHEIGHT 480
+ 114      =1    //#define HITACHI_640_B_160   //--> 640 x 160
+C51 COMPILER V9.60.0.0   ADC                                                               03/02/2020 10:38:12 PAGE 3   
+
+ 115      =1    #define AND_640_480
+ 116      =1  #endif
+ 117      =1  //#define WXGA            // 1280 x 768 (15:9) // 1366 x 768 (16:9)
+ 118      =1  #ifdef WXGA
+           =1     //#define WX_SHARP_LQ106K1LA
+           =1   #define PWIDTH  1280
+           =1   #define PHEIGHT 768
+           =1 #endif
+ 123      =1  //#define WSVGA           // 1024 x 600 *** only video mode
+ 124      =1  #ifdef WSVGA
+           =1   #define PWIDTH  1024
+           =1   #define PHEIGHT 600
+           =1   #define UNIDEN_1024_600
+           =1 #endif
+ 129      =1  //#define WVGA            //  800 x 480
+ 130      =1  //#ifdef WVGA
+ 131      =1    //#define PWIDTH  800
+ 132      =1    //#define PHEIGHT 480//600
+ 133      =1    // If WVGA, you have to select panel.
+ 134      =1    //#define AU_10INCH
+ 135      =1    //#define WVGA_TPO
+ 136      =1    //#define SAMSUNG_10INCH
+ 137      =1    //#define SAMSUNG_TICONLESS_10INCH
+ 138      =1    //#define SHARP_TICONLESS_7INCH
+ 139      =1    //#define AU_TICONLESS_7INCH
+ 140      =1    //#define AU_G084SN05V8_8_4INCH 
+ 141      =1    #define HSD070IDW1_7INCH
+ 142      =1    //#define INNOLUX_AT080TN03
+ 143      =1    //#define AU_TICONLESS_7INCH_CCFL
+ 144      =1    //#define CMO     // CHIMEI panel
+ 145      =1    //#define AU_TICONLESS_10INCH
+ 146      =1    //#define HITACHI_T01
+ 147      =1    //#define HITACHI_TX23D12
+ 148      =1    //#define HITACHI_TX18D24
+ 149      =1    //#define HITACHI_TX18D16
+ 150      =1    //#define TMD_LTA070A320F
+ 151      =1    //#define TMD_LTA080B
+ 152      =1  //#endif  //WVGA
+ 153      =1  //#define HVGA            //  480 x 320
+ 154      =1  //#define QVGA            //  320 x 240 *** only video mode
+ 155      =1  #ifdef QVGA
+           =1   #define PWIDTH  320
+           =1   #define PHEIGHT 240
+           =1   //#define HITACHI_TX09D73
+           =1   //#define AU_DELTARGB
+           =1   //#define SHARP_LQ050Q5DR01
+           =1   //#define SHARP_LQ035
+           =1   //#define TMD
+           =1 #endif
+ 164      =1  
+ 165      =1  //#define WQVGA           //  480 x 234 *** only video mode
+ 166      =1  #ifdef WQVGA
+           =1   #define PWIDTH  480
+           =1   #define PHEIGHT 240
+           =1   // If WQVGA, you have to select panel 
+           =1     #define ANALOG_7INCH
+           =1   //#define PWIDTH  400
+           =1   //#define PHEIGHT 240
+           =1   //#define SHARP_LQ043T3DX02   //  400 x 237
+           =1   //#define LG_ANALOG
+           =1   //#define TMD_ANALOG        //TMD_LTA05B352A
+           =1   //#define T_51945GD       // Optorex Panel
+C51 COMPILER V9.60.0.0   ADC                                                               03/02/2020 10:38:12 PAGE 4   
+
+           =1 #endif  // WQVGA
+ 178      =1  
+ 179      =1  //if LVDS pannel disable TICONLESS
+ 180      =1  
+ 181      =1  //-----------------------------------------------------------------------------
+ 182      =1  //---- Add Support One more panel with DIPSW#1
+ 183      =1  //---- Ex. Add Analog AU 7" Panel with Default Panel for evalution
+ 184      =1  //#define ADD_ANALOGPANEL   // Added Analog panel(AU7") from default set panel(expect WQVGA) with DIP #1 sw
+             -itch.(DIP#1=L:ANALOG, H:DEFAULT)
+ 185      =1                // It can't support WQVGA and ADD_ANALOGPANEL same time!!
+ 186      =1    //#define ADD_ANALOG_7INCH
+ 187      =1    //#define ADD_TMD_LTA05B352A
+ 188      =1                    
+ 189      =1  //---- Support Wide panel function
+ 190      =1  #if (defined WXGA) || (defined WSVGA) || (defined WVGA) || (defined WQVGA)
+           =1 #define WIDE_SCREEN         // Can support 4 display mode, i.e. Normal, Wide, Full, Zoom
+           =1 #endif                // Tested panasonic WVGA panel.
+ 193      =1  
+ 194      =1  //-----------------------------------------------------------------------------
+ 195      =1  //    Panel Vendor Specific
+ 196      =1  //-----------------------------------------------------------------------------
+ 197      =1  
+ 198      =1  //-----------------------------------------------------------------------------
+ 199      =1  //    TV Tuner
+ 200      =1  //-----------------------------------------------------------------------------
+ 201      =1  #define PHILIPS       0
+ 202      =1  #define ALPS        1   // ALPS, LG
+ 203      =1  #define TEMIC       2
+ 204      =1  #define TVAVA       3
+ 205      =1  #define LGTUNER       4
+ 206      =1  #define SAMSUNGMUTITUNER  5
+ 207      =1  
+ 208      =1  #define TVTunerDevice   4
+ 209      =1  //-----------------------------------------------------------------------------
+ 210      =1  //    IR Remote Controller Type
+ 211      =1  //-----------------------------------------------------------------------------
+ 212      =1  //#define REMO_RC5          // RC5 style
+ 213      =1  #define TECHWELL_REMOCON
+ 214      =1  //#define REMO_NEC          // NEC style
+ 215      =1  //#define PHILIPS_REMOCON // New remocon 
+ 216      =1  
+ 217      =1  
+ 218      =1  //-----------------------------------------------------------------------------
+ 219      =1  //    I2C Device Access Address Mapping
+ 220      =1  //-----------------------------------------------------------------------------
+ 221      =1  
+ 222      =1  #define EEPROMI2CAddress  0xa0  // EEPROM (24C16)
+ 223      =1  #define TW88I2CAddress    0x8a  // TW880x
+ 224      =1  
+ 225      =1  #define MSPI2CAddress   0x80  // MSP
+ 226      =1  #define ALC106I2CAddress    0x4A  // MSP
+ 227      =1  
+ 228      =1  #define  AD5110I2CAddress    0x5E//0x58
+ 229      =1  
+ 230      =1  //-----------------------------------------------------------------------------
+ 231      =1  //    AD5110 Command Operation Truth table
+ 232      =1  //-----------------------------------------------------------------------------
+ 233      =1  
+ 234      =1  #define AD5110_CMD_No_Operation           0
+ 235      =1  #define AD5110_CMD_Write_RDAC_To_EEPROM       1
+ 236      =1  #define AD5110_CMD_Write_Data_To_RDAC       2
+ 237      =1  #define AD5110_CMD_Shutdown             3
+C51 COMPILER V9.60.0.0   ADC                                                               03/02/2020 10:38:12 PAGE 5   
+
+ 238      =1  #define AD5110_CMD_Soft_Refresh_RDAC    4
+ 239      =1  #define AD5110_CMD_Read_RDAC        5
+ 240      =1  #define AD5110_CMD_Read_EEPROM              6
+ 241      =1  
+ 242      =1  
+ 243      =1  
+ 244      =1  //-----------------------------------------------------------------------------
+ 245      =1  //    Options for Possible Inputs
+ 246      =1  //-----------------------------------------------------------------------------
+ 247      =1  
+ 248      =1  
+ 249      =1  
+ 250      =1  
+ 251      =1  
+ 252      =1  //-----------------------------------------------------------------------------
+ 253      =1  //    Options for Possible Standards
+ 254      =1  //    Default:NTSC
+ 255      =1  //-----------------------------------------------------------------------------
+ 256      =1  #define SUPPORT_PAL     
+ 257      =1  #define SUPPORT_SECAM
+ 258      =1  #define SUPPORT_NTSC4   
+ 259      =1  #define SUPPORT_PALM  
+ 260      =1  #define SUPPORT_PALN    
+ 261      =1  #define SUPPORT_PAL60   
+ 262      =1  
+ 263      =1  
+ 264      =1  //#define ID_CHECK_BY_FW        // in Video mode, check input system ID by firmware
+ 265      =1  
+ 266      =1  //-----------------------------------------------------------------------------
+ 267      =1  //    Options for Debugging/Release
+ 268      =1  //-----------------------------------------------------------------------------
+ 269      =1  //#define SUPPORT_PATTERN       // support LCD test pattern
+ 270      =1  
+ 271      =1  
+ 272      =1  #ifndef WQVGA
+ 273      =1    #ifndef QVGA
+ 274      =1    #define SUPPORT_OSDPOSITIONMOVE
+ 275      =1    #endif
+ 276      =1  #endif
+ 277      =1  
+ 278      =1  #define SERIAL              // include serial communication routines
+ 279      =1  //#define USE_HI3521_UART2
+ 280      =1  
+ 281      =1  //#define SUPPORT_DEBUG       // Support to use Read & Write in debug OSD Window by remocon.
+ 282      =1  
+ 283      =1  //#define DEBUG           // include debug information
+ 284      =1  #ifdef DEBUG
+           =1   //#define DEBUG_MAIN
+           =1   //#define DEBUG_TIME
+           =1   //#define DEBUG_KEYREMO
+           =1   //#define DEBUG_TW88
+           =1   //#define DEBUG_DECODER
+           =1   //#define DEBUG_I2C
+           =1   //#define DEBUG_EEP
+           =1   //#define DEBUG_OSD
+           =1   //#define DEBUG_AUDIO
+           =1   //#define DEBUG_SETPANEL
+           =1   //#define DEBUG_DTV
+           =1   #define DEBUG_PC
+           =1   //#define DEBUG_PC_MEAS
+           =1   #define DEBUG_PC_COLOR
+           =1   //#define DEBUG_COMPONENT
+C51 COMPILER V9.60.0.0   ADC                                                               03/02/2020 10:38:12 PAGE 6   
+
+           =1   //#define DEBUG_BANK
+           =1   //#define DEBUG_PAUSE
+           =1   //#define DEBUG_MCU
+           =1 #endif
+ 304      =1  
+ 305      =1  #define AUTOCALC_PC         // in PC mode, Enable Auto Calcuration
+ 306      =1  //#define SUPPORT_USERCOLORFROMTXT  // Use color setting of text file in Color mode=USER MODE which is as B
+             -rightness(Reg10), Contast(Reg11),
+ 307      =1                    //    Sat_U(Reg13),Sat_V(Reg14),Sharpness(Reg12,Reg78)                  
+ 308      =1  //#define SUPPORT_GAMMA
+ 309      =1  
+ 310      =1  //#define CHIP_MANUAL_TEST      // DIPSW#1
+ 311      =1  
+ 312      =1  #ifndef INTERNAL_MCU
+ 313      =1  //#define NO_INITIALIZE       // After Power switch turn on with DIP SW4 Enable(Low), or pressed MENU button 
+             -for internal MCU
+ 314      =1                                      //     micom works to access only I2C bus by serial command.
+ 315      =1  #endif
+ 316      =1  
+ 317      =1  //#define SUPPORT_KRS_OSDDEMO   // For KRS Company Demo 
+ 318      =1  //#define SUPPORT_LINE_OSDDEMO
+ 319      =1  
+ 320      =1  //-----------------------------------------------------------------------------
+ 321      =1  //    Special Features
+ 322      =1  //-----------------------------------------------------------------------------
+ 323      =1  
+ 324      =1  #ifndef INTERNAL_MCU
+ 325      =1  //#define SUPPORT_DELTA_RGB
+ 326      =1  #endif
+ 327      =1  #define SUPPORT_SELECTKEY     // choose the keymap of using select key or left,right key.
+ 328      =1  //-----------------------------------------------------------------------------
+ 329      =1  
+ 330      =1  //#define HS_NEWOSDMENU     //Weylis -@121008 for Hor. Style OSD
+ 331      =1  //#define HS_NEWOSDMENU_2     //Weylis -@121008 for Hor. Style OSD(2 line)
+ 332      =1  #endif  //__CONFIG_H__
+   2          
+   3          #if 0/// defined( SUPPORT_PC ) || defined ( SUPPORT_DTV )
+              
+              #include "reg.h"
+              #include "typedefs.h"
+              #include "i2c.h"
+              #include "adc.h"
+              #include "printf.h"
+              #include "main.h"
+              //#include "tw88.h"
+              //#include "pc_eep.h"
+              //#include "measure.h"
+              
+              // Address
+              #define PLLDIVM   0xc3
+              #define PLLDIVL   0xc4
+              #define PHASE   0xc5
+              #define RGB_SEL   0xd0
+              #define ADCMODE   0xc0
+              #define ADC_POWER 0xcb
+              #define VCOCURR   0xc2
+              
+              //=============================================================================
+              //                             ADC Functions
+              //=============================================================================
+              #if 0//def  SUPPORT_DTV
+              CODE BYTE DTV_YPbPr_ADC_init[] = 
+C51 COMPILER V9.60.0.0   ADC                                                               03/02/2020 10:38:12 PAGE 7   
+
+              {
+                TW88I2CAddress, 51,
+                
+              0x02, 0x4A,     // input format
+              0x06, 0x00,     // Analog Control Register
+              0x38, 0x00,     // change Anti Aliasing filter path to RGB
+              0x40, 0xE4,     // scaler input control register
+              0x41, 0x00,
+              0x42, 0x80,
+              0x43, 0x20,
+              0x44, 0x2B,
+              0x45, 0x3B,
+              0x46, 0x20,
+              0x49, 0x30, //; seq
+              0x47, 0x83,
+              0x48, 0x4B,
+              0x4D, 0x10,   //0x00, //; seq
+              0x4A, 0x0E,
+              0x4B, 0x0E,
+              0x4C, 0xF6,
+              0x4E, 0x77,
+              0x4F, 0x10,
+              //0x50, 0x01,
+              0x60, 0xE0,     // Zoom Control Register
+              0x61, 0x80,
+              0x62, 0x7C,
+              0x63, 0x00,
+              0x64, 0x00,
+              0x65, 0x80,
+              
+              0xDA, 0x3D,
+              0xDB, 0xC3,
+              0xDC, 0xFC,
+              0xDD, 0x00,
+              0xDE, 0x00,
+              0xDF, 0x00,
+              
+              0xFF, 0x01, //; Page 1
+              0xC0, 0x10,
+              0xC1, 0xFA,
+              0xC2, 0x00,
+              0xC3, 0x03,
+              0xC4, 0x5A,
+              0xC5, 0x14,
+              0xC6, 0x26,
+              0xC7, 0x04,
+              0xC8, 0x00,
+              0xC9, 0x00,
+              0xCA, 0x00,
+              #ifdef REFERENCE
+              0xCB, 0xD7,
+              #else
+              0xCB, 0xDF,
+              #endif 
+              0xCC, 0x0F,
+              0xCD, 0x00,
+              0xD0, 0x07,
+              0xD1, 0x70,
+              0xD2, 0x70,
+              0xD3, 0x70,
+              0xD4, 0x00,
+              0xD5, 0x00,
+C51 COMPILER V9.60.0.0   ADC                                                               03/02/2020 10:38:12 PAGE 8   
+
+              0xD6, 0x10,
+              0xD7, 0x40,
+              0xD8, 0x02,
+              0xD9, 0x01,
+              0xDA, 0x80,
+              0xDB, 0x80,
+              0xDC, 0x20,
+              0xE0, 0x00,
+              
+                0xff, 0x00,
+                0xff, 0xff
+              };
+              #endif
+              CODE BYTE RGB_ADC_init[] = 
+              {
+                TW88I2CAddress, 52,
+              0xFF, 0x00, //; Page 0
+              0x02, 0xCD,
+              0x06, 0x00,
+              0x38, 0x00,
+              0x40, 0xC4,
+              0x41, 0x00,
+              0x42, 0x04,
+              0x43, 0x20,
+              0x44, 0x2F,
+              0x45, 0x3B,
+              0x46, 0x20,
+              0x47, 0x2C,
+              0x48, 0xC0,
+              0x49, 0x20,
+              0x4A, 0x24,
+              0x4B, 0x24,
+              0x4C, 0xE7,
+              0x4D, 0x10,
+              0x4E, 0x75,
+              0x4F, 0x1E,
+              0x50, 0x00,
+              0x60, 0xCC,
+              0x61, 0x80,
+              0x62, 0x00,
+              0x63, 0x04,
+              0x64, 0x00,
+              0x65, 0x80,
+              
+              0xDA, 0x3D,
+              0xDB, 0xC3,
+              0xDC, 0xFC,
+              0xDD, 0x00,
+              0xDE, 0x00,
+              0xDF, 0x00,
+              
+              0xFF, 0x01, //; Page 1
+              0xC0, 0x18,   //0x08,
+              //0xC1, 0x3F,
+              0xC2, 0x00,
+              0xC3, 0x03,
+              0xC4, 0x20,
+              0xC5, 0x13,
+              0xC6, 0x20,
+              0xC7, 0x04,
+              0xC8, 0x00,
+              0xC9, 0x00,
+C51 COMPILER V9.60.0.0   ADC                                                               03/02/2020 10:38:12 PAGE 9   
+
+              0xCA, 0x00,
+              0xCB, 0xD7,
+              0xCC, 0x1F,
+              0xCD, 0x00,
+              0xD0, 0x07,
+              0xD1, 0x8C,
+              0xD2, 0x79,
+              0xD3, 0x97,
+              0xD4, 0x80,
+              0xD5, 0x00,
+              0xD6, 0x10,
+              0xD7, 0x00,
+              0xD8, 0x47,
+              0xD9, 0x02,
+              0xDA, 0x02,
+              0xDB, 0x01,
+              0xDC, 0x20,
+              0xE0, 0x00,
+              
+              0xff, 0x00,
+              0xff, 0xff
+              };
+              
+              void SetADCMode(BYTE mode)
+              {
+                #ifdef DEBUG_PC
+                dPrintf("\r\n SetADCMode: %d", mode);
+                #endif
+              
+              #ifdef  SUPPORT_DTV
+                if( mode==DTV ) { // DTV-YPbPr
+                  I2CDeviceInitialize( DTV_YPbPr_ADC_init );
+                }
+                else
+              #endif    
+                {     // RGB
+                  I2CDeviceInitialize( RGB_ADC_init );
+                }
+              }
+              
+              WORD GetCoarse(void)
+              {
+                WORD buf;
+              
+                buf = ReadADC_TW88(PLLDIVM) << 8;
+                buf |= ReadADC_TW88(PLLDIVL);
+              
+                buf--;
+                return buf;
+              }
+              
+              void SetCoarse(WORD i)
+              {
+                i++;
+                #ifdef DEBUG_PC_MEAS
+                dPrintf("\r\nSet Coarse->%04x(%d) ", i, i);
+                #endif
+                WriteADC_TW88(PLLDIVM, (BYTE)(i >> 8));
+                WriteADC_TW88(PLLDIVL, (BYTE)(i));
+              }
+              
+              void SetPhase(BYTE j)
+C51 COMPILER V9.60.0.0   ADC                                                               03/02/2020 10:38:12 PAGE 10  
+
+              {
+                #ifdef DEBUG_PC_MEAS
+                dPrintf("\r\nSet Phase->%04x ", (WORD)j);
+                #endif
+              
+                WriteADC_TW88(PHASE, j&0x1f);
+              }
+              
+              BYTE GetPhaseCurrent(void)
+              {
+                return ReadADC_TW88(PHASE) & 0x1f;
+              }
+              
+              BYTE SetVCORange(DWORD _IPF)
+              {
+                BYTE VCO_CURR, oldv, chged=0;
+                BYTE val;
+                
+                val = _IPF / 1000000L;
+                
+                if     ( val < 15 )   VCO_CURR = 0x00;  // 00 000
+                else if( val < 34 )   VCO_CURR = 0x00;  // 00 000
+                else if( val < 45 )   VCO_CURR = 0x08;  // 01 000
+                else if( val < 63 )   VCO_CURR = 0x08;  // 01 000
+                else if( val < 70 )   VCO_CURR = 0x08;  // 10 000
+                else if( val < 80 )   VCO_CURR = 0x10;  // 10 000
+                else if( val <100 )   VCO_CURR = 0x10;  // 10 000
+                else if( val <110 )   VCO_CURR = 0x10;  // 10 000
+                else          VCO_CURR = 0x18;  // 11 000
+                
+                oldv = ReadADC_TW88(VCOCURR) & 0x1f;  // curr VCO_CURR value  
+                val = VCO_CURR;
+                if( oldv != val ) {
+                  chged = 1;
+                  WriteADC_TW88(VCOCURR, val);    //
+                  delay(1);         // time to stabilize
+                }
+              
+                #ifdef DEBUG_PC_MEAS
+                dPrintf("\r\nSetVCO=%02x, changed=%d", (WORD)val, (WORD)chged );
+                #endif
+              
+                return chged;
+              }
+              
+              void AutoColorAdjust(void)
+              {
+              WORD  GainYG, GainUB, GainVR;
+              BYTE  MaxR, MaxG, MaxB, temp, i;
+              bit   Finish = 0;
+              
+                WriteTW88( 0x44, (ReadTW88(0x44)&0xf3)|0x08 );    // set mode to YUV - direct path
+              
+                WriteTW88( 0xff, 1 ); // set Page 1
+                /*
+                temp = ReadTW88(0xD0);    // bit 2 for Y, 1 for U, 0 for V
+                GainYG = temp & 4;
+                GainYG <<= 6;
+                GainYG |= ReadTW88(0xD1); // read gain G
+                GainUB = temp & 2;
+                GainUB <<= 7;
+                GainUB |= ReadTW88(0xD2); // read gain G
+C51 COMPILER V9.60.0.0   ADC                                                               03/02/2020 10:38:12 PAGE 11  
+
+                GainVR = temp & 1;
+                GainVR <<= 8;
+                GainVR |= ReadTW88(0xD3); // read gain G
+                */
+                GainVR = 200;
+                GainYG = 200;
+                GainUB = 200;
+                WriteTW88( 0xD0, 0 );
+                WriteTW88( 0xD1, GainYG );  // write gain G
+                WriteTW88( 0xD2, GainUB );  // write gain B
+                WriteTW88( 0xD3, GainVR );  // write gain R
+                WriteTW88( 0xff, 0 ); // set Page 1
+                #ifdef DEBUG_PC_COLOR
+                Printf("\r\nGain R:%d, G:%d, B:%d", GainVR, GainYG, GainUB);
+                #endif
+                i = 0;
+                while (i++ < 20) {      // max count 20
+                  MeasureAndWait(3);    // measure any fields
+                  WriteTW88( 0x5B, 0x40 );  // readout RGB Max
+                  MaxR = ReadTW88( 0x59 );
+                  MaxG = ReadTW88( 0x58 );
+                  MaxB = ReadTW88( 0x57 );
+                  #ifdef DEBUG_PC_COLOR
+                  Printf("\r\nMax R:%d, G:%d, B:%d", (WORD)MaxR, (WORD)MaxG, (WORD)MaxB);
+                  #endif
+                  if (( MaxR == 0xFC ) && ( MaxG == 0xFC ) && ( MaxB == 0xFC )) break;
+                  
+                  GainVR += (0xFC - MaxR);
+                  GainYG += (0xFC - MaxG);
+                  GainUB += (0xFC - MaxB);
+                  if ( GainVR & 0xE00 ) GainVR = 0x1FF;       // set MAX
+                  if ( GainYG & 0xE00 ) GainYG = 0x1FF;       // set MAX
+                  if ( GainUB & 0xE00 ) GainUB = 0x1FF;       // set MAX
+                  temp = ((GainYG>>6) & 4) + ((GainUB>>7) & 2) + ((GainVR>>8) & 1);
+                  WriteTW88( 0xff, 1 ); // set Page 1
+                  WriteTW88( 0xD0, temp );
+                  WriteTW88( 0xD1, GainYG );  // write gain G
+                  WriteTW88( 0xD2, GainUB );  // write gain B
+                  WriteTW88( 0xD3, GainVR );  // write gain R
+                  WriteTW88( 0xff, 0 ); // set Page 0
+              
+                  #ifdef DEBUG_PC_COLOR
+                  Printf("\r\nSet Gain R:%d, G:%d, B:%d", GainVR, GainYG, GainUB);
+                  #endif
+              
+                }
+                WriteTW88( 0x44, (ReadTW88(0x44)&0xf3)|0x0c );    // set mode to RGB
+                SaveADCGainOffsetEE(1);   // save to new value
+              }
+              
+              #endif  // SUPPORT_PC
+ 328          
+C51 COMPILER V9.60.0.0   ADC                                                               03/02/2020 10:38:12 PAGE 12  
+
+ASSEMBLY LISTING OF GENERATED OBJECT CODE
+
+
+C51 COMPILER V9.60.0.0   ADC                                                               03/02/2020 10:38:12 PAGE 13  
+
+NAME                                    CLASS   MSPACE  TYPE    OFFSET  SIZE
+====                                    =====   ======  ====    ======  ====
+
+
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   ----    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

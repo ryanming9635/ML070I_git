@@ -1,0 +1,290 @@
+C51 COMPILER V9.60.0.0   SYSJUDGE                                                          05/06/2020 11:16:56 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE SYSJUDGE
+OBJECT MODULE PLACED IN .\Output\SysJudge.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE SysJudge.c LARGE OPTIMIZE(8,SPEED) BROWSE INCDIR(.\Include) DEBUG OBJECT
+                    -EXTEND PRINT(.\Listings\SysJudge.lst) TABS(2) OBJECT(.\Output\SysJudge.obj)
+
+line level    source
+
+   1          /*****************************************************************************/
+   2          /*                                                                                              */
+   3          /*  TELI ML070I   MCU                                             */
+   4          /*                                                                                              */
+   5          /*  SysJudge.c                                                                    */
+   6          /*                                                                                              */
+   7          /*****************************************************************************/
+   8           #include <math.h>
+   9          #include <stdio.h>
+  10          
+  11          #include "Config.h"
+  12          
+  13          #include "reg.h"
+  14          #include "typedefs.h"
+  15          #include "main.h"
+  16          #include "i2c.h"
+  17          #include "adc.h"
+  18          #include "etc_eep.h"
+  19          #include "Printf.h"
+*** WARNING C320 IN LINE 41 OF .\Include\Printf.h: DEBUG is defined 
+  20          #include "KeyRemo.h"
+  21          #include "Monitor.h"
+  22          #include "CPU.h"
+  23          #include "HS_DVRProtocol.h"
+  24          
+  25          
+  26          //****************************************************************************
+  27          // DEFINITIONS / MACROS
+  28          //****************************************************************************
+  29          
+  30          //--------------------------------------------------
+  31          // Power status
+  32          //--------------------------------------------------
+  33          //#define GET_POWER_STATUS()                    (g_stPowerInfo.b4PowerStatus)
+  34          //#define SET_POWER_STATUS(x)                   (g_stPowerInfo.b4PowerStatus = x)
+  35          
+  36          //****************************************************************************
+  37          // STRUCT / TYPE / ENUM DEFINITTIONS
+  38          //****************************************************************************
+  39          
+  40          
+  41          //****************************************************************************
+  42          // CODE TABLES
+  43          //****************************************************************************
+  44          
+  45          
+  46          //****************************************************************************
+  47          // VARIABLE DECLARATIONS
+  48          //****************************************************************************
+  49          extern StructModeInfoType idata g_stModeInfo;
+  50          extern StructPowerInfoType idata g_stPowerInfo;
+  51          extern StructBatteryInfoType g_stBatteryInfo;
+  52          
+  53          
+C51 COMPILER V9.60.0.0   SYSJUDGE                                                          05/06/2020 11:16:56 PAGE 2   
+
+  54          //****************************************************************************
+  55          // FUNCTION DECLARATIONS
+  56          //****************************************************************************
+  57          void SysJudgeHandler(void);
+  58          bit SysJudgeCheckStatus(void);
+  59          void SysJudgeStateChangeEvent(EnumModeStatus enumModeState);
+  60          //void SysJudgeModeResetProc(void);
+  61          WORD SysJudgeGetActiveWaitTime(void);
+  62          extern void MCUTimerCancelTimerEvent(BYTE ucEventID);
+  63          //extern void SysModeResetState(BYTE ucResetTarget);
+  64          extern WORD GetBatteryVoltage(void);
+  65          
+  66          //****************************************************************************
+  67          // FUNCTION DEFINITIONS
+  68          //****************************************************************************
+  69          //--------------------------------------------------
+  70          // Description  : Judge Handler
+  71          // Input Value  : None
+  72          // Output Value : None
+  73          //--------------------------------------------------
+  74          void SysJudgeHandler(void)
+  75          {
+  76   1      
+  77   1      #if 1
+  78   1         //  CLR_MODE_STATE_CHANGE();
+  79   1      
+  80   1          switch(GET_POWER_STATUS())
+  81   1          {
+  82   2              case _POWER_STATUS_OFF:
+  83   2      
+  84   2                  if(GET_MODE_STATE() != _MODE_STATUS_POWER_OFF)
+  85   2                  {
+  86   3                      SysJudgeStateChangeEvent(_MODE_STATUS_POWER_OFF);
+  87   3                  }
+  88   2                  
+  89   2                  break;
+  90   2                  
+  91   2              case _POWER_STATUS_SAVING:
+  92   2      //        case _POWER_STATUS_NOSUPPORT_SAVING:
+  93   2      
+  94   2                  if(GET_MODE_STATE() != _MODE_STATUS_POWER_SAVING)
+  95   2                  {
+  96   3                      SysJudgeStateChangeEvent(_MODE_STATUS_POWER_SAVING);
+  97   3                  }
+  98   2                  
+  99   2                  break;
+ 100   2                  
+ 101   2              case _POWER_STATUS_NORMAL:                    
+ 102   2                  
+ 103   2                  switch(GET_MODE_STATE())
+ 104   2                  {
+ 105   3                      case _MODE_STATUS_POWER_OFF:
+ 106   3                          SysJudgeStateChangeEvent(_MODE_STATUS_INITIAL);
+ 107   3                          
+ 108   3                          break;        
+ 109   3                          
+ 110   3                      case _MODE_STATUS_INITIAL:
+ 111   3      
+ 112   3              SysJudgeStateChangeEvent(_MODE_STATUS_SEARCH);
+ 113   3              #if(_DEBUG_MESSAGE_SysJudgeHandler==ON)
+ 114   3              GraphicsPrint(GREEN,"\r\nSysJudgeHandler=_MODE_STATUS_INITIAL");
+ 115   3              #endif
+C51 COMPILER V9.60.0.0   SYSJUDGE                                                          05/06/2020 11:16:56 PAGE 3   
+
+ 116   3                          break;
+ 117   3                          
+ 118   3                      case _MODE_STATUS_SEARCH:
+ 119   3      
+ 120   3        
+ 121   3                          break;
+ 122   3                          
+ 123   3                     // case _MODE_STATUS_DISPLAY_SETTING:
+ 124   3      
+ 125   3                        //  break;
+ 126   3                          
+ 127   3                    //  case _MODE_STATUS_ACTIVE:
+ 128   3                        
+ 129   3                         // break;
+ 130   3                          
+ 131   3                    //  case _MODE_STATUS_NOSUPPORT:
+ 132   3           
+ 133   3               //           break;
+ 134   3                          
+ 135   3                    //  case _MODE_STATUS_NOSIGNAL:
+ 136   3                      case _MODE_STATUS_POWER_SAVING:
+ 137   3      
+ 138   3                          break;
+ 139   3                      
+ 140   3                      //case _MODE_STATUS_FACTORY:
+ 141   3      
+ 142   3                       //   break;
+ 143   3                          
+ 144   3                      default:
+ 145   3      
+ 146   3                          break;
+ 147   3                  }    
+ 148   2                  
+ 149   2                  break;
+ 150   2                  
+ 151   2              default:
+ 152   2                  break;
+ 153   2          }
+ 154   1      #endif
+ 155   1          // Handle Status Check and Manual Reset Requests
+ 156   1          //SysJudgeModeResetProc();    
+ 157   1      }
+ 158          
+ 159          
+ 160          //--------------------------------------------------
+ 161          // Description  : Check Status
+ 162          // Input Value  : None.
+ 163          // Output Value : _FALSE => Status Changed
+ 164          //--------------------------------------------------
+ 165          /*
+ 166          bit SysJudgeCheckStatus(void)
+ 167          {
+ 168          
+ 169          
+ 170          
+ 171              return _TRUE;
+ 172          }
+ 173          */
+ 174          //--------------------------------------------------
+ 175          // Description  : Switch to Active State
+ 176          // Input Value  : None
+ 177          // Output Value : None
+C51 COMPILER V9.60.0.0   SYSJUDGE                                                          05/06/2020 11:16:56 PAGE 4   
+
+ 178          //--------------------------------------------------
+ 179          void SysJudgeStateChangeEvent(EnumModeStatus enumModeState)
+ 180          {
+ 181   1          SET_MODE_STATE(enumModeState);
+ 182   1         SET_MODE_STATE_CHANGE();
+ 183   1      }
+ 184          #if 0
+              void SysJudgeModeResetProc(void)
+              {        
+                  switch(GET_MODE_RESET_TARGET())
+                  {
+                      case _MODE_ACTION_RESET_TO_SEARCH:   
+              
+                          if(GET_POWER_STATUS() != _POWER_STATUS_OFF)
+                          {
+                        //      SysModeResetState(_MODE_ACTION_RESET_TO_SEARCH);    
+              
+                              SysJudgeStateChangeEvent(_MODE_STATUS_SEARCH);
+                          }
+                      
+                          break;
+              
+                      case _MODE_ACTION_RESET_TO_DISPLAY_SETTING:            
+              
+                          if(GET_MODE_STATE() == _MODE_STATUS_ACTIVE)
+                          {
+                             // SysModeResetState(_MODE_ACTION_RESET_TO_DISPLAY_SETTING);
+              
+                              SysJudgeStateChangeEvent(_MODE_STATUS_DISPLAY_SETTING);
+                          }
+                          
+                          break;
+              
+              
+                      case _MODE_ACTION_RESET_TO_NOSIGNAL:
+              
+                          if(GET_POWER_STATUS() != _POWER_STATUS_OFF)
+                          {                   
+              
+                              SysJudgeStateChangeEvent(_MODE_STATUS_NOSIGNAL);
+                            
+                          }
+                          
+                          break;
+                          
+                      case _MODE_ACTION_RESET_TO_NOSUPPORT:
+              
+                          if(GET_POWER_STATUS() != _POWER_STATUS_OFF)
+                          {
+                          //    SysModeResetState(_MODE_ACTION_RESET_TO_NOSUPPORT);    
+                              
+                                
+              
+                              SysJudgeStateChangeEvent(_MODE_STATUS_NOSUPPORT);
+                          }
+                          
+                          break;
+                          
+                      case _MODE_ACTION_RESET_TO_FACTORY_MODE:
+              
+                          SysJudgeStateChangeEvent(_MODE_STATUS_FACTORY);
+                 
+C51 COMPILER V9.60.0.0   SYSJUDGE                                                          05/06/2020 11:16:56 PAGE 5   
+
+                          break;
+              
+                      default:
+                          break;            
+                  }
+                  
+                  SET_MODE_RESET_TARGET(_MODE_ACTION_NO_RESET_MODE);     
+                  /*
+                  if(SysJudgeCheckStatus() == _FALSE)
+                  {
+                      SysModeResetState(_MODE_ACTION_RESET_TO_SEARCH);    
+              
+                      SysJudgeStateChangeEvent(_MODE_STATUS_SEARCH);
+                  }    
+              */
+              }
+              #endif
+ 257          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     92    ----
+   CONSTANT SIZE    =     39    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  1 WARNING(S),  0 ERROR(S)

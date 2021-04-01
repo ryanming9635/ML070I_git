@@ -1,0 +1,104 @@
+C51 COMPILER V9.60.0.0   SYSMODE                                                           05/04/2020 16:53:36 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE SYSMODE
+OBJECT MODULE PLACED IN .\Output\SysMode.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE SysMode.c LARGE OPTIMIZE(8,SPEED) BROWSE INCDIR(.\Include) DEBUG OBJECTE
+                    -XTEND PRINT(.\Listings\SysMode.lst) TABS(2) OBJECT(.\Output\SysMode.obj)
+
+line level    source
+
+   1          /*****************************************************************************/
+   2          /*                                                                                              */
+   3          /*  TELI ML070I   MCU                                             */
+   4          /*                                                                                              */
+   5          /*  SysMode.c                                                               */
+   6          /*                                                                                              */
+   7          /*****************************************************************************/
+   8          
+   9          
+  10          
+  11          #include <math.h>
+  12          #include <stdio.h>
+  13          
+  14          #include "Config.h"
+  15          
+  16          #include "reg.h"
+  17          #include "typedefs.h"
+  18          #include "main.h"
+  19          #include "i2c.h"
+  20          #include "adc.h"
+  21          #include "etc_eep.h"
+  22          #include "Printf.h"
+  23          #include "KeyRemo.h"
+  24          #include "Monitor.h"
+  25          #include "CPU.h"
+  26          #include "HS_DVRProtocol.h"
+  27          
+  28          
+  29          //****************************************************************************
+  30          // DEFINITIONS / MACROS
+  31          //****************************************************************************
+  32          
+  33          
+  34          //****************************************************************************
+  35          // STRUCT / TYPE / ENUM DEFINITTIONS
+  36          //****************************************************************************
+  37          
+  38          
+  39          //****************************************************************************
+  40          // CODE TABLES
+  41          //****************************************************************************
+  42          
+  43          
+  44          //****************************************************************************
+  45          // VARIABLE DECLARATIONS
+  46          //****************************************************************************
+  47          //StructModeInfoType idata g_stModeInfo = {0};
+  48          //****************************************************************************
+  49          // FUNCTION DECLARATIONS
+  50          //****************************************************************************
+  51          void SysModeHandler(void);
+  52          BYTE SysModeGetModeState(void);
+  53          bit SysModeDisplaySetting(void);
+  54          void SysModeSetUpInputCapture(void);
+C51 COMPILER V9.60.0.0   SYSMODE                                                           05/04/2020 16:53:36 PAGE 2   
+
+  55          void SysModeSetUpDisplayCapture(void);
+  56          bit SysModeSetUpMDomain(void);
+  57          //void SysModeResetState(BYTE ucResetTarget);
+  58          void SysModeSetFreeRun(void);
+  59          bit SysModeGetModeStateChange(void);
+  60          void SysModeSetResetTarget(EnumModeAction enumResetTarget);
+  61          void SysModeDisplayTimingInitial(void);    
+  62          extern void HS_power_saving_proc(void);//ryan@20160110
+  63          
+  64          //****************************************************************************
+  65          // FUNCTION DEFINITIONS
+  66          //****************************************************************************
+  67          //--------------------------------------------------
+  68          // Description  : Mode Reset 
+  69          // Input Value  : Reset Target
+  70          // Output Value : None
+  71          //--------------------------------------------------
+  72          //void SysModeResetState(BYTE ucResetTarget)
+  73          //{
+  74          //  ucResetTarget=1;
+  75            
+  76          //}
+  77          
+  78          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   ----    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

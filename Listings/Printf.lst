@@ -1,0 +1,344 @@
+C51 COMPILER V9.60.0.0   PRINTF                                                            03/23/2021 14:24:37 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE PRINTF
+OBJECT MODULE PLACED IN .\Output\Printf.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE Printf.c LARGE OPTIMIZE(8,SPEED) BROWSE INCDIR(.\Include) DEBUG OBJECTEX
+                    -TEND PRINT(.\Listings\Printf.lst) TABS(2) OBJECT(.\Output\Printf.obj)
+
+line level    source
+
+   1          /*****************************************************************************/
+   2          /*                                                                                              */
+   3          /*  TELI ML070I   MCU                                             */
+   4          /*                                                                                              */
+   5          /*  Printf.c                                                                    */
+   6          /*                                                                                              */
+   7          /*****************************************************************************/
+   8          
+   9          #include "Config.h"
+  10          
+  11          #ifdef SERIAL
+  12          
+  13          #include "reg.h"
+  14          #include "Typedefs.h"
+  15          //#include "debug.h"
+  16          #include "main.h"
+  17          #include "printf.h"
+  18          #include <stdarg.h>
+  19          
+  20          CODE BYTE Hex[] = "0123456789ABCDEF";
+  21          extern  bit       RS_Xbusy;     // bit RS_Xbusy=0;
+  22          extern  BYTE  DebugLevel;
+  23          
+  24          #if (_DEBUG_MESSAGE_Monitor==ON)
+              extern bit Monitor_flag;
+              #endif
+  27          
+  28          static const char *_PrintColor[] = {
+  29          "\033[0m",
+  30          "\033[0;31m",
+  31          "\033[0;32m",
+  32          "\033[0;33m",
+  33          "\033[0;34m",
+  34          "\033[0;35m",
+  35          "\033[0;36m",
+  36          "\033[0;37m",
+  37          };
+  38          
+  39          void DoPrint( const char CODE_P *fmt, va_list ap )
+  40          {
+  41   1        char  ch;
+  42   1        char  i;
+  43   1        long  value;
+  44   1        bit   fl_zero;
+  45   1        bit   fl_num;
+  46   1        BYTE  fl_len;
+  47   1        BYTE  cnt;
+  48   1        DWORD mask=1;
+  49   1      
+  50   1        #ifdef KEILC
+  51   1        char *ptr;
+  52   1        #endif
+  53   1      
+  54   1        while(1) {
+C51 COMPILER V9.60.0.0   PRINTF                                                            03/23/2021 14:24:37 PAGE 2   
+
+  55   2          
+  56   2          //----- Find Formatter % -----
+  57   2      
+  58   2          switch( ch = *fmt++ ) {
+  59   3            case 0:   return;
+  60   3            case '%': if( *fmt != '%' ) break;
+  61   3                  fmt++;
+  62   3            default:  _outchar( ch );
+  63   3                  continue;
+  64   3          }
+  65   2      
+  66   2          //----- Get Count -------------
+  67   2          
+  68   2          fl_zero = 0;
+  69   2          fl_num = 0;
+  70   2          cnt = 0;
+  71   2      
+  72   2          ch = *fmt++;
+  73   2      
+  74   2          if( ch=='0' ) {
+  75   3            fl_zero = 1;
+  76   3            ch = *fmt++;
+  77   3            cnt = ch - '0';
+  78   3            ch = *fmt++;
+  79   3          }
+  80   2          else if( ch>='0' && ch<='9' ) {
+  81   3            cnt = ch - '0';
+  82   3            ch = *fmt++;
+  83   3          }
+  84   2      
+  85   2          //----- Get char(B) / int / long(L) ----------------
+  86   2      
+  87   2          fl_len = 2;
+  88   2      
+  89   2          switch(ch) {
+  90   3          case 'l':
+  91   3          case 'L': ch = *fmt++;  fl_len = 4;   break;
+  92   3          case 'b':
+  93   3          case 'B': ch = *fmt++;  fl_len = 1;   break;
+  94   3          }   
+  95   2      
+  96   2          //----- Get Type Discriptor -----
+  97   2          
+  98   2          switch( ch ) {
+  99   3      
+ 100   3            case 'd':
+ 101   3            case 'u':
+ 102   3      
+ 103   3              switch (fl_len) {
+ 104   4              case 1:
+ 105   4                if( ch=='d' ) value = (char)va_arg( ap, char );
+ 106   4                else          value = (BYTE)va_arg( ap, BYTE );
+ 107   4                break;
+ 108   4      
+ 109   4              case 2:
+ 110   4                if( ch=='d' ) value = (int)va_arg( ap,  int );
+ 111   4                else          value = (WORD)va_arg( ap, WORD );
+ 112   4                break;
+ 113   4      
+ 114   4              case 4:
+ 115   4                if( ch=='d' ) value = (long)va_arg( ap, long );
+ 116   4                else          value = (DWORD)va_arg( ap, DWORD );
+C51 COMPILER V9.60.0.0   PRINTF                                                            03/23/2021 14:24:37 PAGE 3   
+
+ 117   4                break;
+ 118   4              }
+ 119   3      
+ 120   3              if( value<0 ) {
+ 121   4                _outchar('-');
+ 122   4                value = value*(-1);
+ 123   4              }
+ 124   3      
+ 125   3              if(cnt==0) {
+ 126   4                if( value==0 ) { _outchar('0'); continue; }
+ 127   4      
+ 128   4                for(cnt=0, mask=1; cnt<10; cnt++) {
+ 129   5                  if( (value/mask)==0 ) break;
+ 130   5                  mask = mask*10;
+ 131   5                }
+ 132   4              }
+ 133   3      
+ 134   3              for(i=0, mask=1; i<cnt-1; i++) mask = mask*10;
+ 135   3      
+ 136   3              while(1) {
+ 137   4                ch = (value / mask) + '0';
+ 138   4                if( ch=='0' && fl_zero==0 && mask!=1 ) ch=' ';
+ 139   4                else fl_zero = 1;
+ 140   4                _outchar(ch);
+ 141   4      
+ 142   4                value = value % (mask);
+ 143   4                mask = mask / 10;
+ 144   4                
+ 145   4                if( mask==0 )
+ 146   4                  break;
+ 147   4              }
+ 148   3              continue;
+ 149   3      
+ 150   3            case 'x':
+ 151   3            case 'X':
+ 152   3      
+ 153   3              switch (fl_len) {
+ 154   4              case 1: value = (BYTE)va_arg( ap, BYTE );   break;
+ 155   4              case 2: value = (WORD)va_arg( ap, WORD );   break;
+ 156   4              case 4: value = (DWORD)va_arg( ap, DWORD );   break;
+ 157   4              }
+ 158   3      
+ 159   3              if(cnt==0) cnt = fl_len*2;
+ 160   3      
+ 161   3              for(i=0; i<cnt; i++) {
+ 162   4                _outchar( Hex[(value >> (cnt-i-1)*4) & 0x000f] );
+ 163   4              }
+ 164   3              continue;
+ 165   3      
+ 166   3            case 's':
+ 167   3      
+ 168   3              #ifdef TASKINGC
+                      
+                      value = (WORD)va_arg( ap, WORD );
+                      while(*(char CODE_P *)value!='\0')
+                        _outchar(*(char CODE_P *)value++);
+                      continue;
+              
+                      #elif defined KEILC
+ 176   3              
+ 177   3              ptr = (char *)va_arg( ap, char* );
+ 178   3              while(*ptr!='\0')
+C51 COMPILER V9.60.0.0   PRINTF                                                            03/23/2021 14:24:37 PAGE 4   
+
+ 179   3                _outchar(*ptr++);
+ 180   3              continue;
+ 181   3      
+ 182   3              #endif
+ 183   3      
+ 184   3      
+ 185   3            case 'c':
+ 186   3              value = va_arg( ap, int );
+ 187   3                _outchar((BYTE)value);
+ 188   3              continue;
+ 189   3      
+ 190   3            default:
+ 191   3              value = (WORD)va_arg( ap, int );
+ 192   3              continue;
+ 193   3          }
+ 194   2        }
+ 195   1      }
+ 196          
+ 197          //===========================================================================//
+ 198          //                                                                           //
+ 199          //===========================================================================//
+ 200          //va_list ap;
+ 201          
+ 202          void Printf( const char CODE_P *fmt, ... )
+ 203          {
+ 204   1        va_list ap;
+ 205   1      
+ 206   1        va_start(ap, fmt);
+ 207   1        DoPrint( fmt, ap );
+ 208   1        va_end( ap );
+ 209   1      }
+ 210          
+ 211          void DEBUG_MESSAGE( const char CODE_P *fmt, ... )
+ 212          {
+ 213   1        va_list ap;
+ 214   1        va_start(ap, fmt);
+ 215   1      #ifdef HS_DEBUG
+ 216   1        DoPrint( fmt, ap );
+ 217   1      #endif
+ 218   1        va_end( ap );
+ 219   1      
+ 220   1      }
+ 221          #if (_DEBUG_MESSAGE_Monitor==ON)
+              
+              void Puts( CODE_P char *ptr )
+              {
+                while(*ptr!='\0')
+                  RS_tx(*ptr++);
+              }
+              #endif
+ 229          
+ 230          //===========================================================================//
+ 231          //                                                                           //
+ 232          //===========================================================================//
+ 233          #ifdef DEBUG
+              
+              void dPrintf( const char CODE_P *fmt, ... )
+              {
+                va_list ap;
+              
+                if( DebugLevel >= DEBUG_INFO ) {
+                  va_start(ap, fmt);
+C51 COMPILER V9.60.0.0   PRINTF                                                            03/23/2021 14:24:37 PAGE 5   
+
+                  DoPrint( fmt, ap );
+                  va_end( ap );
+                }
+              }
+              
+              //===========================================================================//
+              //                                                                           //
+              //===========================================================================//
+              void dPuts( CODE_P char *ptr )
+              {
+                if( DebugLevel >= DEBUG_INFO ) {
+                  while(*ptr!='\0')
+                    RS_tx(*ptr++);
+                }
+              }
+              
+              #if defined( SUPPORT_PC ) || defined( SUPPORT_DTV ) || defined( DEBUG_SETPANEL)
+              void wPuts( CODE_P char *ptr )
+              {
+                if( DebugLevel >= DEBUG_WARN ) {
+                  while(*ptr!='\0')
+                    RS_tx(*ptr++);
+                }
+              }
+              
+              void ePuts( CODE_P char *ptr )
+              {
+                if( DebugLevel >= DEBUG_ERR ) {
+                  while(*ptr!='\0')
+                    RS_tx(*ptr++);
+                }
+              }
+              #endif
+              
+              #endif // DEBUG
+ 276          //===========================================================================//
+ 277          //                                                                          GraphicsPrint
+ 278          //===========================================================================//
+ 279          
+ 280          void GraphicsPrint(PRINT_COLOR_e mode, const char *Message, ...)
+ 281          {
+ 282   1          #if (_DEBUG_MESSAGE_COLOR_MESSAGE==ON)
+              
+                  va_list ap;
+              
+                  #if (_DEBUG_MESSAGE_Monitor==ON)
+                  if( Monitor_flag==_TRUE)
+                  ;
+                  else
+                  #endif      
+                    {
+              
+                  DEBUG_MESSAGE( _PrintColor[mode]);
+                  va_start(ap, Message);
+                  DoPrint( Message, ap );
+                  va_end( ap );
+                  DEBUG_MESSAGE( _PrintColor[PRINT_COLOR_BLACK]);
+                    }
+                  #else
+ 300   1            va_list ap;
+ 301   1            va_start(ap, Message);
+ 302   1            DoPrint( Message, ap );
+C51 COMPILER V9.60.0.0   PRINTF                                                            03/23/2021 14:24:37 PAGE 6   
+
+ 303   1            va_end( ap );
+ 304   1            mode=1;
+ 305   1            
+ 306   1          #endif
+ 307   1      }
+ 308          
+ 309          
+ 310          #endif  // SERIAL
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1560    ----
+   CONSTANT SIZE    =     78    ----
+   XDATA SIZE       =     24     160
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----       2
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

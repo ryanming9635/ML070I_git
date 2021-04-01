@@ -1,0 +1,552 @@
+C51 COMPILER V9.60.0.0   SYSPOWER                                                          03/23/2021 14:24:37 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE SYSPOWER
+OBJECT MODULE PLACED IN .\Output\SysPower.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE SysPower.c LARGE OPTIMIZE(8,SPEED) BROWSE INCDIR(.\Include) DEBUG OBJECT
+                    -EXTEND PRINT(.\Listings\SysPower.lst) TABS(2) OBJECT(.\Output\SysPower.obj)
+
+line level    source
+
+   1          /*****************************************************************************/
+   2          /*                                                                                              */
+   3          /*  TELI ML070I   MCU                                             */
+   4          /*                                                                                              */
+   5          /*  SysPower.c                                                                */
+   6          /*                                                                                              */
+   7          /*****************************************************************************/
+   8          
+   9          #include <math.h>
+  10          #include <stdio.h>
+  11          #include "Config.h"
+  12          #include "reg.h"
+  13          #include "typedefs.h"
+  14          #include "main.h"
+  15          #include "i2c.h"
+  16          #include "adc.h"
+  17          #include "etc_eep.h"
+  18          #include "Printf.h"
+  19          #include "KeyRemo.h"
+  20          #include "Monitor.h"
+  21          #include "CPU.h"
+  22          #include "HS_DVRProtocol.h"
+  23          
+  24          
+  25          //****************************************************************************
+  26          // STRUCT / TYPE / ENUM DEFINITTIONS
+  27          //****************************************************************************
+  28          
+  29          
+  30          //****************************************************************************
+  31          // CODE TABLES
+  32          //****************************************************************************
+  33          
+  34          
+  35          //****************************************************************************
+  36          // VARIABLE DECLARATIONS
+  37          //****************************************************************************
+  38          StructPowerInfoType idata g_stPowerInfo = {0};
+  39          extern StructBatteryInfoType g_stBatteryInfo;
+  40          extern StructDVRInfoType g_stDVRInfo;
+  41          extern BYTE PowerFlag;
+  42          extern BYTE STAT1_Flag;
+  43          extern BYTE STAT2_Flag;
+  44          
+  45          
+  46          //****************************************************************************
+  47          // FUNCTION DECLARATIONS
+  48          //****************************************************************************
+  49          void SysPowerInitial(void);
+  50          void SysPowerHandler(void);
+  51          void SysPowerSwitch(EnumPowerAction enumSwitch);
+  52          void UserInterfacePowerSwitch(EnumPowerAction enumSwitch);
+  53          void UserInterfaceBatteryChargeMode(EnumBatteryStatus enumSwitch);
+  54          
+C51 COMPILER V9.60.0.0   SYSPOWER                                                          03/23/2021 14:24:37 PAGE 2   
+
+  55          extern void MCUTimerCancelTimerEvent(BYTE ucEventID);
+  56          extern bit MCUTimerCheckEventValid(BYTE ucEventIndex);
+  57          
+  58          //****************************************************************************
+  59          // FUNCTION DEFINITIONS
+  60          //****************************************************************************
+  61          //--------------------------------------------------
+  62          // Description  : Initial Source Switch Flags
+  63          // Input Value  : None
+  64          // Output Value : None
+  65          //--------------------------------------------------
+  66          void SysPowerInitial(void)
+  67          {  
+  68   1        CLR_PCON3V3_P();
+  69   1        CLR_Panel_EN();
+  70   1        CLR_PCON5V_P();
+  71   1        CLR_PCON5V();
+  72   1        CLR_Panel_EN();
+  73   1        CLR_PWCTRL();
+  74   1        CLR_BL_PWM();
+  75   1        CLR_AC_MODE();
+  76   1        CLR_BAT_SYS();
+  77   1        CLR_PCON_CAM();
+  78   1        CLR_PCON3V3_TW();
+  79   1        SET_TW8836_RST();  
+  80   1        CLR_GREEN();
+  81   1        CLR_RED();  
+  82   1        
+  83   1        MCUTimerDelayXms(200);//delay 200ms
+  84   1      
+  85   1        DEBUG_MESSAGE("\n\rSysPowerInitial..OK!!");   
+  86   1      
+  87   1      }
+  88          
+  89          //--------------------------------------------------
+  90          // Description  : Power Handler Process
+  91          // Input Value  : None
+  92          // Output Value : None
+  93          //--------------------------------------------------
+  94          void SysPowerHandler(void)
+  95          {
+  96   1          // The process will deal with all kinds of power changing by power action flag.  
+  97   1          switch(GET_TARGET_POWER_STATUS())
+  98   1          {
+  99   2              case _POWER_STATUS_NORMAL:
+ 100   2      
+ 101   2                  switch(GET_POWER_STATUS())
+ 102   2                  {
+ 103   3                      case _POWER_STATUS_OFF:
+ 104   3                          SysPowerSwitch(_POWER_ACTION_OFF_TO_NORMAL);
+ 105   3                          break;
+ 106   3      
+ 107   3                      case _POWER_STATUS_SAVING:
+ 108   3                          SysPowerSwitch(_POWER_ACTION_PS_TO_NORMAL);
+ 109   3                          break;
+ 110   3      
+ 111   3                      case _POWER_STATUS_AC_ON:
+ 112   3                          SysPowerSwitch(_POWER_ACTION_AC_ON_TO_NORMAL);
+ 113   3                          break;
+ 114   3      
+ 115   3                      case _POWER_STATUS_NOSUPPORT_SAVING:
+ 116   3                          break;
+C51 COMPILER V9.60.0.0   SYSPOWER                                                          03/23/2021 14:24:37 PAGE 3   
+
+ 117   3                      case _POWER_STATUS_NORMAL:     
+ 118   3                          break;          
+ 119   3                      default:
+ 120   3                          break;
+ 121   3                  }            
+ 122   2                  
+ 123   2                  SET_POWER_STATUS(_POWER_STATUS_NORMAL);
+ 124   2                  
+ 125   2                  break;
+ 126   2                  
+ 127   2              case _POWER_STATUS_OFF:
+ 128   2      
+ 129   2                  switch(GET_POWER_STATUS())
+ 130   2                  {
+ 131   3                      case _POWER_STATUS_SAVING:
+ 132   3                          SysPowerSwitch(_POWER_ACTION_PS_TO_OFF);
+ 133   3                          break;
+ 134   3      
+ 135   3                      case _POWER_STATUS_AC_ON:
+ 136   3                          SysPowerSwitch(_POWER_ACTION_AC_ON_TO_OFF);
+ 137   3                          break;
+ 138   3      
+ 139   3      
+ 140   3                      case _POWER_STATUS_NORMAL:
+ 141   3                          SysPowerSwitch(_POWER_ACTION_NORMAL_TO_OFF);
+ 142   3                          break;
+ 143   3      
+ 144   3                      default:
+ 145   3                          break;
+ 146   3                  }
+ 147   2      
+ 148   2                  SET_POWER_STATUS(_POWER_STATUS_OFF);
+ 149   2                  
+ 150   2                  break;
+ 151   2      
+ 152   2              case _POWER_STATUS_SAVING:
+ 153   2      
+ 154   2                  switch(GET_POWER_STATUS())
+ 155   2                  {
+ 156   3                      case _POWER_STATUS_NORMAL:
+ 157   3                        SysPowerSwitch(_POWER_ACTION_NORMAL_TO_PS);
+ 158   3                          break;
+ 159   3      
+ 160   3                      default:
+ 161   3                          break;                   
+ 162   3                  }
+ 163   2                              
+ 164   2                  SET_POWER_STATUS(_POWER_STATUS_SAVING);
+ 165   2      
+ 166   2                  break;
+ 167   2              default:
+ 168   2                  break;
+ 169   2          }
+ 170   1      
+ 171   1          // Clear power action to avoid repeat calls in next circle.
+ 172   1          SET_TARGET_POWER_STATUS(GET_POWER_STATUS());
+ 173   1      
+ 174   1      }
+ 175          
+ 176          void UserInterfaceBatteryChargeMode(EnumBatteryStatus enumSwitch)
+ 177          {
+ 178   1      
+C51 COMPILER V9.60.0.0   SYSPOWER                                                          03/23/2021 14:24:37 PAGE 4   
+
+ 179   1        MCUTimerCancelTimerEvent(_SYSTEM_TIMER_EVENT_GRN_BLINK);
+ 180   1        MCUTimerCancelTimerEvent(_SYSTEM_TIMER_EVENT_GRN_2S_BLINK);
+ 181   1        MCUTimerCancelTimerEvent( _SYSTEM_TIMER_EVENT_RED_BLINK);
+ 182   1        MCUTimerCancelTimerEvent( _SYSTEM_TIMER_EVENT_GRN_RED_BLINK);
+ 183   1        MCUTimerCancelTimerEvent( _SYSTEM_TIMER_EVENT_GRN_ON_RED_BLINK);
+ 184   1        MCUTimerCancelTimerEvent( _SYSTEM_TIMER_EVENT_GRN_2S_BLINK_RED_ON);
+ 185   1      
+ 186   1        switch(enumSwitch)
+ 187   1        {
+ 188   2        case  _BATT_STATUS_STOP_CHARGE: 
+ 189   2              SET_PWM(_CHG_CURR,_CHARGE000mA);  
+ 190   2            #if (_DEBUG_MESSAGE_BatteryVoltage==ON)
+                        GraphicsPrint(MAGENTA,"(1_Stop Charge)");   
+                    #endif
+ 193   2      
+ 194   2            SET_BATTERY_CHARGE_STATE(_BATT_STATUS_STOP_CHARGE);
+ 195   2      
+ 196   2          if((GET_DVR_SystemReadyNotic()==_FALSE)&&(PowerFlag==ON))
+ 197   2            MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_BLINK);
+ 198   2          else if(GET_POWER_STATUS()==_POWER_STATUS_SAVING)
+ 199   2            {
+ 200   3              if(GET_AC_PLUG()==_TRUE)
+ 201   3              MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_2S_BLINK);//Update LED Status    
+ 202   3              else
+ 203   3                {
+ 204   4                  if(PowerFlag==OFF)
+ 205   4                  MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_RED_OFF);//Update LED Status               
+ 206   4                  else if(GET_BATTERY_STATE()==_BATT_STATUS_CAPACITY_LEVEL0 )
+ 207   4                  MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_RED_BLINK);//Update LED Status   
+ 208   4                  else
+ 209   4                  MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_2S_BLINK);//Update LED Status    
+ 210   4                }
+ 211   3            }
+ 212   2          else   if(GET_POWER_STATUS()==_POWER_STATUS_NORMAL)
+ 213   2            {
+ 214   3              if(GET_BATTERY_STATE()==_BATT_STATUS_CAPACITY_LEVEL0)
+ 215   3              MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_ON_RED_BLINK);//Update LED Status      
+ 216   3               else
+ 217   3               MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_ON_RED_OFF);//Update LED Status
+ 218   3            }
+ 219   2          else           
+ 220   2            MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_RED_OFF);//Update LED Status
+ 221   2      
+ 222   2                break;    
+ 223   2          case  _BATT_STATUS_LOW_CHARGE:
+ 224   2                SET_PWM(_CHG_CURR,_CHARGE300mA); 
+ 225   2            #if (_DEBUG_MESSAGE_BatteryVoltage==ON)
+                        GraphicsPrint(MAGENTA,"(Low Current Charge)");  
+                    #endif
+ 228   2                SET_BATTERY_CHARGE_STATE(_BATT_STATUS_LOW_CHARGE);  
+ 229   2            
+ 230   2            if((GET_DVR_SystemReadyNotic()==_FALSE)&&(PowerFlag==ON))
+ 231   2              MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_BLINK);
+ 232   2            else if(GET_POWER_STATUS()==_POWER_STATUS_SAVING)
+ 233   2              { if(GET_AC_PLUG()==_TRUE)
+ 234   3                MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_2S_BLINK_RED_ON);//Update LED Status   
+ 235   3                else
+ 236   3                MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_BLINK);//Update LED Status   
+ 237   3                
+ 238   3              }
+ 239   2            else
+ 240   2              {
+C51 COMPILER V9.60.0.0   SYSPOWER                                                          03/23/2021 14:24:37 PAGE 5   
+
+ 241   3                if((PowerFlag==OFF)&&(STAT1_Flag==OFF)&&(STAT2_Flag==ON))
+ 242   3                MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_OFF_RED_ON);//Update LED Status          
+ 243   3                else if((STAT1_Flag==OFF)&&(STAT2_Flag==ON))
+ 244   3                MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_RED_ON);//Update LED Status
+ 245   3                else
+ 246   3                MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_ON_RED_OFF);//Update LED Status
+ 247   3                  
+ 248   3              }
+ 249   2                break;
+ 250   2          case  _BATT_STATUS_HIGH_CHARGE:
+ 251   2                SET_PWM(_CHG_CURR,_CHARGE1000mA); 
+ 252   2            #if (_DEBUG_MESSAGE_BatteryVoltage==ON)
+                        GraphicsPrint(MAGENTA,"(High Current Charge)"); 
+                    #endif
+ 255   2          
+ 256   2            SET_BATTERY_CHARGE_STATE(_BATT_STATUS_HIGH_CHARGE);
+ 257   2      
+ 258   2            
+ 259   2            if((GET_DVR_SystemReadyNotic()==_FALSE)&&(PowerFlag==ON))
+ 260   2              MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_BLINK);
+ 261   2            else if(GET_POWER_STATUS()==_POWER_STATUS_SAVING)
+ 262   2              { if(GET_AC_PLUG()==_TRUE)
+ 263   3                MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_RED_BLINK);//Update LED Status   
+ 264   3                else
+ 265   3                MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_BLINK);//Update LED Status     
+ 266   3              }
+ 267   2            else
+ 268   2              {
+ 269   3                if((STAT1_Flag==OFF)&&(STAT2_Flag==ON))
+ 270   3                MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_OFF_RED_ON);//Update LED Status
+ 271   3                else
+ 272   3                MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_RED_OFF);//Update LED Status
+ 273   3                      
+ 274   3              }
+ 275   2                break;
+ 276   2          case  _BATT_STATUS_NORMAL_CHARGE:
+ 277   2                SET_PWM(_CHG_CURR,_CHARGE700mA); 
+ 278   2            #if (_DEBUG_MESSAGE_BatteryVoltage==ON)
+                        GraphicsPrint(MAGENTA,"(Normal Current Charge)"); 
+                    #endif
+ 281   2                SET_BATTERY_CHARGE_STATE(_BATT_STATUS_NORMAL_CHARGE); 
+ 282   2            
+ 283   2            if((GET_DVR_SystemReadyNotic()==_FALSE)&&(PowerFlag==ON))
+ 284   2              MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_BLINK);
+ 285   2            else if(GET_POWER_STATUS()==_POWER_STATUS_SAVING)
+ 286   2              { 
+ 287   3                if(GET_AC_PLUG()==_TRUE)
+ 288   3                MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_2S_BLINK_RED_ON);//Update LED Status   
+ 289   3                else
+ 290   3                MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_BLINK);//Update LED Status   
+ 291   3                
+ 292   3              }
+ 293   2            else
+ 294   2              {
+ 295   3                if((PowerFlag==OFF)&&(STAT1_Flag==OFF)&&(STAT2_Flag==ON))
+ 296   3                MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_OFF_RED_ON);//Update LED Status          
+ 297   3                else if((STAT1_Flag==OFF)&&(STAT2_Flag==ON))
+ 298   3                MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_RED_ON);//Update LED Status
+ 299   3                else
+ 300   3                MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_ON_RED_OFF);//Update LED Status
+ 301   3                  
+ 302   3              }
+C51 COMPILER V9.60.0.0   SYSPOWER                                                          03/23/2021 14:24:37 PAGE 6   
+
+ 303   2                break;          
+ 304   2          case  _BATT_STATUS_NO_BATT:
+ 305   2                SET_PWM(_CHG_CURR,_CHARGE060mA);
+ 306   2            #if (_DEBUG_MESSAGE_BatteryVoltage==ON)
+                        GraphicsPrint(MAGENTA,"(1_NO BATT)");       
+                    #endif
+ 309   2                SET_BATTERY_CHARGE_STATE(_BATT_STATUS_NO_BATT);
+ 310   2            
+ 311   2            if((GET_DVR_SystemReadyNotic()==_FALSE)&&(PowerFlag==ON))
+ 312   2              MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_BLINK);
+ 313   2            else  if(GET_POWER_STATUS()==_POWER_STATUS_NORMAL)
+ 314   2               MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_ON_RED_OFF);//Update LED Status
+ 315   2            else if(GET_POWER_STATUS()==_POWER_STATUS_SAVING)  
+ 316   2              MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_2S_BLINK);//Update LED Status
+ 317   2            else  
+ 318   2              {
+ 319   3              MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_RED_OFF);//Update LED Status
+ 320   3              }
+ 321   2            break;
+ 322   2                       case _BATT_STATUS_DVR_OFF:         
+ 323   2              #if (_DEBUG_MESSAGE_PowerTimerEvent==ON)
+                        GraphicsPrint(MAGENTA,"(DVR_POWER_OFF)"); 
+                      #endif
+ 326   2      
+ 327   2                if(GET_DVR_RebootAndPower()==_TRUE)
+ 328   2                UserInterfacePowerSwitch(_POWER_ACTION_NORMAL_TO_OFF);
+ 329   2                else
+ 330   2                CLR_PCON5V();  
+ 331   2      
+ 332   2              MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_RED_BLINK);//Update LED Status
+ 333   2                   break;
+ 334   2      
+ 335   2                       case _BATT_STATUS_DVR_ON:
+ 336   2                  #if (_DEBUG_MESSAGE_PowerTimerEvent==ON)
+                           GraphicsPrint(MAGENTA,"(DVR_POWER_ON)"); 
+                          #endif
+ 339   2      
+ 340   2                    if(GET_DVR_RebootAndPower()==_TRUE)
+ 341   2                    {
+ 342   3                    UserInterfacePowerSwitch(_POWER_ACTION_OFF_TO_NORMAL);
+ 343   3                    CLR_DVR_RebootAndPower();
+ 344   3                    }
+ 345   2                    else
+ 346   2                     SET_PCON5V();  
+ 347   2      
+ 348   2                  if(GET_DVR_SystemReadyNotic()==_TRUE)
+ 349   2                  MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_ON_RED_OFF);//Update LED Status
+ 350   2                  else
+ 351   2                  MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_RED_BLINK);//Update LED Status
+ 352   2      
+ 353   2                  break;    
+ 354   2        }
+ 355   1      
+ 356   1      }
+ 357          
+ 358          void UserInterfacePowerSwitch(EnumPowerAction enumSwitch)
+ 359          {
+ 360   1        Printf("\r\n(PowerSwitch=%02x)",(WORD)enumSwitch);  
+ 361   1      
+ 362   1        
+ 363   1          switch(enumSwitch)
+ 364   1          {
+C51 COMPILER V9.60.0.0   SYSPOWER                                                          03/23/2021 14:24:37 PAGE 7   
+
+ 365   2              case _POWER_ACTION_AC_ON_TO_NORMAL:
+ 366   2        case _POWER_ACTION_PS_TO_NORMAL:
+ 367   2        case _POWER_ACTION_OFF_TO_NORMAL:
+ 368   2      #if 1     
+ 369   2        
+ 370   2            SET_PCON5V();   
+ 371   2            SET_PWCTRL();
+ 372   2            SET_AC_MODE();
+ 373   2            SET_BAT_SYS();
+ 374   2            SET_PCON_CAM();
+ 375   2            SET_PCON3V3_TW();
+ 376   2            MCUTimerDelayXms(20);//delay 20ms Power-On Sequence of Panel    
+ 377   2            CLR_TW8836_RST();
+ 378   2            
+ 379   2        MCUTimerActiveTimerEvent(SEC(0.5), _SYSTEM_TIMER_EVENT_JUDGE_FIRST_GET_BATT_BTH_STATE);
+ 380   2        MCUTimerActiveTimerEvent(SEC(/*0.5*/1), _USER_TIMER_EVENT_PANEL_BACKLIGHT_ON);  
+ 381   2      
+ 382   2      #else
+                    SET_PCON3V3_P();
+                    SET_Panel_EN();
+                    SET_PCON5V_P();
+                    SET_PCON5V();   
+                    SET_PWCTRL();
+                    SET_BL_PWM();
+                    SET_AC_MODE();
+                    SET_BAT_SYS();
+                    SET_PCON_CAM();
+                    SET_PCON3V3_TW();
+                    MCUTimerDelayXms(64);//delay 64ms Power-On Sequence and Reset
+                    CLR_TW8836_RST();  
+              #endif
+ 396   2                  break;
+ 397   2          case  _POWER_ACTION_PANEL_POWER_ON:
+ 398   2            SET_PCON3V3_P();
+ 399   2            SET_Panel_EN();
+ 400   2            MCUTimerDelayXms(64);//delay 64ms Power-On Sequence and Reset
+ 401   2            SET_PCON5V_P();
+ 402   2            SET_BL_PWM();
+ 403   2      
+ 404   2            if(GET_DVR_EntrySleepMode()==_TRUE)
+ 405   2            {
+ 406   3            CLR_DVR_EntrySleepMode();
+ 407   3            MCU_SendCmdToDVR(MCU_PROTOCOL_CMD_SLEEP_WAKE_UP);
+ 408   3            }
+ 409   2      
+ 410   2            P3M1=0x00|0x30;//p3.4 and P3.5 set push pull mode ryan@20210223
+ 411   2            break;
+ 412   2      
+ 413   2              case _POWER_ACTION_AC_ON_TO_OFF:
+ 414   2        case _POWER_ACTION_NORMAL_TO_OFF:
+ 415   2        case _POWER_ACTION_PS_TO_OFF:
+ 416   2      
+ 417   2          SET_TW8836_RST(); 
+ 418   2          CLR_PCON3V3_P();
+ 419   2          CLR_PCON5V_P();
+ 420   2          CLR_Panel_EN();
+ 421   2          CLR_PCON5V();
+ 422   2          CLR_Panel_EN();
+ 423   2          CLR_PWCTRL();
+ 424   2          CLR_AC_MODE();
+ 425   2          CLR_BAT_SYS();
+ 426   2          CLR_PCON_CAM();
+C51 COMPILER V9.60.0.0   SYSPOWER                                                          03/23/2021 14:24:37 PAGE 8   
+
+ 427   2          //#if (_DEBUG_MESSAGE_Monitor==ON)
+ 428   2          //#else
+ 429   2          //CLR_PCON3V3_TW(); ///關閉debug message UART1 有問題
+ 430   2          //#endif
+ 431   2          CLR_BL_PWM();
+ 432   2      
+ 433   2          #if 0// (_DEBUG_MESSAGE_Monitor==ON)
+                  #else
+ 435   2          CLR_PCON3V3_TW(); ///關閉debug message UART1 有問題
+ 436   2          #endif
+ 437   2      
+ 438   2          SET_DVR_PowerOFFDelay();
+ 439   2          MCUTimerActiveTimerEvent( SEC(3),_SYSTEM_TIMER_EVENT_POWER_OFF_ON_DELAY);
+ 440   2                  break;
+ 441   2      
+ 442   2              case _POWER_ACTION_NORMAL_TO_PS:
+ 443   2      
+ 444   2            //CLR_PCON3V3_P();
+ 445   2            //CLR_PCON5V_P();
+ 446   2            CLR_Panel_EN();
+ 447   2            CLR_PCON5V_P();
+ 448   2            CLR_PWCTRL();
+ 449   2            CLR_AC_MODE();
+ 450   2            //CLR_BAT_SYS();
+ 451   2            CLR_PCON_CAM();
+ 452   2            CLR_BL_PWM();
+ 453   2            //CLR_PCON5V();
+ 454   2            //SET_TW8836_RST(); 
+ 455   2            //CLR_PCON3V3_TW();
+ 456   2            
+ 457   2            P3M1=0x00;//p3.4 and P3.5 set output ryan@20210226
+ 458   2                  break;
+ 459   2      
+ 460   2              default:
+ 461   2      
+ 462   2                  break;
+ 463   2          }
+ 464   1      
+ 465   1          
+ 466   1      SET_BATTERY_CHARGE_STATE(_BATT_STATUS_NONE);//reset battery state.
+ 467   1      
+ 468   1      }
+ 469          
+ 470          //--------------------------------------------------
+ 471          // Description  : Deal With Power Manage According To Input Pamater
+ 472          // Input Value  : ucSwitch    --> Power action description.
+ 473          // Output Value : None
+ 474          //--------------------------------------------------
+ 475          void SysPowerSwitch(EnumPowerAction enumSwitch)
+ 476          {
+ 477   1      
+ 478   1      
+ 479   1          switch(enumSwitch)
+ 480   1          {
+ 481   2              case _POWER_ACTION_NORMAL_TO_PS:
+ 482   2            UserInterfacePowerSwitch(enumSwitch); 
+ 483   2                  break;
+ 484   2      
+ 485   2              case _POWER_ACTION_NORMAL_TO_OFF:
+ 486   2              case _POWER_ACTION_AC_ON_TO_OFF:
+ 487   2        case _POWER_ACTION_DVR_POWER_OFF: 
+ 488   2            case _POWER_ACTION_PS_TO_OFF:
+C51 COMPILER V9.60.0.0   SYSPOWER                                                          03/23/2021 14:24:37 PAGE 9   
+
+ 489   2          UserInterfacePowerSwitch(enumSwitch); 
+ 490   2        break;
+ 491   2                  
+ 492   2      //       case _POWER_ACTION_PS_TO_OFF:
+ 493   2      //            break;
+ 494   2      
+ 495   2              case _POWER_ACTION_AC_ON_TO_NORMAL:
+ 496   2              case _POWER_ACTION_OFF_TO_NORMAL:
+ 497   2              case _POWER_ACTION_PS_TO_NORMAL:    
+ 498   2               case _POWER_ACTION_PS_TO_BATT: 
+ 499   2        case _POWER_ACTION_DVR_POWER_ON:
+ 500   2        case  _POWER_ACTION_PANEL_POWER_ON:
+ 501   2          // User Power Process
+ 502   2                      UserInterfacePowerSwitch(enumSwitch);        
+ 503   2                break;
+ 504   2            
+ 505   2              default:
+ 506   2                  break;
+ 507   2          }
+ 508   1        
+ 509   1      }
+ 510          
+ 511          
+ 512          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1107    ----
+   CONSTANT SIZE    =     45    ----
+   XDATA SIZE       =   ----       3
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =      2    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

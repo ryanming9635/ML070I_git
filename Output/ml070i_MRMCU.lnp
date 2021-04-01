@@ -1,0 +1,13 @@
+".\Output\STARTUP.obj",
+".\Output\CPU.obj",
+".\Output\etc_eep.obj",
+".\Output\HS_DVRProtocol.obj",
+".\Output\i2c.obj",
+".\Output\keyremo.obj",
+".\Output\main.obj",
+".\Output\monitor.obj",
+".\Output\Printf.obj",
+".\Output\SysPower.obj",
+".\Output\SysTimer.obj" 
+TO ".\Output\ml070i_MRMCU" 
+PRINT(".\Listings\ml070i_MRMCU.m51") RAMSIZE(256) 

@@ -1,0 +1,128 @@
+C51 COMPILER V9.60.0.0   ETC_EEP                                                           03/23/2021 14:24:37 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE ETC_EEP
+OBJECT MODULE PLACED IN .\Output\etc_eep.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE etc_eep.c LARGE OPTIMIZE(8,SPEED) BROWSE INCDIR(.\Include) DEBUG OBJECTE
+                    -XTEND PRINT(.\Listings\etc_eep.lst) TABS(2) OBJECT(.\Output\etc_eep.obj)
+
+line level    source
+
+   1          /*****************************************************************************/
+   2          /*                                                                                              */
+   3          /*  TELI ML070I   MCU                                             */
+   4          /*                                                                                              */
+   5          /*  Etc_eep.c                                                                             */
+   6          /*                                                                                              */
+   7          /*****************************************************************************/
+   8          
+   9          //eeprom.c
+  10          #include "Config.h"
+  11          #include "typedefs.h"
+  12          #include "main.h"
+  13          #include "i2c.h"
+  14          #include "printf.h"
+  15          #include "etc_eep.h"
+  16          
+  17          DWORD GetFWRevEE()
+  18          {
+  19   1        DWORD rev=0;
+  20   1      /*
+  21   1        if( ReadEEP(0) != '0' ) return 0;
+  22   1        if( ReadEEP(1) != '7' ) return 0;
+  23   1        if( ReadEEP(2) != '0' ) return 0;
+  24   1        if( ReadEEP(3) != 'I' ) return 0;
+  25   1      */
+  26   1      rev = ((ReadEEP(EEP_FWREV_MAJOR)<<16)|(ReadEEP(EEP_FWREV_MINOR1)<<8)|(ReadEEP(EEP_FWREV_MINOR2)));
+  27   1      
+  28   1        return rev;
+  29   1      }
+  30          
+  31          BYTE GetProjectNameEE(void)
+  32          {
+  33   1        BYTE rev=1;
+  34   1      
+  35   1        if( ReadEEP(0) != '0' ) return 0;
+  36   1        if( ReadEEP(1) != '7' ) return 0;
+  37   1        if( ReadEEP(2) != '0' ) return 0;
+  38   1        if( ReadEEP(3) != 'I' ) return 0;
+  39   1      
+  40   1      return rev;
+  41   1      }
+  42          
+  43          void SaveFWRevEE(void)
+  44          {
+  45   1      /*
+  46   1        WriteEEP(0, '0');
+  47   1        WriteEEP(1, '7');
+  48   1        WriteEEP(2, '0');
+  49   1        WriteEEP(3, 'I');
+  50   1        */
+  51   1        WriteEEP(EEP_FWREV_MAJOR, MCU_FW_Major );
+  52   1        WriteEEP(EEP_FWREV_MINOR1, MCU_FW_Sub0 );
+  53   1        WriteEEP(EEP_FWREV_MINOR2, MCU_FW_Sub1);
+  54   1      
+C51 COMPILER V9.60.0.0   ETC_EEP                                                           03/23/2021 14:24:37 PAGE 2   
+
+  55   1      }
+  56          
+  57          #if (_DEBUG_MESSAGE_Monitor==ON)
+              
+              void SaveDebugLevelEE(BYTE dl)
+              {
+                WriteEEP(EEP_DEBUGLEVEL, dl);
+              }
+              #endif
+  64          
+  65          //===================================================================
+  66          
+  67          void ClearBasicEE(void)
+  68          {
+  69   1      
+  70   1        Printf("\r\nClearBasicEE...");
+  71   1      
+  72   1        WriteEEP(0, '0');
+  73   1        WriteEEP(1, '7');
+  74   1        WriteEEP(2, '0');
+  75   1        WriteEEP(3, 'I');
+  76   1      
+  77   1        WriteEEP(EEP_Powerflag,ON);
+  78   1      
+  79   1      //  WriteEEP(EEP_CameraVolt, 14);  //7.6V
+  80   1        WriteEEP(EEP_CameraVolt, 39);  //5.1V
+  81   1      
+  82   1        WriteEEP(EEP_DEBUGLEVEL,OFF); 
+  83   1      
+  84   1        WriteEEP(EEP_DC12_PWR_START, OFF);  
+  85   1      
+  86   1        WriteEEP(EEP_LowBattery_Flag, OFF); 
+  87   1        
+  88   1        WriteEEP(EEP_PowerOffToOnflag,ON);
+  89   1      
+  90   1        WriteEEP(EEP_Encorder1,1);
+  91   1        WriteEEP(EEP_Decimal1,0);
+  92   1      
+  93   1        WriteEEP(EEP_Encorder2,1);
+  94   1        WriteEEP(EEP_Decimal2,0);
+  95   1      
+  96   1        WriteEEP(EEP_Encorder3,1);
+  97   1        WriteEEP(EEP_Decimal3,0);
+  98   1      
+  99   1        WriteEEP(EEP_Encorder4,1);
+ 100   1        WriteEEP(EEP_Decimal4,0);
+ 101   1          
+ 102   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    333    ----
+   CONSTANT SIZE    =     18    ----
+   XDATA SIZE       =   ----       1
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

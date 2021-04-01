@@ -1,0 +1,104 @@
+C51 COMPILER V9.60.0.0   KEYREMO                                                           03/23/2021 14:24:37 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE KEYREMO
+OBJECT MODULE PLACED IN .\Output\keyremo.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE keyremo.c LARGE OPTIMIZE(8,SPEED) BROWSE INCDIR(.\Include) DEBUG OBJECTE
+                    -XTEND PRINT(.\Listings\keyremo.lst) TABS(2) OBJECT(.\Output\keyremo.obj)
+
+line level    source
+
+   1          /*****************************************************************************/
+   2          /*                                                                                              */
+   3          /*  TELI ML070I   MCU                                             */
+   4          /*                                                                                              */
+   5          /*  keyremo.c                                                                   */
+   6          /*                                                                                              */
+   7          /*****************************************************************************/
+   8          
+   9          #include "config.h"
+  10          #include "typedefs.h"
+  11          #include "keyremo.h"
+  12          #include "main.h"
+  13          #include "i2c.h"
+  14          #include "cpu.h"
+  15          #include "printf.h"
+  16          #include "reg.h"
+  17          #include "etc_eep.h"
+  18          #include "HS_DVRProtocol.h"
+  19          
+  20          extern bit  RepeatKey;
+  21          extern  DATA  WORD  tic_pc;
+  22          extern  bit KeyReady;
+  23          extern  DATA BYTE Key;
+  24          extern  BYTE  keyticSec;
+  25          extern BYTE DVR_FACTORY_MODE;
+  26          extern BYTE PowerFlag;
+  27          extern BYTE  updn_reg[4];
+  28          extern short EncorderCount;
+  29          extern bit ChangeKey;
+  30          extern BYTE bytHoldOn3SPowerOff;
+  31          extern BYTE bytHoldOn3SPowerOffMode;
+  32          
+  33          void Scankey(void)
+  34          {
+  35   1      
+  36   1        if( GetKey(1)) 
+  37   1        {
+  38   2      
+  39   2        if((DVR_FACTORY_MODE==ON)&&(PowerFlag==ON))
+  40   2        {
+  41   3        DVR_FACTORY_MODE=OFF;//reset value
+  42   3        MCUTimerActiveTimerEvent(SEC(0.5), _USER_TIMER_EVENT_OSD_DVR_FACTORY_MODE);
+  43   3        }
+  44   2        else if((bytHoldOn3SPowerOffMode==ON)&&(PowerFlag==ON))
+  45   2          {
+  46   3          bytHoldOn3SPowerOff=OFF;
+  47   3          bytHoldOn3SPowerOffMode=OFF;
+  48   3          PowerFlag=OFF;
+  49   3          WriteEEP(EEP_Powerflag,PowerFlag);                                
+  50   3          }
+  51   2        else
+  52   2           MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_JUDGE_PSW_STATE);
+  53   2        }
+  54   1      
+C51 COMPILER V9.60.0.0   KEYREMO                                                           03/23/2021 14:24:37 PAGE 2   
+
+  55   1      }
+  56          
+  57          //=============================================================================
+  58          //    Get Key 
+  59          //=============================================================================
+  60          BYTE GetKey(BYTE repeat)
+  61          {
+  62   1      
+  63   1      bit ready;
+  64   1      
+  65   1        ready = KeyReady;
+  66   1        KeyReady = 0;
+  67   1        
+  68   1        if( !ready ) return 0;
+  69   1        if( repeat ) return Key;
+  70   1        if( !RepeatKey ) return Key;
+  71   1      
+  72   1        return 0;
+  73   1      }
+  74          
+  75          
+  76          
+  77          
+  78          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    108    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----       1
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

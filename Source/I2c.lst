@@ -1,0 +1,3288 @@
+C51 COMPILER V9.60.0.0   I2C                                                               03/02/2020 12:07:33 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE I2C
+OBJECT MODULE PLACED IN .\Output\I2c.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE I2c.c LARGE OPTIMIZE(9,SIZE) BROWSE INCDIR(.\Include\) DEBUG OBJECTEXTEN
+                    -D CODE LISTINCLUDE SYMBOLS PRINT(.\Source\I2c.lst) TABS(2) OBJECT(.\Output\I2c.obj)
+
+line level    source
+
+   1          //-------------------------------------------------------------
+   2          //  This is changed for sdcc compiler 2.2.0a  LJY000721
+   3          //  ver0.11 2/20/2001 Support Z86129 Line 21 decoder.
+   4          //-------------------------------------------------------------
+   5          /*#include <io51.h>*/
+   6          //#include <pk-51.h>  LJY000721
+   7          
+   8          #include "Config.h"
+   1      =1  /*****************************************************************************/
+   2      =1  /*                                                                                              */
+   3      =1  /*  TELI ML070I   MCU                                             */
+   4      =1  /*                                                                                              */
+   5      =1  /*****************************************************************************/
+   6      =1  
+   7      =1  #ifndef __CONFIG_H__
+   8      =1  #define __CONFIG_H__
+   9      =1  
+  10      =1  //#define INTERNAL_MCU -- defined by Project Compiler session
+  11      =1  //#define   HS      
+  12      =1  //#define   E_Wintek  
+  13      =1  //#define   AWT 
+  14      =1  //#define Holtz
+  15      =1  
+  16      =1  
+  17      =1  
+  18      =1  //#define QUAD
+  19      =1  /*
+  20      =1  #ifdef QUAD
+  21      =1    #define AWT_ML072Q
+  22      =1  #else
+  23      =1    #define AWT_ML072S
+  24      =1  #endif
+  25      =1  */
+  26      =1  //#define SUPPORT_SVIDEO                     //andy Awt 20090914
+  27      =1  //#define SUPPORT_COMPONENT     // support component analog to decoder//andy Awt 20090914
+  28      =1  
+  29      =1  //#define SUPPORT_DTV           // support DTV input through component( to ADC ).//andy Awt 20090914
+  30      =1  //#define SUPPORT_PC          // support PC function
+  31      =1  //#define SUPPORT_DVI       // support DVI input
+  32      =1  //#define SUPPORT_SDCARD
+  33      =1  
+  34      =1  //#define SUPPORT_RS485
+  35      =1  //-----------------------------------------------------------------------------
+  36      =1  //    Firmware Version
+  37      =1  //-----------------------------------------------------------------------------
+  38      =1  #define FWVER     0x0001      // Rev 0001
+  39      =1  
+  40      =1  #define MCU_FW_Major      0x00      
+  41      =1  #define MCU_FW_Sub0     0x00      
+  42      =1  #define MCU_FW_Sub1     0x01      
+  43      =1  //-----------------------------------------------------------------------------
+  44      =1  //    Compiler
+  45      =1  //-----------------------------------------------------------------------------
+  46      =1  #define KEILC           // Keil C 5.0
+C51 COMPILER V9.60.0.0   I2C                                                               03/02/2020 12:07:33 PAGE 2   
+
+  47      =1  //-----------------------------------------------------------------------------
+  48      =1  //    MPU Clock
+  49      =1  //-----------------------------------------------------------------------------
+  50      =1  #ifndef INTERNAL_MCU
+  51      =1  //#define CLOCK_11M         // 11.0592MHz
+  52      =1  #define CLOCK_22M         // 22.1184MHz
+  53      =1  #else                 // INTERNAL_MCU
+           =1 #define CLOCK_27M         // 27MHz
+           =1 #define REG_START_ADDRESS 0xc000    // register start 0xc000, for page0, 0xc100-page1 
+           =1 #endif
+  57      =1  //-----------------------------------------------------------------------------
+  58      =1  //    TW88 Version
+  59      =1  //-----------------------------------------------------------------------------
+  60      =1  #define TW8816
+  61      =1  //-----------------------------------------------------------------------------
+  62      =1  //    Options for Backlight control
+  63      =1  //-----------------------------------------------------------------------------
+  64      =1  //#define BACKLIGHT_CCFL
+  65      =1  //#define BACKLIGHT_LED
+  66      =1  #define BACKLIGHT_PWM
+  67      =1  
+  68      =1  //-----------------------------------------------------------------------------
+  69      =1  //    Panel Resolution
+  70      =1  //-----------------------------------------------------------------------------
+  71      =1  // ---- Select Default Panel
+  72      =1  //
+  73      =1  //#define UXGA            // 1600 x 1200
+  74      =1  //#define SXGA              // 1280 x 1024
+  75      =1  //#define XGA  // 1024 x 768
+  76      =1  /*
+  77      =1  #ifdef XGA
+  78      =1    #define LVDS          
+  79      =1    #define PWIDTH  1024
+  80      =1    #define PHEIGHT 768
+  81      =1  #endif
+  82      =1  //#define SVGA            //  800 x 600
+  83      =1  #define VGA             //  640 x 480
+  84      =1  #ifdef VGA
+  85      =1    #define PWIDTH  640
+  86      =1    #define PHEIGHT 480
+  87      =1    //#define HITACHI_640_B_160   //--> 640 x 160
+  88      =1    #define AND_640_480
+  89      =1  #endif
+  90      =1  //#define WXGA            // 1280 x 768 (15:9) // 1366 x 768 (16:9)
+  91      =1  #ifdef WXGA
+  92      =1      //#define WX_SHARP_LQ106K1LA
+  93      =1    #define PWIDTH  1280
+  94      =1    #define PHEIGHT 768
+  95      =1  #endif
+  96      =1  //#define WSVGA           // 1024 x 600 *** only video mode
+  97      =1  #ifdef WSVGA
+  98      =1    #define PWIDTH  1024
+  99      =1    #define PHEIGHT 600
+ 100      =1    #define UNIDEN_1024_600
+ 101      =1  #endif
+ 102      =1  */
+ 103      =1  //#define WVGA            //  800 x 480
+ 104      =1  //#ifdef WVGA
+ 105      =1    //#define PWIDTH  800
+ 106      =1    //#define PHEIGHT 480//600
+ 107      =1    // If WVGA, you have to select panel.
+ 108      =1    //#define AU_10INCH
+C51 COMPILER V9.60.0.0   I2C                                                               03/02/2020 12:07:33 PAGE 3   
+
+ 109      =1    //#define WVGA_TPO
+ 110      =1    //#define SAMSUNG_10INCH
+ 111      =1    //#define SAMSUNG_TICONLESS_10INCH
+ 112      =1    //#define SHARP_TICONLESS_7INCH
+ 113      =1    //#define AU_TICONLESS_7INCH
+ 114      =1    //#define AU_G084SN05V8_8_4INCH 
+ 115      =1  //  #define HSD070IDW1_7INCH
+ 116      =1    //#define INNOLUX_AT080TN03
+ 117      =1    //#define AU_TICONLESS_7INCH_CCFL
+ 118      =1    //#define CMO     // CHIMEI panel
+ 119      =1    //#define AU_TICONLESS_10INCH
+ 120      =1    //#define HITACHI_T01
+ 121      =1    //#define HITACHI_TX23D12
+ 122      =1    //#define HITACHI_TX18D24
+ 123      =1    //#define HITACHI_TX18D16
+ 124      =1    //#define TMD_LTA070A320F
+ 125      =1    //#define TMD_LTA080B
+ 126      =1  //#endif  //WVGA
+ 127      =1  //#define HVGA            //  480 x 320
+ 128      =1  //#define QVGA            //  320 x 240 *** only video mode
+ 129      =1  /*
+ 130      =1  #ifdef QVGA
+ 131      =1    #define PWIDTH  320
+ 132      =1    #define PHEIGHT 240
+ 133      =1    //#define HITACHI_TX09D73
+ 134      =1    //#define AU_DELTARGB
+ 135      =1    //#define SHARP_LQ050Q5DR01
+ 136      =1    //#define SHARP_LQ035
+ 137      =1    //#define TMD
+ 138      =1  #endif
+ 139      =1  
+ 140      =1  //#define WQVGA           //  480 x 234 *** only video mode
+ 141      =1  #ifdef WQVGA
+ 142      =1    #define PWIDTH  480
+ 143      =1    #define PHEIGHT 240
+ 144      =1    // If WQVGA, you have to select panel 
+ 145      =1      #define ANALOG_7INCH
+ 146      =1    //#define PWIDTH  400
+ 147      =1    //#define PHEIGHT 240
+ 148      =1    //#define SHARP_LQ043T3DX02   //  400 x 237
+ 149      =1    //#define LG_ANALOG
+ 150      =1    //#define TMD_ANALOG        //TMD_LTA05B352A
+ 151      =1    //#define T_51945GD       // Optorex Panel
+ 152      =1  #endif  // WQVGA
+ 153      =1  */
+ 154      =1  //if LVDS pannel disable TICONLESS
+ 155      =1  
+ 156      =1  //-----------------------------------------------------------------------------
+ 157      =1  //---- Add Support One more panel with DIPSW#1
+ 158      =1  //---- Ex. Add Analog AU 7" Panel with Default Panel for evalution
+ 159      =1  //#define ADD_ANALOGPANEL   // Added Analog panel(AU7") from default set panel(expect WQVGA) with DIP #1 sw
+             -itch.(DIP#1=L:ANALOG, H:DEFAULT)
+ 160      =1                // It can't support WQVGA and ADD_ANALOGPANEL same time!!
+ 161      =1    //#define ADD_ANALOG_7INCH
+ 162      =1    //#define ADD_TMD_LTA05B352A
+ 163      =1                    
+ 164      =1  //---- Support Wide panel function
+ 165      =1  /*
+ 166      =1  #if (defined WXGA) || (defined WSVGA) || (defined WVGA) || (defined WQVGA)
+ 167      =1  #define WIDE_SCREEN         // Can support 4 display mode, i.e. Normal, Wide, Full, Zoom
+ 168      =1  #endif                // Tested panasonic WVGA panel.
+ 169      =1  */
+C51 COMPILER V9.60.0.0   I2C                                                               03/02/2020 12:07:33 PAGE 4   
+
+ 170      =1  //-----------------------------------------------------------------------------
+ 171      =1  //    Panel Vendor Specific
+ 172      =1  //-----------------------------------------------------------------------------
+ 173      =1  /*
+ 174      =1  //-----------------------------------------------------------------------------
+ 175      =1  //    TV Tuner
+ 176      =1  //-----------------------------------------------------------------------------
+ 177      =1  #define PHILIPS       0
+ 178      =1  #define ALPS        1   // ALPS, LG
+ 179      =1  #define TEMIC       2
+ 180      =1  #define TVAVA       3
+ 181      =1  #define LGTUNER       4
+ 182      =1  #define SAMSUNGMUTITUNER  5
+ 183      =1  
+ 184      =1  #define TVTunerDevice   4
+ 185      =1  //-----------------------------------------------------------------------------
+ 186      =1  //    IR Remote Controller Type
+ 187      =1  //-----------------------------------------------------------------------------
+ 188      =1  //#define REMO_RC5          // RC5 style
+ 189      =1  #define TECHWELL_REMOCON
+ 190      =1  //#define REMO_NEC          // NEC style
+ 191      =1  //#define PHILIPS_REMOCON // New remocon 
+ 192      =1  */
+ 193      =1  
+ 194      =1  //-----------------------------------------------------------------------------
+ 195      =1  //    I2C Device Access Address Mapping
+ 196      =1  //-----------------------------------------------------------------------------
+ 197      =1  #define EEPROMI2CAddress  0xa0  // EEPROM (24C16)
+ 198      =1  #define TW88I2CAddress    0x8a  // TW880x
+ 199      =1  
+ 200      =1  /*
+ 201      =1  #define MSPI2CAddress   0x80  // MSP
+ 202      =1  #define ALC106I2CAddress    0x4A  // MSP
+ 203      =1  */
+ 204      =1  #define  AD5110I2CAddress    0x5E//0x58
+ 205      =1  
+ 206      =1  //-----------------------------------------------------------------------------
+ 207      =1  //    AD5110 Command Operation Truth table
+ 208      =1  //-----------------------------------------------------------------------------
+ 209      =1  
+ 210      =1  #define AD5110_CMD_No_Operation           0
+ 211      =1  #define AD5110_CMD_Write_RDAC_To_EEPROM       1
+ 212      =1  #define AD5110_CMD_Write_Data_To_RDAC       2
+ 213      =1  #define AD5110_CMD_Shutdown             3
+ 214      =1  #define AD5110_CMD_Soft_Refresh_RDAC    4
+ 215      =1  #define AD5110_CMD_Read_RDAC        5
+ 216      =1  #define AD5110_CMD_Read_EEPROM              6
+ 217      =1  
+ 218      =1  
+ 219      =1  
+ 220      =1  //-----------------------------------------------------------------------------
+ 221      =1  //    Options for Possible Inputs
+ 222      =1  //-----------------------------------------------------------------------------
+ 223      =1  
+ 224      =1  
+ 225      =1  
+ 226      =1  
+ 227      =1  
+ 228      =1  //-----------------------------------------------------------------------------
+ 229      =1  //    Options for Possible Standards
+ 230      =1  //    Default:NTSC
+ 231      =1  //-----------------------------------------------------------------------------
+C51 COMPILER V9.60.0.0   I2C                                                               03/02/2020 12:07:33 PAGE 5   
+
+ 232      =1  /*
+ 233      =1  #define SUPPORT_PAL     
+ 234      =1  #define SUPPORT_SECAM
+ 235      =1  #define SUPPORT_NTSC4   
+ 236      =1  #define SUPPORT_PALM  
+ 237      =1  #define SUPPORT_PALN    
+ 238      =1  #define SUPPORT_PAL60   
+ 239      =1  */
+ 240      =1  
+ 241      =1  //#define ID_CHECK_BY_FW        // in Video mode, check input system ID by firmware
+ 242      =1  
+ 243      =1  //-----------------------------------------------------------------------------
+ 244      =1  //    Options for Debugging/Release
+ 245      =1  //-----------------------------------------------------------------------------
+ 246      =1  //#define SUPPORT_PATTERN       // support LCD test pattern
+ 247      =1  
+ 248      =1  /*
+ 249      =1  #ifndef WQVGA
+ 250      =1    #ifndef QVGA
+ 251      =1    #define SUPPORT_OSDPOSITIONMOVE
+ 252      =1    #endif
+ 253      =1  #endif
+ 254      =1  */
+ 255      =1  #define SERIAL              // include serial communication routines
+ 256      =1  //#define USE_HI3521_UART2
+ 257      =1  
+ 258      =1  //#define SUPPORT_DEBUG       // Support to use Read & Write in debug OSD Window by remocon.
+ 259      =1  
+ 260      =1  //#define DEBUG           // include debug information
+ 261      =1  #if 0///def DEBUG
+           =1   //#define DEBUG_MAIN
+           =1   //#define DEBUG_TIME
+           =1   //#define DEBUG_KEYREMO
+           =1   //#define DEBUG_TW88
+           =1   //#define DEBUG_DECODER
+           =1   //#define DEBUG_I2C
+           =1   //#define DEBUG_EEP
+           =1   //#define DEBUG_OSD
+           =1   //#define DEBUG_AUDIO
+           =1   //#define DEBUG_SETPANEL
+           =1   //#define DEBUG_DTV
+           =1   #define DEBUG_PC
+           =1   //#define DEBUG_PC_MEAS
+           =1   #define DEBUG_PC_COLOR
+           =1   //#define DEBUG_COMPONENT
+           =1   //#define DEBUG_BANK
+           =1   //#define DEBUG_PAUSE
+           =1   //#define DEBUG_MCU
+           =1 #endif
+ 281      =1  
+ 282      =1  //#define AUTOCALC_PC         // in PC mode, Enable Auto Calcuration
+ 283      =1  //#define SUPPORT_USERCOLORFROMTXT  // Use color setting of text file in Color mode=USER MODE which is as B
+             -rightness(Reg10), Contast(Reg11),
+ 284      =1                    //    Sat_U(Reg13),Sat_V(Reg14),Sharpness(Reg12,Reg78)                  
+ 285      =1  //#define SUPPORT_GAMMA
+ 286      =1  
+ 287      =1  //#define CHIP_MANUAL_TEST      // DIPSW#1
+ 288      =1  
+ 289      =1  //#ifndef INTERNAL_MCU
+ 290      =1  //#define NO_INITIALIZE       // After Power switch turn on with DIP SW4 Enable(Low), or pressed MENU button 
+             -for internal MCU
+ 291      =1                                      //     micom works to access only I2C bus by serial command.
+C51 COMPILER V9.60.0.0   I2C                                                               03/02/2020 12:07:33 PAGE 6   
+
+ 292      =1  //#endif
+ 293      =1  
+ 294      =1  //#define SUPPORT_KRS_OSDDEMO   // For KRS Company Demo 
+ 295      =1  //#define SUPPORT_LINE_OSDDEMO
+ 296      =1  
+ 297      =1  //-----------------------------------------------------------------------------
+ 298      =1  //    Special Features
+ 299      =1  //-----------------------------------------------------------------------------
+ 300      =1  
+ 301      =1  //#ifndef INTERNAL_MCU
+ 302      =1  //#define SUPPORT_DELTA_RGB
+ 303      =1  //#endif
+ 304      =1  //#define SUPPORT_SELECTKEY     // choose the keymap of using select key or left,right key.
+ 305      =1  //-----------------------------------------------------------------------------
+ 306      =1  
+ 307      =1  //#define HS_NEWOSDMENU     //Weylis -@121008 for Hor. Style OSD
+ 308      =1  //#define HS_NEWOSDMENU_2     //Weylis -@121008 for Hor. Style OSD(2 line)
+ 309      =1  #endif  //__CONFIG_H__
+   9          
+  10          #include "reg.h"
+   1      =1  //
+   2      =1  //Registers.h : Register declaration
+   3      =1  //
+   4      =1  
+   5      =1  #ifndef __REGISTERS__
+   6      =1  #define __REGISTERS__
+   7      =1  
+   8      =1  #ifdef INTERNAL_MCU
+           =1 /*  BYTE Registers  */
+           =1 sfr P0    = 0x80;
+           =1 sfr P1    = 0x90;
+           =1 sfr P2    = 0xA0;
+           =1 sfr P3    = 0xB0;
+           =1 sfr PSW   = 0xD0;
+           =1 sfr ACC   = 0xE0;
+           =1 sfr B     = 0xF0;
+           =1 sfr SP    = 0x81;
+           =1 sfr DPL   = 0x82;
+           =1 sfr DPH   = 0x83;
+           =1 sfr PCON  = 0x87;
+           =1 sfr TCON  = 0x88;
+           =1 sfr TMOD  = 0x89;
+           =1 sfr TL0   = 0x8A;
+           =1 sfr TL1   = 0x8B;
+           =1 sfr TH0   = 0x8C;
+           =1 sfr TH1   = 0x8D;
+           =1 sfr IE    = 0xA8;
+           =1 sfr IP    = 0xB8;
+           =1 sfr SCON  = 0x98;
+           =1 sfr SBUF  = 0x99;
+           =1 
+           =1 //sfr P4    = 0xd8;
+           =1 
+           =1 /*  8052 Extensions  */
+           =1 sfr EXIF  = 0x91;   // external interrupt 2,3,4,5 flags should be cleared by software
+           =1 sfr T2CON = 0xC8;
+           =1 sfr RCAP2L = 0xCA;
+           =1 sfr RCAP2H = 0xCB;
+           =1 sfr TL2   = 0xCC;
+           =1 sfr TH2   = 0xCD;
+           =1 sfr EICON = 0xD8;
+           =1 sfr EIE   = 0xE8;
+C51 COMPILER V9.60.0.0   I2C                                                               03/02/2020 12:07:33 PAGE 7   
+
+           =1 sfr EIP   = 0xF8;
+           =1 
+           =1 /*  TW88 Core Extension */
+           =1 sfr BANKREG   = 0x9A;
+           =1 sfr SPICONTROL  = 0x9B;
+           =1 sfr T0HIGH    = 0x9C;
+           =1 sfr T0LOW     = 0x9D;
+           =1 sfr T1HIGH    = 0x9E;
+           =1 sfr T1LOW     = 0x9F;
+           =1 sfr T2HIGH    = 0x93;
+           =1 sfr T2LOW     = 0x94;
+           =1 
+           =1 /*  BIT Registers  */
+           =1 /*  PSW  */
+           =1 sbit CY    = 0xD7;
+           =1 sbit AC    = 0xD6;
+           =1 sbit F0    = 0xD5;
+           =1 sbit RS1   = 0xD4;
+           =1 sbit RS0   = 0xD3;
+           =1 sbit OV    = 0xD2;
+           =1 sbit P     = 0xD0;
+           =1 
+           =1 /*  TCON  */
+           =1 sbit TF1   = 0x8F;
+           =1 sbit TR1   = 0x8E;
+           =1 sbit TF0   = 0x8D;
+           =1 sbit TR0   = 0x8C;
+           =1 sbit IE1   = 0x8B;
+           =1 sbit IT1   = 0x8A;
+           =1 sbit IE0   = 0x89;
+           =1 sbit IT0   = 0x88;
+           =1 
+           =1 /*  IE  */
+           =1 sbit EA    = 0xAF;
+           =1 sbit ES    = 0xAC;
+           =1 sbit ET1   = 0xAB;
+           =1 sbit EX1   = 0xAA;
+           =1 sbit ET0   = 0xA9;
+           =1 sbit EX0   = 0xA8;
+           =1 
+           =1 /*  EIE  */
+           =1 sbit EWDI  = 0xEC;    // Watch dog timer interrupt enable
+           =1 sbit EX5   = 0xEB;    // external interrupt 5 enable
+           =1 sbit EX4   = 0xEA;    // external interrupt 4 enable
+           =1 sbit EX3   = 0xE9;    // external interrupt 3 enable
+           =1 sbit EX2   = 0xE8;    // external interrupt 2 enable
+           =1 
+           =1 /*  IP  */
+           =1 sbit PS    = 0xBC;
+           =1 sbit PT1   = 0xBB;
+           =1 sbit PX1   = 0xBA;
+           =1 sbit PT0   = 0xB9;
+           =1 sbit PX0   = 0xB8;
+           =1 
+           =1 /*  EIP  */
+           =1 sbit PWDI  = 0xFC;    // Watch dog timer interrupt priority
+           =1 sbit PX5   = 0xFB;    // external interrupt5 priority
+           =1 sbit PX4   = 0xFA;    // external interrupt4 priority
+           =1 sbit PX3   = 0xF9;    // external interrupt3 priority
+           =1 sbit PX2   = 0xF8;    // external interrupt2 priority
+           =1 
+           =1 /*  P3  */
+C51 COMPILER V9.60.0.0   I2C                                                               03/02/2020 12:07:33 PAGE 8   
+
+           =1 sbit RD    = 0xB7;
+           =1 sbit WR    = 0xB6;
+           =1 sbit T1    = 0xB5;
+           =1 sbit T0    = 0xB4;
+           =1 sbit INT1  = 0xB3;
+           =1 sbit INT0  = 0xB2;
+           =1 sbit TXD   = 0xB1;
+           =1 sbit RXD   = 0xB0;
+           =1 
+           =1 /*  SCON  */
+           =1 sbit SM0   = 0x9F;
+           =1 sbit SM1   = 0x9E;
+           =1 sbit SM2   = 0x9D;
+           =1 sbit REN   = 0x9C;
+           =1 sbit TB8   = 0x9B;
+           =1 sbit RB8   = 0x9A;
+           =1 sbit TI    = 0x99;
+           =1 sbit RI    = 0x98;
+           =1 
+           =1 /*  8052 Extensions  */
+           =1 /*  IE  */
+           =1 sbit ET2   = 0xAD;
+           =1 
+           =1 /*  IP  */
+           =1 sbit PT2   = 0xBD;
+           =1 
+           =1 /*  P1  */
+           =1 sbit T2EX  = 0x91;
+           =1 sbit T2    = 0x90;
+           =1              
+           =1 /*  T2CON  */
+           =1 sbit TF2   = 0xCF;
+           =1 sbit EXF2  = 0xCE;
+           =1 sbit RCLK  = 0xCD;
+           =1 sbit TCLK  = 0xCC;
+           =1 sbit EXEN2 = 0xCB;
+           =1 sbit TR2   = 0xCA;
+           =1 sbit C_T2  = 0xC9;
+           =1 sbit CP_RL2= 0xC8;
+           =1 
+           =1 sfr CHPENR = 0xF6;
+           =1 sfr CHPCON = 0xBF;
+           =1 sfr SFRAL  = 0xC4;
+           =1 sfr SFRAH  = 0xC5;
+           =1 sfr SFRFD  = 0xC6;
+           =1 sfr SFRCN  = 0xC7;
+           =1 
+           =1 sbit P0_0  = 0x80;
+           =1 sbit P0_1  = 0x81;
+           =1 sbit P0_2  = 0x82;
+           =1 sbit P0_3  = 0x83;
+           =1 sbit P0_4  = 0x84;
+           =1 sbit P0_5  = 0x85;
+           =1 sbit P0_6  = 0x86;
+           =1 sbit P0_7  = 0x87;
+           =1 
+           =1 sbit P1_0  = 0x90;
+           =1 sbit P1_1  = 0x91;
+           =1 sbit P1_2  = 0x92;
+           =1 sbit P1_3  = 0x93;
+           =1 sbit P1_4  = 0x94;
+           =1 sbit P1_5  = 0x95;
+C51 COMPILER V9.60.0.0   I2C                                                               03/02/2020 12:07:33 PAGE 9   
+
+           =1 sbit P1_6  = 0x96;
+           =1 sbit P1_7  = 0x97;
+           =1 
+           =1 sbit P2_0  = 0xa0;
+           =1 sbit P2_1  = 0xa1;
+           =1 sbit P2_2  = 0xa2;
+           =1 sbit P2_3  = 0xa3;
+           =1 sbit P2_4  = 0xa4;
+           =1 sbit P2_5  = 0xa5;
+           =1 sbit P2_6  = 0xa6;
+           =1 sbit P2_7  = 0xa7;
+           =1 
+           =1 sbit P3_0  = 0xb0;
+           =1 sbit P3_1  = 0xb1;
+           =1 sbit P3_2  = 0xb2;
+           =1 sbit P3_3  = 0xb3;
+           =1 sbit P3_4  = 0xb4;
+           =1 sbit P3_5  = 0xb5;
+           =1 sbit P3_6  = 0xb6;
+           =1 sbit P3_7  = 0xb7;
+           =1 
+           =1 #else // external MCU=WINBOND
+ 189      =1  /*  BYTE Registers  */
+ 190      =1  sfr P0    = 0x80;
+ 191      =1  sfr P1    = 0x90;
+ 192      =1  sfr P2    = 0xA0;
+ 193      =1  sfr P3    = 0xB0;
+ 194      =1  sfr PSW   = 0xD0;
+ 195      =1  sfr ACC   = 0xE0;
+ 196      =1  sfr B     = 0xF0;
+ 197      =1  sfr SP    = 0x81;
+ 198      =1  sfr DPL   = 0x82;
+ 199      =1  sfr DPH   = 0x83;
+ 200      =1  sfr PCON  = 0x87;
+ 201      =1  sfr TCON  = 0x88;
+ 202      =1  sfr TMOD  = 0x89;
+ 203      =1  sfr TL0   = 0x8A;
+ 204      =1  sfr TL1   = 0x8B;
+ 205      =1  sfr TH0   = 0x8C;
+ 206      =1  sfr TH1   = 0x8D;
+ 207      =1  sfr CKCON = 0x8E;   //clock control register, default =0x01
+ 208      =1  sfr IE    = 0xA8;
+ 209      =1  sfr IP    = 0xB8;
+ 210      =1  sfr SCON  = 0x98;
+ 211      =1  sfr SBUF  = 0x99;
+ 212      =1  sfr P4 = 0xE8; //Megawin Ryan@970716
+ 213      =1  //sfr P4    = 0xa5;      //SST MCU
+ 214      =1  //sfr P4    = 0xd8;   //winbond<960820>
+ 215      =1  
+ 216      =1  
+ 217      =1  /*  8052 Extensions  */
+ 218      =1  sfr ADCTL = 0xC5;   //william-20111017
+ 219      =1  sfr ADCV = 0xC6;    //william-20111017
+ 220      =1  sfr ADCVL = 0xE8;   //william-20111017
+ 221      =1  sfr T2CON = 0xC8;
+ 222      =1  sfr RCAP2L = 0xCA;
+ 223      =1  sfr RCAP2H = 0xCB;
+ 224      =1  sfr TL2   = 0xCC;
+ 225      =1  sfr TH2   = 0xCD;
+ 226      =1  
+ 227      =1  // for UART2
+ 228      =1  sfr S2CON  = 0xAA;
+C51 COMPILER V9.60.0.0   I2C                                                               03/02/2020 12:07:33 PAGE 10  
+
+ 229      =1  sfr S2BRT  = 0xBA;
+ 230      =1  sfr S2BUF  = 0x9A;
+ 231      =1  sfr AUXR2  = 0xA6;
+ 232      =1  sfr AUXIE  = 0xAD;
+ 233      =1  
+ 234      =1  
+ 235      =1  sfr P1M0  = 0x91;
+ 236      =1  sfr P1M1  = 0x92;
+ 237      =1  sfr P0M0  = 0x93;
+ 238      =1  sfr P0M1  = 0x94;
+ 239      =1  sfr P2M0  = 0x95;
+ 240      =1  sfr P2M1  = 0x96;
+ 241      =1  sfr P3M0  = 0xB1;
+ 242      =1  sfr P3M1  = 0xB2;
+ 243      =1  
+ 244      =1  
+ 245      =1  // for PCA
+ 246      =1  sfr CCON   = 0xD8;
+ 247      =1  sfr CMOD   = 0xD9;
+ 248      =1  sfr CCAPM0 = 0xDA;
+ 249      =1  sfr CCAPM1 = 0xDB;
+ 250      =1  sfr CCAPM2 = 0xDC;
+ 251      =1  sfr CCAPM3 = 0xDD;
+ 252      =1  sfr CCAPM4 = 0xDE;
+ 253      =1  sfr CCAPM5 = 0xDF;
+ 254      =1  sfr CL     = 0xE9;
+ 255      =1  sfr CH     = 0xF9;
+ 256      =1  sfr CCAP0L = 0xEA;
+ 257      =1  sfr CCAP0H = 0xFA;
+ 258      =1  sfr CCAP1L = 0xEB;
+ 259      =1  sfr CCAP1H = 0xFB;
+ 260      =1  sfr CCAP2L = 0xEC;
+ 261      =1  sfr CCAP2H = 0xFC;
+ 262      =1  sfr CCAP3L = 0xED;
+ 263      =1  sfr CCAP3H = 0xFD;
+ 264      =1  sfr CCAP4L = 0xEE;
+ 265      =1  sfr CCAP4H = 0xFE;
+ 266      =1  sfr CCAP5L = 0xEF;
+ 267      =1  sfr CCAP5H = 0xFF;
+ 268      =1  sfr PCAPWM0= 0xF2;
+ 269      =1  sfr PCAPWM1= 0xF3;
+ 270      =1  sfr PCAPWM2= 0xF4;
+ 271      =1  sfr PCAPWM3= 0xF5;
+ 272      =1  sfr PCAPWM4= 0xF6;
+ 273      =1  sfr PCAPWM5= 0xF7;
+ 274      =1  
+ 275      =1  /*  BIT Registers  */
+ 276      =1  /*  PSW  */
+ 277      =1  sbit CY    = 0xD7;
+ 278      =1  sbit AC    = 0xD6;
+ 279      =1  sbit F0    = 0xD5;
+ 280      =1  sbit RS1   = 0xD4;
+ 281      =1  sbit RS0   = 0xD3;
+ 282      =1  sbit OV    = 0xD2;
+ 283      =1  sbit P     = 0xD0;
+ 284      =1  
+ 285      =1  /*  TCON  */
+ 286      =1  sbit TF1   = 0x8F;
+ 287      =1  sbit TR1   = 0x8E;
+ 288      =1  sbit TF0   = 0x8D;
+ 289      =1  sbit TR0   = 0x8C;
+ 290      =1  sbit IE1   = 0x8B;
+C51 COMPILER V9.60.0.0   I2C                                                               03/02/2020 12:07:33 PAGE 11  
+
+ 291      =1  sbit IT1   = 0x8A;
+ 292      =1  sbit IE0   = 0x89;
+ 293      =1  sbit IT0   = 0x88;
+ 294      =1  
+ 295      =1  /*  IE  */
+ 296      =1  sbit EA    = 0xAF;
+ 297      =1  sbit ES    = 0xAC;
+ 298      =1  sbit ET1   = 0xAB;
+ 299      =1  sbit EX1   = 0xAA;
+ 300      =1  sbit ET0   = 0xA9;
+ 301      =1  sbit EX0   = 0xA8;
+ 302      =1  
+ 303      =1  /*  IP  */
+ 304      =1  sbit PS    = 0xBC;
+ 305      =1  sbit PT1   = 0xBB;
+ 306      =1  sbit PX1   = 0xBA;
+ 307      =1  sbit PT0   = 0xB9;
+ 308      =1  sbit PX0   = 0xB8;
+ 309      =1  
+ 310      =1  /*  P3  */
+ 311      =1  sbit RD    = 0xB7;
+ 312      =1  sbit WR    = 0xB6;
+ 313      =1  sbit T1    = 0xB5;
+ 314      =1  sbit T0    = 0xB4;
+ 315      =1  sbit INT1  = 0xB3;
+ 316      =1  sbit INT0  = 0xB2;
+ 317      =1  sbit TXD   = 0xB1;
+ 318      =1  sbit RXD   = 0xB0;
+ 319      =1  
+ 320      =1  /*  SCON  */
+ 321      =1  sbit SM0   = 0x9F;
+ 322      =1  sbit SM1   = 0x9E;
+ 323      =1  sbit SM2   = 0x9D;
+ 324      =1  sbit REN   = 0x9C;
+ 325      =1  sbit TB8   = 0x9B;
+ 326      =1  sbit RB8   = 0x9A;
+ 327      =1  sbit TI    = 0x99;
+ 328      =1  sbit RI    = 0x98;
+ 329      =1  
+ 330      =1  /*  8052 Extensions  */
+ 331      =1  /*  IE  */
+ 332      =1  sbit ET2   = 0xAD;
+ 333      =1  
+ 334      =1  /*  IP  */
+ 335      =1  sbit PT2   = 0xBD;
+ 336      =1  
+ 337      =1  /*  P1  */
+ 338      =1  sbit T2EX  = 0x91;
+ 339      =1  sbit T2    = 0x90;
+ 340      =1               
+ 341      =1  /*  T2CON  */
+ 342      =1  sbit TF2   = 0xCF;
+ 343      =1  sbit EXF2  = 0xCE;
+ 344      =1  sbit RCLK  = 0xCD;
+ 345      =1  sbit TCLK  = 0xCC;
+ 346      =1  sbit EXEN2 = 0xCB;
+ 347      =1  sbit TR2   = 0xCA;
+ 348      =1  sbit C_T2  = 0xC9;
+ 349      =1  sbit CP_RL2= 0xC8;
+ 350      =1  
+ 351      =1  sfr CHPENR = 0xF6;
+ 352      =1  sfr CHPCON = 0xBF;
+C51 COMPILER V9.60.0.0   I2C                                                               03/02/2020 12:07:33 PAGE 12  
+
+ 353      =1  sfr SFRAL  = 0xC4;
+ 354      =1  sfr SFRAH  = 0xC5;
+ 355      =1  sfr SFRFD  = 0xC6;
+ 356      =1  sfr SFRCN  = 0xC7;
+ 357      =1  
+ 358      =1  sbit P0_0  = 0x80;
+ 359      =1  sbit P0_1  = 0x81;
+ 360      =1  sbit P0_2  = 0x82;
+ 361      =1  sbit P0_3  = 0x83;
+ 362      =1  sbit P0_4  = 0x84;
+ 363      =1  sbit P0_5  = 0x85;
+ 364      =1  sbit P0_6  = 0x86;
+ 365      =1  sbit P0_7  = 0x87;
+ 366      =1  
+ 367      =1  sbit P1_0  = 0x90;
+ 368      =1  sbit P1_1  = 0x91;
+ 369      =1  sbit P1_2  = 0x92;
+ 370      =1  sbit P1_3  = 0x93;
+ 371      =1  sbit P1_4  = 0x94;
+ 372      =1  sbit P1_5  = 0x95;
+ 373      =1  sbit P1_6  = 0x96;
+ 374      =1  sbit P1_7  = 0x97;
+ 375      =1  
+ 376      =1  sbit P2_0  = 0xa0;
+ 377      =1  sbit P2_1  = 0xa1;
+ 378      =1  sbit P2_2  = 0xa2;
+ 379      =1  sbit P2_3  = 0xa3;
+ 380      =1  sbit P2_4  = 0xa4;
+ 381      =1  sbit P2_5  = 0xa5;
+ 382      =1  sbit P2_6  = 0xa6;
+ 383      =1  sbit P2_7  = 0xa7;
+ 384      =1  
+ 385      =1  sbit P3_0  = 0xb0;
+ 386      =1  sbit P3_1  = 0xb1;
+ 387      =1  sbit P3_2  = 0xb2;
+ 388      =1  sbit P3_3  = 0xb3;
+ 389      =1  sbit P3_4  = 0xb4;
+ 390      =1  sbit P3_5  = 0xb5;
+ 391      =1  sbit P3_6  = 0xb6;
+ 392      =1  sbit P3_7  = 0xb7;
+ 393      =1  
+ 394      =1  sbit P4_0  = P4^0;
+ 395      =1  sbit P4_1  = P4^1;
+ 396      =1  sbit P4_2  = P4^2;
+ 397      =1  sbit P4_3  = P4^3;
+ 398      =1  #endif  // INTERNAL_MCU
+ 399      =1  
+ 400      =1  #endif  //__REGISTERS__
+  11          #include "typedefs.h"
+   1      =1  #ifndef __TYPEDEFS__
+   2      =1  #define __TYPEDEFS__
+   3      =1  
+   4      =1  
+   5      =1  #define DATA    data
+   6      =1  #define PDATA   pdata
+   7      =1  #define IDATA   data
+   8      =1  #define CODE    code
+   9      =1  #define CODE_P
+  10      =1  #define PDATA_P
+  11      =1  #define IDATA_P
+  12      =1  #define DATA_P
+  13      =1  
+C51 COMPILER V9.60.0.0   I2C                                                               03/02/2020 12:07:33 PAGE 13  
+
+  14      =1  #define INTERRUPT( num, name ) name() interrupt num
+  15      =1  
+  16      =1  #define _between(x, a, b) (a<=x && x<=b)
+  17      =1  #define _swap(a, b)     { a^=b; b^=a; a^=b; }
+  18      =1  
+  19      =1  #define SEC(x)                                  (1000 * (x))
+  20      =1  
+  21      =1  typedef unsigned char Register;
+  22      =1  typedef unsigned char BYTE;
+  23      =1  typedef unsigned short  WORD;
+  24      =1  typedef unsigned long DWORD;
+  25      =1  
+  26      =1  #define TRUE  1
+  27      =1  #define FALSE 0
+  28      =1  #define _TRUE 1
+  29      =1  #define _FALSE  0
+  30      =1  
+  31      =1  //VInputStdDetectMode
+  32      =1  #define AUTO  0
+  33      =1  
+  34      =1  //VInputStd
+  35      =1  #define NTSC  1     
+  36      =1  #define PAL   2
+  37      =1  #define SECAM 3
+  38      =1  #define NTSC4 4
+  39      =1  #define PALM  5
+  40      =1  #define PALN  6
+  41      =1  #define PAL60 7
+  42      =1  
+  43      =1  #define MAXINPUTSTD PAL60+1 // 
+  44      =1  
+  45      =1  #define UNKNOWN 0xfe
+  46      =1  #define NOINPUT 0 //0xff
+  47      =1  
+  48      =1  
+  49      =1  
+  50      =1  
+  51      =1  #define NIL     0xff
+  52      =1  //****************************************************************************
+  53      =1  // DEFINITIONS / MACROS
+  54      =1  //****************************************************************************
+  55      =1  
+  56      =1  #define GET_MODE_STATE()                            (g_stModeInfo.b5ModeState)
+  57      =1  #define SET_MODE_STATE(x)                         (g_stModeInfo.b5ModeState = x)
+  58      =1  #define GET_MODE_STATE_CHANGE()                 (bit)(g_stModeInfo.b1ModeStateChanged)
+  59      =1  #define SET_MODE_STATE_CHANGE()                 (g_stModeInfo.b1ModeStateChanged = _TRUE)
+  60      =1  #define CLR_MODE_STATE_CHANGE()                 (g_stModeInfo.b1ModeStateChanged = _FALSE)
+  61      =1  #define GET_MODE_RESET_TARGET()                   (g_stModeInfo.b4ModeResetFlag)
+  62      =1  #define SET_MODE_RESET_TARGET(x)                (g_stModeInfo.b4ModeResetFlag = x)
+  63      =1  #define GET_TARGET_POWER_STATUS()           (g_stPowerInfo.b4PowerAction)
+  64      =1  #define SET_TARGET_POWER_STATUS(x)          (g_stPowerInfo.b4PowerAction = x)
+  65      =1  
+  66      =1  #define GET_BATTERY_STATE()       (g_stBatteryInfo.b5BatteryStatus)
+  67      =1  #define SET_BATTERY_STATE(x)        (g_stBatteryInfo.b5BatteryStatus = x)
+  68      =1  #define GET_NO_BATTERY()        (bit)(g_stBatteryInfo.b1NoBattery)
+  69      =1  #define SET_NO_BATTERY()        (g_stBatteryInfo.b1NoBattery =_TRUE)
+  70      =1  #define CLR_NO_BATTERY()        (g_stBatteryInfo.b1NoBattery = _FALSE)
+  71      =1  
+  72      =1  #define GET_AC_PLUG()       (bit)(g_stBatteryInfo.b1AC_PLUG)
+  73      =1  #define SET_AC_PLUG()       (g_stBatteryInfo.b1AC_PLUG =_TRUE)
+  74      =1  #define CLR_AC_PLUG()       (g_stBatteryInfo.b1AC_PLUG = _FALSE)
+  75      =1        
+C51 COMPILER V9.60.0.0   I2C                                                               03/02/2020 12:07:33 PAGE 14  
+
+  76      =1  
+  77      =1  #define GET_BTH_STATE()         (g_stBatteryInfo.b3BTHStatus)
+  78      =1  #define SET_BTH_STATE(x)          (g_stBatteryInfo.b3BTHStatus = x)
+  79      =1  
+  80      =1  #define GET_BATTERY_CAPACITY()        (g_stBatteryInfo.BatteryCapacity)
+  81      =1  #define SET_BATTERY_CAPACITY(x)     (g_stBatteryInfo.BatteryCapacity = x)
+  82      =1  #define GET_BATTERY_CAPACITY_FLAG()       (bit)(g_stBatteryInfo.b1BatteryCapacityLow)
+  83      =1  #define SET_BATTERY_CAPACITY_FLAG()       (g_stBatteryInfo.b1BatteryCapacityLow =_TRUE)
+  84      =1  #define CLR_BATTERY_CAPACITY_FLAG()     (g_stBatteryInfo.b1BatteryCapacityLow =_FALSE)
+  85      =1  
+  86      =1  #define GET_BATTERY_ABNORMAL()        (bit)(g_stBatteryInfo.b1BatteryAbnormal)
+  87      =1  #define SET_BATTERY_ABNORMAL()        (g_stBatteryInfo.b1BatteryAbnormal=_TRUE)
+  88      =1  #define CLR_BATTERY_ABNORMAL()        (g_stBatteryInfo.b1BatteryAbnormal=_FALSE)
+  89      =1  
+  90      =1  #define GET_BATTERY_CHARGE_STATE()        (g_stBatteryInfo.b2BatteryChargeStatus)
+  91      =1  #define SET_BATTERY_CHARGE_STATE(x)     (g_stBatteryInfo.b2BatteryChargeStatus = x)
+  92      =1  
+  93      =1  //--------------------------------------------------
+  94      =1  // Power status
+  95      =1  //--------------------------------------------------
+  96      =1  #define GET_POWER_STATUS()                 (g_stPowerInfo.b4PowerStatus)
+  97      =1  #define SET_POWER_STATUS(x)                (g_stPowerInfo.b4PowerStatus = x)
+  98      =1  
+  99      =1  //--------------------------------------------------
+ 100      =1  // Enumerations of Timer Events
+ 101      =1  //--------------------------------------------------
+ 102      =1  
+ 103      =1  typedef struct
+ 104      =1  {
+ 105      =1      BYTE b1EventValid : 1;
+ 106      =1      BYTE b7EventID : 7;
+ 107      =1      WORD usTime;
+ 108      =1  } StructTimerEventTableType;
+ 109      =1  
+ 110      =1  typedef enum
+ 111      =1  {
+ 112      =1      _USER_TIMER_EVENT_START,
+ 113      =1      _USER_TIMER_EVENT_KEY_REPEAT_ENABLE = _USER_TIMER_EVENT_START,   
+ 114      =1      _USER_TIMER_EVENT_KEY_SCAN_READY,
+ 115      =1      _USER_TIMER_EVENT_OSD_CAMERA_VOLTAGE_INC,
+ 116      =1      _USER_TIMER_EVENT_OSD_CAMERA_VOLTAGE_DEC,
+ 117      =1      _USER_TIMER_EVENT_OSD_GET_MCU_VERSION,
+ 118      =1      _USER_TIMER_EVENT_OSD_MCU_ENTRY_SLEEP_MODE,
+ 119      =1      _USER_TIMER_EVENT_OSD_DISTANCE_RESET,
+ 120      =1      _USER_TIMER_EVENT_OSD_DVR_REBOOT,
+ 121      =1      _USER_TIMER_EVENT_OSD_DVR_SHUTDOWN,
+ 122      =1      _USER_TIMER_EVENT_OSD_ENCODER_DEVIATION_SETTING,
+ 123      =1      //
+ 124      =1       _USER_TIMER_EVENT_OSD_SHOW_NO_CABLE,
+ 125      =1      _USER_TIMER_EVENT_OSD_SHOW_NO_SIGNAL,
+ 126      =1      _USER_TIMER_EVENT_OSD_SHOW_POWER_SAVING,
+ 127      =1      _USER_TIMER_EVENT_GO_TO_POWER_SAVING,
+ 128      =1      _USER_TIMER_EVENT_OSD_DISABLE,
+ 129      =1      _USER_TIMER_EVENT_PANEL_BACKLIGHT_ON,
+ 130      =1      _USER_TIMER_EVENT_PANEL_POWER_OFF,
+ 131      =1      _USER_TIMER_EVENT_DO_AUTO_COLOR,
+ 132      =1      _USER_TIMER_EVENT_PANEL_USED_TIMER,
+ 133      =1      _USER_TIMER_EVENT_HLWIN_TYPE5_MOVE,    
+ 134      =1    _USER_TIMER_EVENT_LED_POWER_SAVING,
+ 135      =1    _USER_TIMER_EVENT_LIGHT_SENSER_ON,
+ 136      =1    _USER_TIMER_EVENT_SHOW_BURN_IN,//ryan@20151230
+ 137      =1    _USER_TIMER_EVENT_BURN_IN_ON,//ryan@20151230
+C51 COMPILER V9.60.0.0   I2C                                                               03/02/2020 12:07:33 PAGE 15  
+
+ 138      =1    _USER_TIMER_EVENT_CHECK,//ryan@20151231
+ 139      =1    _USER_TIMER_EVENT_DISPLAY_INFO,//ryan@20151231
+ 140      =1    _USER_TIMER_EVENT_STANDBY_MODE,
+ 141      =1    _USER_TIMER_EVENT_FACTORY_MODE,//ryan@20160113
+ 142      =1      _USER_TIMER_EVENT_END,
+ 143      =1      _USER_TIMER_EVENT_COUNT = _USER_TIMER_EVENT_END,
+ 144      =1  } EnumUserTimerEventID;
+ 145      =1  
+ 146      =1  typedef enum
+ 147      =1  {
+ 148      =1      _SYSTEM_TIMER_EVENT_START = _USER_TIMER_EVENT_COUNT,
+ 149      =1      _SYSTEM_TIMER_EVENT_SOURCE_CLEAR_DETECTING = _SYSTEM_TIMER_EVENT_START,
+ 150      =1      _SYSTEM_TIMER_EVENT_JUDGE_BATT_STATE,
+ 151      =1      _SYSTEM_TIMER_EVENT_JUDGE_POWER_STATE,
+ 152      =1      _SYSTEM_TIMER_EVENT_JUDGE_BTH_STATE,
+ 153      =1      _SYSTEM_TIMER_EVENT_JUDGE_PSW_STATE,    
+ 154      =1      _SYSTEM_TIMER_EVENT_JUDGE_AC_MODE,
+ 155      =1      _SYSTEM_TIMER_EVENT_JUDGE_DVR_COMM,
+ 156      =1      _SYSTEM_TIMER_EVENT_JUDGE_TW8836_COMM,
+ 157      =1      _SYSTEM_TIMER_EVENT_JUDGE_WDT_ECHO,
+ 158      =1       _SYSTEM_TIMER_EVENT_GRN_ON,    
+ 159      =1      _SYSTEM_TIMER_EVENT_GRN_OFF,    
+ 160      =1      _SYSTEM_TIMER_EVENT_RED_ON,      
+ 161      =1      _SYSTEM_TIMER_EVENT_RED_OFF,   
+ 162      =1      _SYSTEM_TIMER_EVENT_GRN_BLINK,    
+ 163      =1      _SYSTEM_TIMER_EVENT_RED_BLINK,   
+ 164      =1      _SYSTEM_TIMER_EVENT_GRN_RED_BLINK,    
+ 165      =1      _SYSTEM_TIMER_EVENT_GRN_RED_ON,    
+ 166      =1      _SYSTEM_TIMER_EVENT_GRN_ON_RED_BLINK,    
+ 167      =1      _SYSTEM_TIMER_EVENT_END,
+ 168      =1      _SYSTEM_TIMER_EVENT_COUNT,
+ 169      =1  } EnumSystemTimerEventID;
+ 170      =1  
+ 171      =1  
+ 172      =1  typedef enum
+ 173      =1  {
+ 174      =1      _SCALER_TIMER_EVENT_START = _SYSTEM_TIMER_EVENT_COUNT,
+ 175      =1      _SCALER_TIMER_EVENT_TMDS_HDMI_PACKET_DETECT = _SCALER_TIMER_EVENT_START, 
+ 176      =1      _SCALER_TIMER_EVENT_TMDS_VIDEO_DETECT,  
+ 177      =1      _SCALER_TIMER_EVENT_AUDIO_LOAD_STABLE_I_CODE,
+ 178      =1      _SCALER_TIMER_EVENT_DP_HOTPLUG_ASSERTED,
+ 179      =1      _SCALER_TIMER_EVENT_DP_HDCP_LONG_HOTPLUG_EVENT,
+ 180      =1      _SCALER_TIMER_EVENT_DP_LINK_STATUS_IRQ,    
+ 181      =1      _SCALER_TIMER_EVENT_D0_PORT_DIGITAL_SWITCH,
+ 182      =1      _SCALER_TIMER_EVENT_D1_PORT_DIGITAL_SWITCH,  
+ 183      =1      _SCALER_TIMER_EVENT_NR_DETECTION_FINISHED,  
+ 184      =1      _SCALER_TIMER_EVENT_PHASE_CALIBRATION,    
+ 185      =1      _SCALER_TIMER_EVENT_PHASE_CNT_CHECK,
+ 186      =1      _SCALER_TIMER_EVENT_MHL_D0_READY_TO_TRANSMIT,
+ 187      =1      _SCALER_TIMER_EVENT_MHL_D0_READY_TO_RESEND,
+ 188      =1      _SCALER_TIMER_EVENT_MHL_D0_RECONNECT_1K,
+ 189      =1      _SCALER_TIMER_EVENT_MHL_D0_ACTIVE_VBUS,
+ 190      =1      _SCALER_TIMER_EVENT_MHL_D1_READY_TO_TRANSMIT,
+ 191      =1      _SCALER_TIMER_EVENT_MHL_D1_READY_TO_RESEND,
+ 192      =1      _SCALER_TIMER_EVENT_MHL_D1_RECONNECT_1K,
+ 193      =1      _SCALER_TIMER_EVENT_MHL_D1_ACTIVE_VBUS,
+ 194      =1      _SCALER_TIMER_EVENT_DCC_HISTOGRAM_THD_CHANGE,
+ 195      =1      _SCALER_TIMER_EVENT_END,
+ 196      =1      _SCALER_TIMER_EVENT_COUNT = _SCALER_TIMER_EVENT_END,
+ 197      =1  } EnumMCUTimerEventID;
+ 198      =1  
+ 199      =1  #define _SIMULTANEOUS_SCALER_EVENT_COUNT       0//     (5 + (_D0_INPUT_PORT_TYPE == _D0_MHL_PORT) + (_D1_I
+C51 COMPILER V9.60.0.0   I2C                                                               03/02/2020 12:07:33 PAGE 16  
+
+             -NPUT_PORT_TYPE == _D1_MHL_PORT))
+ 200      =1  #define _SIMULTANEOUS_USER_EVENT_COUNT             5
+ 201      =1  #define _SIMULTANEOUS_SYSTEM_EVENT_COUNT            3
+ 202      =1  
+ 203      =1  
+ 204      =1  #define _TIMER_EVENT_COUNT    (_SIMULTANEOUS_USER_EVENT_COUNT + _SIMULTANEOUS_SYSTEM_EVENT_COUNT + _SIMULT
+             -ANEOUS_SCALER_EVENT_COUNT)
+ 205      =1  
+ 206      =1  
+ 207      =1  //--------------------------------------------------
+ 208      =1  // Power action
+ 209      =1  //--------------------------------------------------
+ 210      =1  
+ 211      =1  typedef enum
+ 212      =1  {
+ 213      =1      _POWER_ACTION_OFF_TO_NORMAL = 0x00,          
+ 214      =1      _POWER_ACTION_AC_ON_TO_NORMAL,         
+ 215      =1      _POWER_ACTION_AC_ON_TO_OFF,  ////2          
+ 216      =1      _POWER_ACTION_PS_TO_NORMAL,           
+ 217      =1      _POWER_ACTION_PS_TO_OFF,              
+ 218      =1      _POWER_ACTION_NORMAL_TO_PS,   //5        
+ 219      =1      _POWER_ACTION_NORMAL_TO_OFF,          
+ 220      =1      _POWER_ACTION_NORMAL_TO_NOSUPPORT_PS, 
+ 221      =1      _POWER_ACTION_NOSUPPORT_PS_TO_PS,
+ 222      =1      _POWER_ACTION_NOSUPPORT_PS_TO_OFF, 
+ 223      =1      _POWER_ACTION_NONE = 0xFF,
+ 224      =1  } EnumPowerAction;
+ 225      =1  
+ 226      =1  typedef enum
+ 227      =1  {
+ 228      =1      _MODE_ACTION_NO_RESET_MODE = 0x00,                
+ 229      =1      _MODE_ACTION_RESET_TO_SEARCH,
+ 230      =1      _MODE_ACTION_RESET_TO_DISPLAY_SETTING, 
+ 231      =1      _MODE_ACTION_RESET_TO_DISPLAY_SETTING_WITHOUT_FORCETOBG,
+ 232      =1      _MODE_ACTION_RESET_TO_NOSUPPORT,    
+ 233      =1      _MODE_ACTION_RESET_TO_NOSIGNAL,
+ 234      =1      _MODE_ACTION_RESET_TO_POWER_SAVING,    
+ 235      =1      _MODE_ACTION_RESET_TO_POWER_OFF,           
+ 236      =1      _MODE_ACTION_RESET_TO_FACTORY_MODE,   
+ 237      =1      _MODE_ACTION_NONE = 0xFF,
+ 238      =1  } EnumModeAction;
+ 239      =1  
+ 240      =1  
+ 241      =1  //--------------------------------------------------
+ 242      =1  // Power status
+ 243      =1  //--------------------------------------------------
+ 244      =1  
+ 245      =1  typedef enum
+ 246      =1  {
+ 247      =1      _MODE_STATUS_INITIAL = 0x00,            
+ 248      =1      _MODE_STATUS_SEARCH,             
+ 249      =1      _MODE_STATUS_DISPLAY_SETTING,    
+ 250      =1      _MODE_STATUS_ACTIVE,             
+ 251      =1      _MODE_STATUS_NOSUPPORT,          
+ 252      =1      _MODE_STATUS_NOSIGNAL,           
+ 253      =1      _MODE_STATUS_POWER_SAVING,       
+ 254      =1      _MODE_STATUS_POWER_OFF,          
+ 255      =1      _MODE_STATUS_FACTORY,     
+ 256      =1      _MODE_STATUS_NONE = 0xFF,
+ 257      =1  } EnumModeStatus;
+ 258      =1  
+ 259      =1  typedef enum
+C51 COMPILER V9.60.0.0   I2C                                                               03/02/2020 12:07:33 PAGE 17  
+
+ 260      =1  {
+ 261      =1      _POWER_STATUS_AC_ON = 0x00,
+ 262      =1      _POWER_STATUS_OFF,
+ 263      =1      _POWER_STATUS_NORMAL,
+ 264      =1      _POWER_STATUS_NORMAL_BATTERY_MODE,   
+ 265      =1      _POWER_STATUS_NORMAL_NO_MATTERY_MODE,
+ 266      =1      _POWER_STATUS_SAVING,
+ 267      =1      _POWER_STATUS_SAVING_BATTERY_MODE,   
+ 268      =1      _POWER_STATUS_NOSUPPORT_SAVING,
+ 269      =1      _POWER_STATUS_NONE = 0xFF,
+ 270      =1  } EnumPowerStatus;
+ 271      =1  
+ 272      =1  
+ 273      =1  //--------------------------------------------------
+ 274      =1  // Battery status
+ 275      =1  //--------------------------------------------------
+ 276      =1  
+ 277      =1  typedef enum
+ 278      =1  {
+ 279      =1    _BATT_STATUS_CAPACITY_LEVEL4=0x00,
+ 280      =1    _BATT_STATUS_CAPACITY_LEVEL3,
+ 281      =1    _BATT_STATUS_CAPACITY_LEVEL2,
+ 282      =1    _BATT_STATUS_CAPACITY_LEVEL1,
+ 283      =1    _BATT_STATUS_AC_MODE,
+ 284      =1    _BATT_STATUS_TEMP_HIGH, 
+ 285      =1    _BATT_STATUS_TEMP_NORMAL,
+ 286      =1    _BATT_STATUS_TEMP_LOW, 
+ 287      =1    _BATT_STATUS_NO_BATT,
+ 288      =1    _BATT_STATUS_CAPACITY_LOW,
+ 289      =1    _BATT_STATUS_CAPACITY_HIGH,
+ 290      =1    _BATT_STATUS_ABNORMAL_MODE,
+ 291      =1    _BATT_STATUS_FAST_CHARGE,
+ 292      =1    _BATT_STATUS_LOW_CHARGE,
+ 293      =1    _BATT_STATUS_STOP_CHARGE,
+ 294      =1    _BATT_STATUS_START_CHARGE,
+ 295      =1        _BATT_STATUS_NONE = 0xFF,
+ 296      =1  } EnumBatteryStatus;
+ 297      =1  
+ 298      =1  //--------------------------------------------------
+ 299      =1  // Battery action
+ 300      =1  //--------------------------------------------------
+ 301      =1  /*
+ 302      =1  typedef enum
+ 303      =1  {
+ 304      =1      _POWER_ACTION_OFF_TO_NORMAL = 0x00,          
+ 305      =1      _POWER_ACTION_AC_ON_TO_NORMAL,         
+ 306      =1      _POWER_ACTION_AC_ON_TO_OFF,  ////2          
+ 307      =1      _POWER_ACTION_PS_TO_NORMAL,           
+ 308      =1      _POWER_ACTION_PS_TO_OFF,              
+ 309      =1      _POWER_ACTION_NORMAL_TO_PS,   //5        
+ 310      =1      _POWER_ACTION_NORMAL_TO_OFF,          
+ 311      =1      _POWER_ACTION_NORMAL_TO_NOSUPPORT_PS, 
+ 312      =1      _POWER_ACTION_NOSUPPORT_PS_TO_PS,
+ 313      =1      _POWER_ACTION_NOSUPPORT_PS_TO_OFF, 
+ 314      =1      _POWER_ACTION_NONE = 0xFF,
+ 315      =1  } EnumPowerAction;
+ 316      =1  */
+ 317      =1  /*
+ 318      =1  typedef enum
+ 319      =1  {
+ 320      =1      _MODE_ACTION_NO_RESET_MODE = 0x00,                
+ 321      =1      _MODE_ACTION_RESET_TO_SEARCH,
+C51 COMPILER V9.60.0.0   I2C                                                               03/02/2020 12:07:33 PAGE 18  
+
+ 322      =1      _MODE_ACTION_RESET_TO_DISPLAY_SETTING, 
+ 323      =1      _MODE_ACTION_RESET_TO_DISPLAY_SETTING_WITHOUT_FORCETOBG,
+ 324      =1      _MODE_ACTION_RESET_TO_NOSUPPORT,    
+ 325      =1      _MODE_ACTION_RESET_TO_NOSIGNAL,
+ 326      =1      _MODE_ACTION_RESET_TO_POWER_SAVING,    
+ 327      =1      _MODE_ACTION_RESET_TO_POWER_OFF,           
+ 328      =1      _MODE_ACTION_RESET_TO_FACTORY_MODE,   
+ 329      =1      _MODE_ACTION_NONE = 0xFF,
+ 330      =1  } EnumModeAction;
+ 331      =1  */
+ 332      =1  
+ 333      =1  typedef struct
+ 334      =1  {
+ 335      =1      BYTE b5BatteryStatus:5;
+ 336      =1      BYTE b1NoBattery:1;
+ 337      =1      BYTE b1AC_PLUG:1;
+ 338      =1      BYTE b3BTHStatus:3;
+ 339      =1      BYTE b1BatteryCapacityLow:1;
+ 340      =1      BYTE b1BatteryAbnormal:1;
+ 341      =1      BYTE b2BatteryChargeStatus:2;
+ 342      =1      WORD BatteryCapacity;
+ 343      =1  } StructBatteryInfoType;
+ 344      =1  
+ 345      =1  
+ 346      =1  typedef struct
+ 347      =1  {
+ 348      =1      BYTE b4PowerAction : 4;
+ 349      =1      BYTE b4PowerStatus : 4;
+ 350      =1      BYTE b1GDIIsolationFlag : 1;
+ 351      =1      BYTE b1TopIsolationFlag : 1;
+ 352      =1      BYTE b1AnalogIsolationFlag : 1;
+ 353      =1  } StructPowerInfoType;
+ 354      =1  
+ 355      =1  
+ 356      =1  typedef struct
+ 357      =1  {
+ 358      =1      BYTE b5ModeState : 5;
+ 359      =1      BYTE b1DisplaySettingReady : 1;
+ 360      =1      BYTE b1TimingConfirm : 1;
+ 361      =1      BYTE b1ModeStateChanged : 1;
+ 362      =1      BYTE b4ModeResetFlag : 4;    
+ 363      =1      BYTE b1NoWaitForActive : 1;
+ 364      =1      BYTE b1ActiveReady : 1;
+ 365      =1  } StructModeInfoType;
+ 366      =1  
+ 367      =1  
+ 368      =1  
+ 369      =1  /*
+ 370      =1  
+ 371      =1  enum SourceModeTypeEnum
+ 372      =1  { 
+ 373      =1    AVMode,      // 0   0X00
+ 374      =1    //VGAMode,       // 1
+ 375      =1  #ifdef USE_CAMD 
+ 376      =1    CAM_D,         // 2
+ 377      =1  #endif
+ 378      =1    CAM_A,         // 3     0x01
+ 379      =1    CAM_B,         // 4     0x02
+ 380      =1    CAM_C,         // 5     0x03
+ 381      =1    CAM_R,         // 6     0x04
+ 382      =1    CAM_AB,        // 7     0x05
+ 383      =1    CAM_CR,        // 8     0x06
+C51 COMPILER V9.60.0.0   I2C                                                               03/02/2020 12:07:33 PAGE 19  
+
+ 384      =1    CAM_AR,        // 9     0x07
+ 385      =1    CAM_RB,        // 10    0x08
+ 386      =1    CAM_AC,        // 11    0x09
+ 387      =1    CAM_CB,        // 12    0x0a
+ 388      =1    CAM_RAB_T,     // 13    0x0b
+ 389      =1    CAM_RAB_H,     // 14    0x0c
+ 390      =1  
+ 391      =1    CAM_QUAD,      // 15    0x0d
+ 392      =1    CAM_ABR_T3,    // 16    0x0e
+ 393      =1    CAM_ABR_T4,    // 17    0x0f
+ 394      =1    CAM_RAC_T,      //0x10  
+ 395      =1    CAM_RBC_T,      //0x11
+ 396      =1    CAM_RAC_T2,     //0x12  
+ 397      =1    CAM_RBC_T2,     //0x13  
+ 398      =1    CAM_BA,       //0x14
+ 399      =1    CAM_BC,
+ 400      =1    CAM_BR,
+ 401      =1    CAM_CA,
+ 402      =1    CAM_ABC,
+ 403      =1    CAM_ABR,
+ 404      =1    CAM_ACR,
+ 405      =1    CAM_BAC,
+ 406      =1    CAM_BAR,
+ 407      =1    CAM_BCR,
+ 408      =1    CAM_CAB,
+ 409      =1    CAM_CAR,
+ 410      =1    CAM_CBR,  
+ 411      =1    SEQ,           // 18      0x10
+ 412      =1    CAM_NUM
+ 413      =1  };
+ 414      =1  */
+ 415      =1  //#define _TIMER_EVENT_COUNT      _SYSTEM_TIMER_EVENT_END////                    (_SIMULTANEOUS_USER_EVENT
+             -_COUNT + _SIMULTANEOUS_SYSTEM_EVENT_COUNT + _SIMULTANEOUS_SCALER_EVENT_COUNT)
+ 416      =1  
+ 417      =1  //typedef unsigned char SourceModeType;
+ 418      =1  
+ 419      =1  #endif  /* __TYPEDEFS__ */
+  12          #include "cpu.h"
+   1      =1  #ifndef __CPU__
+   2      =1  #define __CPU__
+   3      =1  
+   4      =1  /*
+   5      =1  #ifdef INTERNAL_MCU
+   6      =1  #define I2C_SCL   P2_0
+   7      =1  #else
+   8      =1  #define I2C_SCL   P1_0
+   9      =1  #endif
+  10      =1  #define I2C_SDA   P1_1
+  11      =1  */
+  12      =1  #define I2C_SCL   P1_0
+  13      =1  #define I2C_SDA   P1_1
+  14      =1  #define BUF_MAX   8
+  15      =1  #define DVR_BUF_MAX   30
+  16      =1  
+  17      =1  //--------------------------------------------------
+  18      =1  // Panel  Related MACRO
+  19      =1  //--------------------------------------------------
+  20      =1  #define GET_P_IO1()   (P3_4)  
+  21      =1  #define SET_P_IO1()   (P3_4 = 1)    
+  22      =1  #define CLR_P_IO1()   (P3_4 = 0)  
+  23      =1  
+  24      =1  #define GET_P_IO2()   (P3_5)  
+C51 COMPILER V9.60.0.0   I2C                                                               03/02/2020 12:07:33 PAGE 20  
+
+  25      =1  #define SET_P_IO2()   (P3_5 = 1)    
+  26      =1  #define CLR_P_IO2()   (P3_5 = 0)  
+  27      =1  
+  28      =1  #define GET_BL_PWM()    (P1_4)  
+  29      =1  #define SET_BL_PWM()    (P1_4 = 1)    //ON
+  30      =1  #define CLR_BL_PWM()    (P1_4 = 0)  //OFF
+  31      =1  
+  32      =1  #define GET_PCON3V3_P()  (P0_3) 
+  33      =1  #define SET_PCON3V3_P()  (P0_3 = 0)    //ON
+  34      =1  #define CLR_PCON3V3_P()  (P0_3 = 1) //OFF
+  35      =1  
+  36      =1  #define GET_PCON5V_P()   (P0_4) 
+  37      =1  #define SET_PCON5V_P()   (P0_4 = 0)    //ON
+  38      =1  #define CLR_PCON5V_P()   (P0_4 = 1) //OFF
+  39      =1  
+  40      =1  #define GET_Panel_EN()   (P2_1) 
+  41      =1  #define SET_Panel_EN()   (P2_1 = 1)    //ON
+  42      =1  #define CLR_Panel_EN()   (P2_1 = 0) //OFF
+  43      =1  
+  44      =1  #define GET_CTP_INT()   (P2_4)  
+  45      =1  #define SET_CTP_INT()   (P2_4 = 1)     //ON
+  46      =1  #define CLR_CTP_INT()   (P2_4 = 0)  //OFF
+  47      =1  
+  48      =1  #define GET_CTP_RST()   (P2_5)  
+  49      =1  #define SET_CTP_RST()   (P2_5 = 1)     //ON
+  50      =1  #define CLR_CTP_RST()   (P2_5 = 0)  //OFF
+  51      =1  
+  52      =1  #define GET_PWCTRL()    (P3_7)  
+  53      =1  #define SET_PWCTRL()    (P3_7 = 1)     //ON
+  54      =1  #define CLR_PWCTRL()    (P3_7 = 0)  //OFF
+  55      =1  
+  56      =1  //--------------------------------------------------
+  57      =1  // Battery  Related MACRO
+  58      =1  //--------------------------------------------------
+  59      =1  
+  60      =1  #define GET_PWR_GOOD()  (P1_5)    
+  61      =1  
+  62      =1  #define GET_STAT1()   (P0_0)    
+  63      =1  #define GET_STAT2()   (P0_1)    
+  64      =1  
+  65      =1  #define GET_CHG_CURR()    (P0_6)  
+  66      =1  #define SET_CHG_CURR()    (P0_6 = 1)     //ON
+  67      =1  #define CLR_CHG_CURR()    (P0_6 = 0)  //OFF
+  68      =1  
+  69      =1  #define GET_AC_MODE()   (P4_2)  
+  70      =1  #define SET_AC_MODE()   (P4_2 = 1)     //ON
+  71      =1  #define CLR_AC_MODE()   (P4_2 = 0)  //OFF
+  72      =1  
+  73      =1  //--------------------------------------------------
+  74      =1  // DVR Power  Related MACRO
+  75      =1  //--------------------------------------------------
+  76      =1  
+  77      =1  #define GET_BAT_SYS()   (P2_6)  
+  78      =1  #define SET_BAT_SYS()   (P2_6 = 1)     //ON
+  79      =1  #define CLR_BAT_SYS()   (P2_6 = 0)  //OFF
+  80      =1  
+  81      =1  //--------------------------------------------------
+  82      =1  // CAM Power  Related MACRO
+  83      =1  //--------------------------------------------------
+  84      =1  
+  85      =1  #define GET_PCON_CAM()    (P2_2)  
+  86      =1  #define SET_PCON_CAM()    (P2_2 = 1)     //ON
+C51 COMPILER V9.60.0.0   I2C                                                               03/02/2020 12:07:33 PAGE 21  
+
+  87      =1  #define CLR_PCON_CAM()    (P2_2 = 0)  //OFF
+  88      =1  
+  89      =1  //--------------------------------------------------
+  90      =1  // TW8836 Power  Related MACRO
+  91      =1  //--------------------------------------------------
+  92      =1  
+  93      =1  #define GET_PCON3V3_TW()    (P3_6)  
+  94      =1  #define SET_PCON3V3_TW()    (P3_6 = 0)     //ON
+  95      =1  #define CLR_PCON3V3_TW()    (P3_6 = 1)  //OFF
+  96      =1  
+  97      =1  #define GET_TW8836_RST()      (P2_0)  
+  98      =1  #define SET_TW8836_RST()      (P2_0 = 0)     //ON
+  99      =1  #define CLR_TW8836_RST()      (P2_0 = 1)  //OFF
+ 100      =1  
+ 101      =1  
+ 102      =1  //--------------------------------------------------
+ 103      =1  // I/O board  Related MACRO
+ 104      =1  //--------------------------------------------------
+ 105      =1  
+ 106      =1  #define GET_GREEN()       (P4_0)  
+ 107      =1  #define SET_GREEN()       (P4_0 = 0)     
+ 108      =1  #define CLR_GREEN()       (P4_0 = 1)  
+ 109      =1  
+ 110      =1  #define GET_RED()         (P4_1)  
+ 111      =1  #define SET_RED()         (P4_1 = 0)     
+ 112      =1  #define CLR_RED()         (P4_1 = 1)  
+ 113      =1  
+ 114      =1  #define GET_PSW()       (P4_3)  
+ 115      =1  #define SET_PSW()       (P4_3 = 1)     
+ 116      =1  #define CLR_PSW()       (P4_3 = 0)  
+ 117      =1  
+ 118      =1  #define GET_ADAP_12()     (P0_5)  
+ 119      =1  #define SET_ADAP_12()     (P0_5 = 1)     
+ 120      =1  #define CLR_ADAP_12()     (P0_5 = 0)  
+ 121      =1  
+ 122      =1  
+ 123      =1  #ifdef REMO_RC5
+           =1 #define EnableRemoconInt()  { RemoDataReady = 0;  EX0 = 1;}
+           =1 #endif
+ 126      =1  void  InitCPU(void);
+ 127      =1  void  InitVars(void);
+ 128      =1  void  InitTechwell(void);
+ 129      =1  void  main_init (void);
+ 130      =1  void  PowerDown( void );
+ 131      =1  #if 0
+           =1 BYTE  OKSleepTime(void);
+           =1 #endif
+ 134      =1  #ifdef REMO_RC5
+           =1 void  InitForRemo(void);
+           =1 #endif
+ 137      =1  void  PowerLED(BYTE flag);
+ 138      =1  void    Wait_ms(WORD Tms);
+ 139      =1  BYTE    TW2835Command(char,char,char,char,char);
+ 140      =1  void SET_PWM(BYTE index, BYTE val);
+ 141      =1  
+ 142      =1  #endif
+  13          #include "I2C.h"
+   1      =1  #ifndef __I2C_H__
+   2      =1  #define __I2C_H__
+   3      =1  //AD5110 table
+   4      =1  /*   
+   5      =1  "RA=100K+5.1K, RB=10K+10K  "        //  
+C51 COMPILER V9.60.0.0   I2C                                                               03/02/2020 12:07:33 PAGE 22  
+
+   6      =1  ¶¥¼Æ  D7D6D5D4D3D2D1D0  Vout        //
+   7      =1  0 0 4.90                            //
+   8      =1  1 1 4.92      
+   9      =1  2 10  4.93      
+  10      =1  3 11  4.95      
+  11      =1  4 100 4.97      
+  12      =1  5 101 4.99      
+  13      =1  6 110 5.00      
+  14      =1  7 111 5.02      
+  15      =1  8 1000  5.03      
+  16      =1  9 1001  5.05      
+  17      =1  10  1010  5.07      
+  18      =1  11  1011  5.09      
+  19      =1  12  1100  5.11      
+  20      =1  13  1101  5.12      
+  21      =1  14  1110  5.14      
+  22      =1  15  1111  5.16      
+  23      =1  16  10000 5.18      
+  24      =1  17  10001 5.20      
+  25      =1  18  10010 5.21      
+  26      =1  19  10011 5.23      
+  27      =1  20  10100 5.25      
+  28      =1  21  10101 5.27      
+  29      =1  22  10110 5.29      
+  30      =1  23  10111 5.31      
+  31      =1  24  11000 5.33      
+  32      =1  25  11001 5.35      
+  33      =1  26  11010 5.37      
+  34      =1  27  11011 5.39      
+  35      =1  28  11100 5.41      
+  36      =1  29  11101 5.43      
+  37      =1  30  11110 5.45      
+  38      =1  31  11111 5.47      
+  39      =1  32  100000  5.48      
+  40      =1  33  100001  5.51      
+  41      =1  34  100010  5.54      
+  42      =1  35  100011  5.56      
+  43      =1  36  100100  5.58      
+  44      =1  37  100101  5.60      
+  45      =1  38  100110  5.63      
+  46      =1  39  100111  5.65      
+  47      =1  40  101000  5.67      
+  48      =1  41  101001  5.69      
+  49      =1  42  101010  5.72      
+  50      =1  43  101011  5.74      
+  51      =1  44  101100  5.76      
+  52      =1  45  101101  5.78      
+  53      =1  46  101110  5.81      
+  54      =1  47  101111  5.84      
+  55      =1  48  110000  5.86      
+  56      =1  49  110001  5.88      
+  57      =1  50  110010  5.91      
+  58      =1  51  110011  5.93      
+  59      =1  52  110100  5.96      
+  60      =1  53  110101  5.98      
+  61      =1  54  110110  6.01      
+  62      =1  55  110111  6.04      
+  63      =1  56  111000  6.06      
+  64      =1  57  111001  6.09      
+  65      =1  58  111010  6.11      
+  66      =1  59  111011  6.15      
+  67      =1  60  111100  6.17      
+C51 COMPILER V9.60.0.0   I2C                                                               03/02/2020 12:07:33 PAGE 23  
+
+  68      =1  61  111101  6.20      
+  69      =1  62  111110  6.23      
+  70      =1  63  111111  6.26      
+  71      =1  64  1000000 6.28      
+  72      =1  65  1000001 6.32      
+  73      =1  66  1000010 6.35      
+  74      =1  67  1000011 6.37      
+  75      =1  68  1000100 6.40      
+  76      =1  69  1000101 6.44      
+  77      =1  70  1000110 6.47      
+  78      =1  71  1000111 6.50      
+  79      =1  72  1001000 6.53      
+  80      =1  73  1001001 6.56      
+  81      =1  74  1001010 6.59      
+  82      =1  75  1001011 6.62      
+  83      =1  76  1001100 6.66      
+  84      =1  77  1001101 6.69      
+  85      =1  78  1001110 6.72      
+  86      =1  79  1001111 6.76      
+  87      =1  80  1010000 6.79      
+  88      =1  81  1010001 6.83      
+  89      =1  82  1010010 6.86      
+  90      =1  83  1010011 6.90      
+  91      =1  84  1010100 6.93      
+  92      =1  85  1010101 6.97      
+  93      =1  86  1010110 7.01      
+  94      =1  87  1010111 7.04      
+  95      =1  88  1011000 7.08      
+  96      =1  89  1011001 7.12      
+  97      =1  90  1011010 7.16      
+  98      =1  91  1011011 7.20      
+  99      =1  92  1011100 7.24      
+ 100      =1  93  1011101 7.28      
+ 101      =1  94  1011110 7.32      
+ 102      =1  95  1011111 7.36      
+ 103      =1  96  1100000 7.40      
+ 104      =1  97  1100001 7.44      
+ 105      =1  98  1100010 7.48      
+ 106      =1  99  1100011 7.53      
+ 107      =1  100 1100100 7.57      
+ 108      =1  101 1100101 7.61      
+ 109      =1  102 1100110 7.66      
+ 110      =1  103 1100111 7.71      
+ 111      =1  104 1101000 7.75      
+ 112      =1  105 1101001 7.80      
+ 113      =1  106 1101010 7.84      
+ 114      =1  107 1101011 7.89      
+ 115      =1  108 1101100 7.94      
+ 116      =1  109 1101101 7.99      
+ 117      =1  110 1101110 8.04      
+ 118      =1  111 1101111 8.09      
+ 119      =1  112 1110000 8.14      
+ 120      =1  113 1110001 8.19      
+ 121      =1  114 1110010 8.25      
+ 122      =1  115 1110011 8.30      
+ 123      =1  116 1110100 8.35      
+ 124      =1  117 1110101 8.41      
+ 125      =1  118 1110110 8.47      
+ 126      =1  119 1110111 8.52      
+ 127      =1  120 1111000 8.58      
+ 128      =1  121 1111001 8.64      
+ 129      =1  122 1111010 8.70      
+C51 COMPILER V9.60.0.0   I2C                                                               03/02/2020 12:07:33 PAGE 24  
+
+ 130      =1  123 1111011 8.76      
+ 131      =1  124 1111100 8.82      
+ 132      =1  125 1111101 8.88      
+ 133      =1  126 1111110 8.95      
+ 134      =1  127 1111111 9.01      
+ 135      =1  */
+ 136      =1  void I2CReadByte3(BYTE *);
+ 137      =1  void I2CRead8Byte(BYTE *);
+ 138      =1  #if 0
+           =1 void I2CReadByteMSP(BYTE addr, BYTE index, BYTE *pd, BYTE cnt);
+           =1 #endif
+ 141      =1  BYTE I2CWriteByte2(BYTE);
+ 142      =1  BYTE I2CWriteByte3(BYTE*);
+ 143      =1  BYTE I2CWrite8Byte(BYTE *);
+ 144      =1  
+ 145      =1  void I2CStart(void);
+ 146      =1  void I2CWriteData(BYTE value);
+ 147      =1  BYTE I2CReadData(void);
+ 148      =1  #if 0
+           =1 BYTE I2CReadDataWithACK(void);
+           =1 #endif
+ 151      =1  void I2CStop(void);
+ 152      =1  void I2Cdelay(void);
+ 153      =1  
+ 154      =1  
+ 155      =1  
+ 156      =1  #define WriteTW88(a,b)    WriteI2C(TW88I2CAddress, a, b)
+ 157      =1  #define ReadTW88(a)     ReadI2C(TW88I2CAddress, a)
+ 158      =1  /*
+ 159      =1  
+ 160      =1  
+ 161      =1  BYTE WriteTW88_Wait (BYTE, BYTE);
+ 162      =1  void WriteADC   (BYTE, BYTE);
+ 163      =1  BYTE ReadADC    (BYTE);
+ 164      =1  //BYTE ReadADC_TW88(BYTE index);
+ 165      =1  void WriteADC_TW88(BYTE index, BYTE dat);
+ 166      =1  */
+ 167      =1  void WriteEEP   (WORD, BYTE);
+ 168      =1  BYTE ReadEEP    (WORD);
+ 169      =1  //WORD ReadALC106(WORD index);
+ 170      =1  //void WriteALC106(WORD index, WORD  dat);
+ 171      =1  
+ 172      =1  WORD ReadI2CWORD(BYTE addr, BYTE index);
+ 173      =1  BYTE ReadI2C    (BYTE addr, BYTE index);
+ 174      =1  void WriteI2C   (BYTE addr, BYTE index, BYTE val);
+ 175      =1  
+ 176      =1  void WriteI2Cn_(BYTE addr, BYTE *val, BYTE cnt);
+ 177      =1  void WriteI2Cn (BYTE addr, BYTE index, BYTE *val, BYTE cnt);
+ 178      =1  void WriteI2CnD(BYTE addr, BYTE index, BYTE val, BYTE cnt);
+ 179      =1  
+ 180      =1  void ReadI2Cmn(BYTE addr, BYTE wcnt, BYTE rcnt, BYTE *rwdata);
+ 181      =1  void WriteAD5110(WORD index, WORD  dat);
+ 182      =1  WORD ReadAD5110(WORD index);
+ 183      =1  
+ 184      =1  
+ 185      =1  #define   WriteADC(a,b) WriteADC_TW88(a,b)
+ 186      =1  #define   ReadADC(a)    ReadADC_TW88(a)
+ 187      =1  
+ 188      =1  #endif  /* __I2C_H__ */
+  14          #include "main.h"
+   1      =1  #ifndef __MAIN__
+   2      =1  #define __MAIN__
+C51 COMPILER V9.60.0.0   I2C                                                               03/02/2020 12:07:33 PAGE 25  
+
+   3      =1  
+   4      =1  #define ON          1
+   5      =1  #define OFF         0
+   6      =1  #define Hs_debug
+   7      =1  //#define DVR
+   8      =1  #define Format_SDCard
+   9      =1  #define BJTSwitch
+  10      =1  
+  11      =1  
+  12      =1  
+  13      =1  #define Panel_Enable()          P4=P4|0x08 //andy 980908
+  14      =1  #define Panel_Disable()     P4=P4&0xf7
+  15      =1  
+  16      =1  #if 0
+           =1 #define SetBacklight()      P4=P4|0x04
+           =1 #define clrBacklight()      P4=P4&0xfb
+           =1 #else
+  20      =1  #define SetBacklight()      P4=P4&0xfb
+  21      =1  #define clrBacklight()       P4=P4|0x04
+  22      =1  #endif
+  23      =1  /*
+  24      =1  #define COLUMN1_PIN   P2_3
+  25      =1  #define COLUMN2_PIN   P2_4
+  26      =1  #define COLUMN3_PIN   P2_5
+  27      =1  */
+  28      =1  
+  29      =1  //InputSelection
+  30      =1  /*
+  31      =1  struct struct_IdName {
+  32      =1    BYTE  Id;
+  33      =1    BYTE  Name[16];
+  34      =1  };
+  35      =1  /*
+  36      =1  
+  37      =1  #define CH_TW2835              1
+  38      =1  #define CH_CAMD                2
+  39      =1  #define CH_AV                  3
+  40      =1  #define PC             7
+  41      =1  #define ChineseDefaultMenu   8
+  42      =1  
+  43      =1  #define SVIDEO        2
+  44      =1  #define COMPONENT     3
+  45      =1  //#define ANALOGDTV     4
+  46      =1  #define DTV         4
+  47      =1  #define TV          5
+  48      =1  #define SCART       6
+  49      =1  
+  50      =1  #define DIGITALVGA      8
+  51      =1  
+  52      =1  #define AIRTV       0 //9
+  53      =1  #define CABLETV       1 //0xa
+  54      =1  
+  55      =1  
+  56      =1  #define TVTUNER       0xd   //10
+  57      =1  #define MUTE        1 
+  58      =1  #define MENU        2 
+  59      =1  #define TVVOL       4 
+  60      =1  #define CC          8 
+  61      =1  #define INPUTINFO     0x10
+  62      =1  #define PCINFO        0x20
+  63      =1  #define GAUGEINFO           0x40
+  64      =1  //#define RATINGINFO      0x40
+C51 COMPILER V9.60.0.0   I2C                                                               03/02/2020 12:07:33 PAGE 26  
+
+  65      =1  #define TVCHN       0x80
+  66      =1  //#define MUTE        0x40
+  67      =1  
+  68      =1  #define YPBPR_480i      0
+  69      =1  #define YPBPR_576i      1
+  70      =1  #define YPBPR_480p      2
+  71      =1  #define YPBPR_576p      3
+  72      =1  #define YPBPR_1080i     4
+  73      =1  #define YPBPR_720p      5
+  74      =1  #define YPBPR_720p50    6
+  75      =1  */
+  76      =1  
+  77      =1  #define _STOP_PWM     0x00
+  78      =1  #define _RUN_PWM    0xFF
+  79      =1  #define _BL_PWM     0x14
+  80      =1  #define _CHG_CURR   0x15
+  81      =1  
+  82      =1  //ADC
+  83      =1  #define P16_BTH   6  //P1.6
+  84      =1  #define P17_BAT   7  //P1.7
+  85      =1  
+  86      =1  
+  87      =1  
+  88      =1  //--------------------------- P0 Define -----------------------------
+  89      =1  //#define SEL_MIX     P0_6  // 
+  90      =1  //--------------------------- P1 Define -----------------------------
+  91      =1  //#define SEL_DVI     P3_5  //LJY062001   
+  92      =1  
+  93      =1  #define TW88HWReset     P3_4  //LJY001010 //LJY000721
+  94      =1  #define PowerUp             P3_7
+  95      =1  #define LBEN P1_6
+  96      =1  //======================= CDS Control ================================= 
+  97      =1  //#define CDS_CTRL           P1_5
+  98      =1  /*
+  99      =1  extern BYTE SelectModeType;
+ 100      =1  extern BYTE InputSelection;
+ 101      =1  extern BYTE SEQTime;
+ 102      =1  extern BYTE Priority;
+ 103      =1  extern BYTE PowerFlag;
+ 104      =1  //extern bit AutoDayNight;
+ 105      =1  extern bit SDCardCoverDetect;
+ 106      =1  */
+ 107      =1  BYTE keyIn(void);
+ 108      =1  void TimerForRemocon(void);
+ 109      =1  void TimerForTick(void);
+ 110      =1  void DisableRemoconInt(void);
+ 111      =1  BYTE SetSupport_remocon(BYTE newd);
+ 112      =1  
+ 113      =1  void delay(BYTE cnt);
+ 114      =1  
+ 115      =1  BYTE RS_ready(void);
+ 116      =1  #ifdef Hs_debug
+ 117      =1  BYTE RS_rx(void);
+ 118      =1  #endif
+ 119      =1  void RS_tx(BYTE tx_buf);
+ 120      =1  
+ 121      =1  BYTE RS2_rx(void);
+ 122      =1  void RS2_tx(BYTE tx_buf);
+ 123      =1  
+ 124      =1  //void NewLine(void);
+ 125      =1  //void PutsP(PDATA_P BYTE *ptr);
+ 126      =1  #ifdef Hs_debug
+C51 COMPILER V9.60.0.0   I2C                                                               03/02/2020 12:07:33 PAGE 27  
+
+ 127      =1  //void MonWriteI2C(BYTE addr, BYTE index, BYTE val);
+ 128      =1  //BYTE MonReadI2C(BYTE addr, BYTE index);
+ 129      =1  #endif
+ 130      =1  BYTE Asc1Bin(BYTE asc);
+ 131      =1  BYTE Asc2Bin(PDATA_P BYTE *s);
+ 132      =1  
+ 133      =1  //void I2CDeviceInitialize( CODE_P BYTE *RegSet);
+ 134      =1  
+ 135      =1  //void RestartSystemClock(WORD clock_hm);
+ 136      =1  //WORD GetTime_ms(void);
+ 137      =1  #if 0
+           =1 BYTE GetTime_H(void);
+           =1 BYTE GetTime_M(void);
+           =1 #endif
+ 141      =1  //void ChangeTime_H( char add );
+ 142      =1  //void ChangeTime_M( char add );
+ 143      =1  //WORD GetWakeupTime(void);
+ 144      =1  //void SetWakeupTime(WORD wtime);
+ 145      =1  
+ 146      =1  
+ 147      =1  //WORD GetOffTime(void);
+ 148      =1  //void SetOffTime(WORD wtime);
+ 149      =1  //BYTE GetSleepTimer(void);
+ 150      =1  //void SetSleepTimer(BYTE stime);
+ 151      =1  /*
+ 152      =1  WORD DiffTime_ms( WORD stime, WORD etime );
+ 153      =1  //void SetLastBlockedTime(void);
+ 154      =1  void SetLastCCTime(void);       //ljy010904...CC_FIX_CLEAR_ON_TIME
+ 155      =1  
+ 156      =1  void SetOSDLastKeyInTime(void);
+ 157      =1  WORD GetOSDLastKeyInTime(void);
+ 158      =1  WORD GetIVF(void);
+ 159      =1  DWORD GetIHF(void);
+ 160      =1  BYTE ReadVInputSTD(void);
+ 161      =1  void SetVInputStd(BYTE newd);
+ 162      =1  BYTE GetVInputStd(void);
+ 163      =1  BYTE GetInputSelection(void);
+ 164      =1  #ifdef ADD_ANALOGPANEL
+ 165      =1  BYTE IsAnalogOn(void);
+ 166      =1  #endif
+ 167      =1  void InitVideoData(BYTE src);
+ 168      =1  void ChangeVInputStdDetectMode(BYTE val);
+ 169      =1  BYTE GetVInputStdInx(void);
+ 170      =1  
+ 171      =1  void MonWriteI2Cn_(BYTE addr, BYTE *val, BYTE cnt) ;
+ 172      =1  */
+ 173      =1  ///void Usage(void);
+ 174      =1  #ifdef Hs_debug
+ 175      =1    void Prompt(void);
+ 176      =1  #endif
+ 177      =1  /*
+ 178      =1  void DebugKeyIn(BYTE ikey);
+ 179      =1  void DVIPowerDown(bit flag);
+ 180      =1  void PowerDown_XTAL(bit flag);
+ 181      =1  */
+ 182      =1  //void ChangeInput(BYTE newsel);
+ 183      =1  
+ 184      =1  
+ 185      =1  void WaitPowerOn(void);
+ 186      =1  //void PowerOff(void);
+ 187      =1  //BYTE GetNextInputSelection(void);
+ 188      =1  
+C51 COMPILER V9.60.0.0   I2C                                                               03/02/2020 12:07:33 PAGE 28  
+
+ 189      =1  //BYTE WantToStopTVScan(void);
+ 190      =1  
+ 191      =1  //BYTE IsTW8801(void);
+ 192      =1  //BYTE IsTW8803(void);
+ 193      =1  //BYTE ConvertVideoVSAT(BYTE reg);
+ 194      =1  
+ 195      =1  //BYTE IsNoInput(void);
+ 196      =1  void LoadEEPROM (void);
+ 197      =1  void Hs_InitVars(void);
+ 198      =1  /*
+ 199      =1  void AdjustAutoDayNight(BYTE val);
+ 200      =1  void ACCPowerControl(void);
+ 201      =1  void AdjustBacklight(BYTE val);//val=0~110
+ 202      =1  */
+ 203      =1  BYTE mcuLib_ProtocolAppend(BYTE *pucBuf, BYTE* piLen, BYTE ucByte);
+ 204      =1  BYTE mcuLib_ProtocolSendCmdWithParamNum(BYTE ucType, BYTE* pucParam, BYTE ucSize);
+ 205      =1  void MCU_SendCmdToDVR(BYTE ucType);
+ 206      =1  void SetAD5110Step(BYTE newv) ;
+ 207      =1  
+ 208      =1  
+ 209      =1  
+ 210      =1  extern BYTE ScanPowerkey(void);
+ 211      =1  extern void MCUTimerInitialTimerEvent(void);
+ 212      =1  extern void MCUTimerActiveTimerEvent(WORD usTime, BYTE ucEventID);
+ 213      =1  extern void SysTimerHandler(void);
+ 214      =1  extern void SysJudgeHandler(void);
+ 215      =1  extern void SysModeHandler(void);
+ 216      =1  extern void SysPowerHandler(void);
+ 217      =1  
+ 218      =1  extern void MCUTimerDelayXms(WORD usNum);
+ 219      =1  
+ 220      =1  
+ 221      =1  struct RegisterInfo
+ 222      =1  {
+ 223      =1     int  Min;
+ 224      =1     int  Max;
+ 225      =1     int  Default;
+ 226      =1  };
+ 227      =1  struct LongRegisterInfo
+ 228      =1  {
+ 229      =1     WORD Min;
+ 230      =1     WORD Max;
+ 231      =1     WORD Default;
+ 232      =1  };
+ 233      =1  
+ 234      =1  
+ 235      =1  
+ 236      =1  
+ 237      =1  #endif  // __MAIN__
+  15          //#include "debug.h"
+  16          #include "printf.h"
+   1      =1  #ifndef __PRINTF__
+   2      =1  #define __PRINTF__
+   3      =1  
+   4      =1  #define _outchar(c) while(1) { if( !RS_Xbusy ) { SBUF = c; RS_Xbusy=1; break; } }
+   5      =1  #define Putch(c) _outchar(c)
+   6      =1  
+   7      =1  #ifdef SERIAL
+   8      =1  
+   9      =1   void Printf ( const char CODE_P *fmt, ... );
+  10      =1   void Puts ( CODE_P char *ptr );
+  11      =1  
+C51 COMPILER V9.60.0.0   I2C                                                               03/02/2020 12:07:33 PAGE 29  
+
+  12      =1  #define TW2835Cmd(a)   Puts ( a )
+  13      =1  
+  14      =1  #else
+           =1 
+           =1  #undef  DEBUG
+           =1  #define Printf(a,b)  //
+           =1  #define Puts(a)      //
+           =1 
+           =1 #endif
+  21      =1  
+  22      =1  
+  23      =1  #ifndef DEBUG
+  24      =1  
+  25      =1   #define dPuts(a)   //
+  26      =1   #define wPuts(a)   //
+  27      =1   #define ePuts(a)   //
+  28      =1  
+  29      =1  #else
+           =1 
+           =1  void dPrintf( const char CODE_P *fmt, ... );
+           =1  void wPrintf( const char CODE_P *fmt, ... );
+           =1  void ePrintf( const char CODE_P *fmt, ... );
+           =1 
+           =1  void dPuts( CODE_P char *ptr );
+           =1  void wPuts( CODE_P char *ptr );
+           =1  void ePuts( CODE_P char *ptr );
+           =1 
+           =1 #endif  // DEBUG
+  40      =1  
+  41      =1  BYTE Getch(void);
+  42      =1  BYTE Getche(void);
+  43      =1  
+  44      =1  
+  45      =1  #endif  //__PRINTF__
+  17          //#include "osdbasic.h"
+  18          #include "CPU.h"
+   1      =1  #ifndef __CPU__
+           =1 #define __CPU__
+           =1 
+           =1 /*
+           =1 #ifdef INTERNAL_MCU
+           =1 #define I2C_SCL   P2_0
+           =1 #else
+           =1 #define I2C_SCL   P1_0
+           =1 #endif
+           =1 #define I2C_SDA   P1_1
+           =1 */
+           =1 #define I2C_SCL   P1_0
+           =1 #define I2C_SDA   P1_1
+           =1 #define BUF_MAX   8
+           =1 #define DVR_BUF_MAX   30
+           =1 
+           =1 //--------------------------------------------------
+           =1 // Panel  Related MACRO
+           =1 //--------------------------------------------------
+           =1 #define GET_P_IO1()   (P3_4)  
+           =1 #define SET_P_IO1()   (P3_4 = 1)    
+           =1 #define CLR_P_IO1()   (P3_4 = 0)  
+           =1 
+           =1 #define GET_P_IO2()   (P3_5)  
+           =1 #define SET_P_IO2()   (P3_5 = 1)    
+           =1 #define CLR_P_IO2()   (P3_5 = 0)  
+C51 COMPILER V9.60.0.0   I2C                                                               03/02/2020 12:07:33 PAGE 30  
+
+           =1 
+           =1 #define GET_BL_PWM()    (P1_4)  
+           =1 #define SET_BL_PWM()    (P1_4 = 1)    //ON
+           =1 #define CLR_BL_PWM()    (P1_4 = 0)  //OFF
+           =1 
+           =1 #define GET_PCON3V3_P()  (P0_3) 
+           =1 #define SET_PCON3V3_P()  (P0_3 = 0)    //ON
+           =1 #define CLR_PCON3V3_P()  (P0_3 = 1) //OFF
+           =1 
+           =1 #define GET_PCON5V_P()   (P0_4) 
+           =1 #define SET_PCON5V_P()   (P0_4 = 0)    //ON
+           =1 #define CLR_PCON5V_P()   (P0_4 = 1) //OFF
+           =1 
+           =1 #define GET_Panel_EN()   (P2_1) 
+           =1 #define SET_Panel_EN()   (P2_1 = 1)    //ON
+           =1 #define CLR_Panel_EN()   (P2_1 = 0) //OFF
+           =1 
+           =1 #define GET_CTP_INT()   (P2_4)  
+           =1 #define SET_CTP_INT()   (P2_4 = 1)     //ON
+           =1 #define CLR_CTP_INT()   (P2_4 = 0)  //OFF
+           =1 
+           =1 #define GET_CTP_RST()   (P2_5)  
+           =1 #define SET_CTP_RST()   (P2_5 = 1)     //ON
+           =1 #define CLR_CTP_RST()   (P2_5 = 0)  //OFF
+           =1 
+           =1 #define GET_PWCTRL()    (P3_7)  
+           =1 #define SET_PWCTRL()    (P3_7 = 1)     //ON
+           =1 #define CLR_PWCTRL()    (P3_7 = 0)  //OFF
+           =1 
+           =1 //--------------------------------------------------
+           =1 // Battery  Related MACRO
+           =1 //--------------------------------------------------
+           =1 
+           =1 #define GET_PWR_GOOD()  (P1_5)    
+           =1 
+           =1 #define GET_STAT1()   (P0_0)    
+           =1 #define GET_STAT2()   (P0_1)    
+           =1 
+           =1 #define GET_CHG_CURR()    (P0_6)  
+           =1 #define SET_CHG_CURR()    (P0_6 = 1)     //ON
+           =1 #define CLR_CHG_CURR()    (P0_6 = 0)  //OFF
+           =1 
+           =1 #define GET_AC_MODE()   (P4_2)  
+           =1 #define SET_AC_MODE()   (P4_2 = 1)     //ON
+           =1 #define CLR_AC_MODE()   (P4_2 = 0)  //OFF
+           =1 
+           =1 //--------------------------------------------------
+           =1 // DVR Power  Related MACRO
+           =1 //--------------------------------------------------
+           =1 
+           =1 #define GET_BAT_SYS()   (P2_6)  
+           =1 #define SET_BAT_SYS()   (P2_6 = 1)     //ON
+           =1 #define CLR_BAT_SYS()   (P2_6 = 0)  //OFF
+           =1 
+           =1 //--------------------------------------------------
+           =1 // CAM Power  Related MACRO
+           =1 //--------------------------------------------------
+           =1 
+           =1 #define GET_PCON_CAM()    (P2_2)  
+           =1 #define SET_PCON_CAM()    (P2_2 = 1)     //ON
+           =1 #define CLR_PCON_CAM()    (P2_2 = 0)  //OFF
+           =1 
+C51 COMPILER V9.60.0.0   I2C                                                               03/02/2020 12:07:33 PAGE 31  
+
+           =1 //--------------------------------------------------
+           =1 // TW8836 Power  Related MACRO
+           =1 //--------------------------------------------------
+           =1 
+           =1 #define GET_PCON3V3_TW()    (P3_6)  
+           =1 #define SET_PCON3V3_TW()    (P3_6 = 0)     //ON
+           =1 #define CLR_PCON3V3_TW()    (P3_6 = 1)  //OFF
+           =1 
+           =1 #define GET_TW8836_RST()      (P2_0)  
+           =1 #define SET_TW8836_RST()      (P2_0 = 0)     //ON
+           =1 #define CLR_TW8836_RST()      (P2_0 = 1)  //OFF
+           =1 
+           =1 
+           =1 //--------------------------------------------------
+           =1 // I/O board  Related MACRO
+           =1 //--------------------------------------------------
+           =1 
+           =1 #define GET_GREEN()       (P4_0)  
+           =1 #define SET_GREEN()       (P4_0 = 0)     
+           =1 #define CLR_GREEN()       (P4_0 = 1)  
+           =1 
+           =1 #define GET_RED()         (P4_1)  
+           =1 #define SET_RED()         (P4_1 = 0)     
+           =1 #define CLR_RED()         (P4_1 = 1)  
+           =1 
+           =1 #define GET_PSW()       (P4_3)  
+           =1 #define SET_PSW()       (P4_3 = 1)     
+           =1 #define CLR_PSW()       (P4_3 = 0)  
+           =1 
+           =1 #define GET_ADAP_12()     (P0_5)  
+           =1 #define SET_ADAP_12()     (P0_5 = 1)     
+           =1 #define CLR_ADAP_12()     (P0_5 = 0)  
+           =1 
+           =1 
+           =1 #ifdef REMO_RC5
+           =1 #define EnableRemoconInt()  { RemoDataReady = 0;  EX0 = 1;}
+           =1 #endif
+           =1 void  InitCPU(void);
+           =1 void  InitVars(void);
+           =1 void  InitTechwell(void);
+           =1 void  main_init (void);
+           =1 void  PowerDown( void );
+           =1 #if 0
+           =1 BYTE  OKSleepTime(void);
+           =1 #endif
+           =1 #ifdef REMO_RC5
+           =1 void  InitForRemo(void);
+           =1 #endif
+           =1 void  PowerLED(BYTE flag);
+           =1 void    Wait_ms(WORD Tms);
+           =1 BYTE    TW2835Command(char,char,char,char,char);
+           =1 void SET_PWM(BYTE index, BYTE val);
+           =1 
+           =1 #endif
+  19          
+  20          
+  21          #define ID_ADDR   0xc5
+  22          #define ID_DATA   0xc6
+  23          
+  24          extern  BYTE  DebugLevel;
+  25          #ifdef  INTERNAL_MCU
+              extern  BYTE  xdata * data regTW88;
+C51 COMPILER V9.60.0.0   I2C                                                               03/02/2020 12:07:33 PAGE 32  
+
+              #endif
+  28          
+  29          
+  30          /*****************************************************************************/
+  31          /*                                                                           */
+  32          /*****************************************************************************/
+  33          
+  34          #define I2C_FAST
+  35          
+  36          #ifdef I2C_FAST
+  37           #define I2Cdelay()
+  38          #else
+               void I2Cdelay(void)
+               {
+                 BYTE i;
+                 for(i=0; i<1; i++){
+                 }
+               }
+              #endif
+  46          
+  47          #if (defined  QVGA) || (defined WQVGA)
+              void I2C_delay(void)
+              {
+                 BYTE i;
+                 for(i=0; i<255; i++){
+                  i=i;
+                 }
+                 for(i=0; i<128; i++){
+                  i=i;
+                 }
+              }
+              #else
+  59           #define I2C_delay() 
+  60          #endif
+  61          #if 0
+              BYTE I2CWriteData_Wait(BYTE value);
+              #endif
+  64          #if defined( SUPPORT_PC ) || defined( SUPPORT_DTV )
+              void WriteADC_TW88(BYTE index, BYTE dat)
+              {
+                BYTE  page;
+              
+                page = ReadTW88( 0xff );    // save page
+                WriteTW88( 0xff, 0x01 );    // change page1
+                WriteTW88(index, dat);  
+                WriteTW88( 0xff, page );    // restore page
+              
+              }
+              
+              BYTE ReadADC_TW88(BYTE index)
+              {
+                BYTE  page, val;
+              
+                page = ReadTW88( 0xff );    // save page
+                WriteTW88( 0xff, 0x01 );    // change page1
+                val = ReadTW88( index );
+                WriteTW88( 0xff, page );    // restore page
+                
+                return val;
+              }
+              
+              
+C51 COMPILER V9.60.0.0   I2C                                                               03/02/2020 12:07:33 PAGE 33  
+
+              #endif  // SUPPORT_PC
+  90          
+  91          void WriteEEP(WORD index, BYTE dat)
+  92          {
+  93   1        BYTE addr;
+  94   1      
+  95   1        addr = (EEPROMI2CAddress | (index>>7)) & 0xfe;
+  96   1      
+  97   1        I2CStart();
+  98   1        I2CWriteData(addr);
+  99   1        I2CWriteData((BYTE)index);
+ 100   1        I2CWriteData(dat);
+ 101   1        I2CStop();
+ 102   1      
+ 103   1        #ifdef DEBUG_EEP
+                  dPrintf("Write %02xh to [Adrs(%02xh)Index(%02xh)\r\n", (WORD)dat, (WORD)addr, (WORD)index );
+                #endif
+ 106   1      
+ 107   1        delay(2);
+ 108   1      }
+ 109          
+ 110          BYTE ReadEEP(WORD index)
+ 111          {
+ 112   1        BYTE val;
+ 113   1        BYTE addr;
+ 114   1      
+ 115   1        addr = (EEPROMI2CAddress | (index>>7)) & 0xfe;
+ 116   1      
+ 117   1        val = ReadI2C(addr,(BYTE)index);
+ 118   1      
+ 119   1        #ifdef DEBUG_OSD
+                  dPrintf("Read [Adrs:%02xh,Index:%02xh] %02xh\r\n", (WORD)addr, (WORD)index, (WORD)val);
+                #endif
+ 122   1        delay(2);
+ 123   1        return val;
+ 124   1      }
+ 125          
+ 126          BYTE ReadI2C(BYTE addr, BYTE index)
+ 127          {
+ 128   1        BYTE val;
+ 129   1      
+ 130   1        I2CStart();
+ 131   1        I2CWriteData(addr);
+ 132   1        I2CWriteData(index);
+ 133   1        I2CStart();
+ 134   1        I2CWriteData(addr | 0x01);
+ 135   1        val = I2CReadData();
+ 136   1        I2CStop();
+ 137   1      
+ 138   1        return val;
+ 139   1      }
+ 140          
+ 141          
+ 142          void WriteI2C(BYTE addr, BYTE index, BYTE val)
+ 143          {
+ 144   1        I2CStart();
+ 145   1        I2CWriteData(addr);
+ 146   1        I2CWriteData(index);
+ 147   1        I2CWriteData(val);
+ 148   1        I2CStop();
+ 149   1      }
+ 150          /*
+C51 COMPILER V9.60.0.0   I2C                                                               03/02/2020 12:07:33 PAGE 34  
+
+ 151          void WriteI2CnD(BYTE addr, BYTE index, BYTE val, BYTE cnt)
+ 152          {
+ 153            BYTE i;
+ 154          
+ 155            I2CStart();
+ 156            I2CWriteData(addr);
+ 157            I2CWriteData(index);
+ 158          
+ 159            for(i=0; i<cnt; i++){
+ 160              I2CWriteData(val);    //LJY050101
+ 161              I2C_delay();
+ 162            }
+ 163          
+ 164            I2CStop();
+ 165          }
+ 166          
+ 167          void WriteI2Cn(BYTE addr, BYTE index, BYTE *val, BYTE cnt)
+ 168          {
+ 169            BYTE i;
+ 170          
+ 171          
+ 172            I2CStart();
+ 173            I2CWriteData(addr);
+ 174            I2CWriteData(index);
+ 175          
+ 176            for(i=0; i<cnt; i++){
+ 177              I2CWriteData(*(val+i)); 
+ 178              I2C_delay();
+ 179            }
+ 180            I2CStop();
+ 181          }
+ 182          
+ 183          void WriteI2Cn_(BYTE addr, BYTE *val, BYTE cnt)
+ 184          {
+ 185            BYTE i;
+ 186          
+ 187            I2CStart();
+ 188            I2CWriteData(addr);
+ 189          
+ 190            for(i=0; i<cnt; i++){
+ 191              I2CWriteData(*(val+i));   //LJY050101
+ 192            }
+ 193            I2CStop();
+ 194          }
+ 195          
+ 196          */
+ 197          
+ 198          #if 0
+              //BYTE I2CWriteData_Wait(BYTE value);
+              
+              void I2CReadByteMSP(BYTE addr, BYTE index, BYTE *pd, BYTE cnt)
+              {
+                BYTE i;
+              
+                I2CStart();
+                I2CWriteData_Wait(addr);
+                I2CWriteData(index);
+                for(i=0; i<cnt; i++) {
+                  I2CWriteData(*(pd+i));
+                }
+                I2CStart();
+                I2CWriteData_Wait(addr | 0x01);
+C51 COMPILER V9.60.0.0   I2C                                                               03/02/2020 12:07:33 PAGE 35  
+
+                *pd = I2CReadDataWithACK();
+                *(pd+1) = I2CReadData();
+              
+                I2CStop();
+              }
+              
+              
+              
+              /*****************************************************************************/
+              /*                                                                           */
+              /*****************************************************************************/
+              
+              BYTE I2CWriteData_Wait(BYTE value)
+              {
+                WORD i;
+                BYTE ack;
+              
+                for(i=0; i<8; i++, value<<=1) {
+                  if(value & 0x80) I2C_SDA = 1;
+                  else       I2C_SDA = 0;
+                  I2Cdelay();
+                  I2C_SCL = 1;  I2Cdelay();
+                  I2C_SCL = 0;
+                }
+                I2C_SDA = 1;  I2Cdelay();
+                I2C_SCL = 1;  I2Cdelay();
+                i=0;
+                  while(1) {
+                  if( I2C_SCL ) break;
+                  i++;
+                }
+              
+                ack = I2C_SDA;  //I2Cdelay();
+                I2C_SCL = 0;
+                return (1-ack);
+              }
+              #endif
+ 250          
+ 251          
+ 252          
+ 253          #ifndef QVGA
+ 254          void dd(void)
+ 255          {
+ 256   1      //BYTE i=0;
+ 257   1      //for(i=0; i<1; i++)
+ 258   1      //{}
+ 259   1      }
+ 260          #else
+              #define dd()  I2Cdelay()
+              #endif
+ 263          
+ 264          void I2CStart()
+ 265          {
+ 266   1        I2C_SDA = 1;  dd();
+ 267   1        I2C_SCL = 1;  dd();
+ 268   1        I2C_SDA = 0;  dd();
+ 269   1        I2C_SCL = 0;
+ 270   1      }
+ 271          
+ 272          void I2CStop()
+ 273          {
+ 274   1        I2C_SDA = 0;  dd();
+C51 COMPILER V9.60.0.0   I2C                                                               03/02/2020 12:07:33 PAGE 36  
+
+ 275   1        I2C_SCL = 1;  dd();
+ 276   1        I2C_SDA = 1;
+ 277   1      }
+ 278          
+ 279          void I2CWriteData(BYTE value)
+ 280          {
+ 281   1      /*
+ 282   1        int i;
+ 283   1      
+ 284   1        for(i=0; i<8; i++, value<<=1) {
+ 285   1          I2C_SCL = 0;
+ 286   1          I2Cdelay(); // HHY 2.04 in special case, it was unstable
+ 287   1          if(value & 0x80) I2C_SDA = 1;
+ 288   1          else       I2C_SDA = 0;
+ 289   1          I2Cdelay();
+ 290   1          I2C_SCL = 1;
+ 291   1        }
+ 292   1      */
+ 293   1      
+ 294   1        I2C_SCL=0;  I2C_SDA=(value & 0x80)? 1:0;  I2C_SCL=1;  dd();
+ 295   1        I2C_SCL=0;  I2C_SDA=(value & 0x40)? 1:0;  I2C_SCL=1;  dd();
+ 296   1        I2C_SCL=0;  I2C_SDA=(value & 0x20)? 1:0;  I2C_SCL=1;  dd();
+ 297   1        I2C_SCL=0;  I2C_SDA=(value & 0x10)? 1:0;  I2C_SCL=1;  dd();
+ 298   1      
+ 299   1        I2C_SCL=0;  I2C_SDA=(value & 0x08)? 1:0;  I2C_SCL=1;  dd();
+ 300   1        I2C_SCL=0;  I2C_SDA=(value & 0x04)? 1:0;  I2C_SCL=1;  dd();
+ 301   1        I2C_SCL=0;  I2C_SDA=(value & 0x02)? 1:0;  I2C_SCL=1;  dd();
+ 302   1        I2C_SCL=0;  I2C_SDA=(value & 0x01)? 1:0;  I2C_SCL=1;  dd();
+ 303   1      
+ 304   1      
+ 305   1        I2C_SCL = 0;  // HHY 3.00
+ 306   1        I2C_SCL = 0;  // HHY 3.00
+ 307   1        I2C_SCL = 0;  //  I2Cdelay();
+ 308   1        I2C_SDA = 1;  //  I2Cdelay();
+ 309   1      
+ 310   1        I2C_SCL = 1;  // HHY 3.00
+ 311   1        I2C_SCL = 1;  // HHY 3.00
+ 312   1        I2C_SCL = 1;  //  I2Cdelay();
+ 313   1        I2C_SCL = 0;
+ 314   1      }
+ 315          
+ 316          BYTE I2CReadData()
+ 317          {
+ 318   1        int i;
+ 319   1        BYTE value=0;
+ 320   1      
+ 321   1        I2C_SDA = 1;  dd();
+ 322   1        I2C_SCL = 0;
+ 323   1        
+ 324   1        for(i=0; i<8; i++) {
+ 325   2          I2C_SCL = 1;
+ 326   2          value <<= 1;
+ 327   2          if(I2C_SDA) value |= 1;
+ 328   2          I2C_SCL = 0;
+ 329   2        }
+ 330   1        dd();
+ 331   1        
+ 332   1        I2C_SCL = 1;  // HHY 3.00
+ 333   1        I2C_SCL = 1;  // HHY 3.00
+ 334   1        I2C_SCL = 1;
+ 335   1        I2C_SCL = 0;
+ 336   1      
+C51 COMPILER V9.60.0.0   I2C                                                               03/02/2020 12:07:33 PAGE 37  
+
+ 337   1        return value;
+ 338   1      
+ 339   1      }
+ 340          #if 1
+ 341          BYTE I2CReadDataWithACK()
+ 342          {
+ 343   1        int i;
+ 344   1        BYTE value=0;
+ 345   1      
+ 346   1        I2C_SDA = 1;  I2Cdelay();
+ 347   1        I2C_SCL = 0;
+ 348   1      
+ 349   1        for(i=0; i<8; i++) {
+ 350   2          I2C_SCL = 1;
+ 351   2          value <<= 1;
+ 352   2          if(I2C_SDA) value |= 1;
+ 353   2          I2C_SCL = 0;
+ 354   2        }
+ 355   1        I2C_SDA = 0;  I2Cdelay();   //ack
+ 356   1        I2C_SCL = 1;  I2Cdelay();
+ 357   1        I2C_SCL = 0;
+ 358   1      
+ 359   1        return value;
+ 360   1      }
+ 361          
+ 362          WORD ReadI2CWORD(BYTE addr, BYTE index)
+ 363          {
+ 364   1        WORD val;
+ 365   1      
+ 366   1        I2CStart();
+ 367   1        I2CWriteData(addr);
+ 368   1        I2CWriteData(index);
+ 369   1        I2CStart();
+ 370   1        I2CWriteData(addr | 0x01);
+ 371   1        val = I2CReadDataWithACK();
+ 372   1        val = val<<8;
+ 373   1        val |= I2CReadData();
+ 374   1        I2CStop();
+ 375   1      
+ 376   1        return val;
+ 377   1      }
+ 378          /*
+ 379          void WriteALC106(WORD index, WORD  dat)
+ 380          {
+ 381            BYTE addr;
+ 382            BYTE dat1,dat2;
+ 383          
+ 384            dat2=dat&0x00ff;
+ 385            dat1=(dat>>8)&0x00ff;
+ 386              
+ 387            addr = (ALC106I2CAddress | (index>>7)) & 0xfe;
+ 388          
+ 389            I2CStart();
+ 390            I2CWriteData(addr);
+ 391            I2CWriteData((BYTE)index);
+ 392            I2CWriteData(dat1);
+ 393            dd();
+ 394            I2CWriteData(dat2);
+ 395            I2CStop();
+ 396          
+ 397            #ifdef DEBUG_EEP
+ 398              Printf("Write %02xh to [Adrs(%02xh)Index(%02xh)\r\n", (WORD)dat, (WORD)addr, (WORD)index );
+C51 COMPILER V9.60.0.0   I2C                                                               03/02/2020 12:07:33 PAGE 38  
+
+ 399            #endif
+ 400          
+ 401            delay(2);
+ 402          }
+ 403          
+ 404          WORD ReadALC106(WORD index)
+ 405          {
+ 406            WORD val;
+ 407            BYTE addr;
+ 408          
+ 409            addr = (ALC106I2CAddress | (index>>7)) & 0xfe;
+ 410          
+ 411            val = ReadI2CWORD(addr,(BYTE)index);
+ 412            #ifdef DEBUG_OSD
+ 413              Printf("Read [Adrs:%02xh,Index:%02xh] %xh\r\n", (WORD)addr, (WORD)index, (WORD)val);
+ 414            #endif
+ 415            delay(2);
+ 416            return val;
+ 417          }
+ 418          */
+ 419          void WriteAD5110(WORD index, WORD  dat)
+ 420          {
+ 421   1        BYTE addr;
+ 422   1        BYTE dat1,dat2;
+ 423   1      
+ 424   1        dat2=dat&0x00ff;
+ 425   1        dat1=(dat>>8)&0x00ff;
+ 426   1          
+ 427   1        addr = (AD5110I2CAddress| (index>>7)) & 0xfe;
+ 428   1      
+ 429   1        I2CStart();
+ 430   1        I2CWriteData(addr);
+ 431   1        I2CWriteData((BYTE)index);
+ 432   1        I2CWriteData(dat1);
+ 433   1        dd();
+ 434   1        I2CWriteData(dat2);
+ 435   1        I2CStop();
+ 436   1      
+ 437   1        #ifdef DEBUG_EEP
+                  Printf("Write %02xh to [Adrs(%02xh)Index(%02xh)\r\n", (WORD)dat, (WORD)addr, (WORD)index );
+                #endif
+ 440   1      
+ 441   1        delay(2);
+ 442   1      }
+ 443          
+ 444          WORD ReadAD5110(WORD index)
+ 445          {
+ 446   1        WORD val;
+ 447   1        BYTE addr;
+ 448   1      
+ 449   1        addr = (AD5110I2CAddress | (index>>7)) & 0xfe;
+ 450   1      
+ 451   1        val = ReadI2CWORD(addr,(BYTE)index);
+ 452   1        #ifdef DEBUG_OSD
+                  Printf("Read [Adrs:%02xh,Index:%02xh] %xh\r\n", (WORD)addr, (WORD)index, (WORD)val);
+                #endif
+ 455   1        delay(2);
+ 456   1        return val;
+ 457   1      }
+ 458          
+ 459          #endif
+C51 COMPILER V9.60.0.0   I2C                                                               03/02/2020 12:07:33 PAGE 39  
+
+ASSEMBLY LISTING OF GENERATED OBJECT CODE
+
+
+             ; FUNCTION Com002C (BEGIN)
+0000         L?0045:
+0000         L?0046:
+0000 9291              MOV     P1_1,C
+0002 D290              SETB    P1_0
+0004 120000      R     LCALL   dd
+0007 C290              CLR     P1_0
+0009 22                RET     
+             ; FUNCTION Com002C (END)
+
+             ; FUNCTION _WriteEEP (BEGIN)
+                                           ; SOURCE LINE # 91
+0000 900000      R     MOV     DPTR,#index
+0003 EE                MOV     A,R6
+0004 F0                MOVX    @DPTR,A
+0005 A3                INC     DPTR
+0006 EF                MOV     A,R7
+0007 F0                MOVX    @DPTR,A
+0008 A3                INC     DPTR
+0009 ED                MOV     A,R5
+000A F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 92
+                                           ; SOURCE LINE # 95
+000B 900000      R     MOV     DPTR,#index
+000E E0                MOVX    A,@DPTR
+000F FE                MOV     R6,A
+0010 A3                INC     DPTR
+0011 E0                MOVX    A,@DPTR
+0012 7807              MOV     R0,#07H
+0014         ?C0038:
+0014 CE                XCH     A,R6
+0015 C3                CLR     C
+0016 13                RRC     A
+0017 CE                XCH     A,R6
+0018 13                RRC     A
+0019 D8F9              DJNZ    R0,?C0038
+001B 44A0              ORL     A,#0A0H
+001D 54FE              ANL     A,#0FEH
+001F 900000      R     MOV     DPTR,#addr
+0022 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 97
+0023 120000      R     LCALL   I2CStart
+                                           ; SOURCE LINE # 98
+0026 900000      R     MOV     DPTR,#addr
+0029 E0                MOVX    A,@DPTR
+002A FF                MOV     R7,A
+002B 120000      R     LCALL   _I2CWriteData
+                                           ; SOURCE LINE # 99
+002E 900000      R     MOV     DPTR,#index
+0031 A3                INC     DPTR
+0032 E0                MOVX    A,@DPTR
+0033 FF                MOV     R7,A
+0034 120000      R     LCALL   _I2CWriteData
+                                           ; SOURCE LINE # 100
+0037 900000      R     MOV     DPTR,#dat
+003A E0                MOVX    A,@DPTR
+003B FF                MOV     R7,A
+003C 120000      R     LCALL   _I2CWriteData
+                                           ; SOURCE LINE # 101
+C51 COMPILER V9.60.0.0   I2C                                                               03/02/2020 12:07:33 PAGE 40  
+
+003F 120000      R     LCALL   I2CStop
+                                           ; SOURCE LINE # 107
+0042 7F02              MOV     R7,#02H
+0044 020000      E     LJMP    _delay
+             ; FUNCTION _WriteEEP (END)
+
+             ; FUNCTION _ReadEEP (BEGIN)
+                                           ; SOURCE LINE # 110
+;---- Variable 'index' assigned to Register 'R4/R5' ----
+0000 AD07              MOV     R5,AR7
+0002 AC06              MOV     R4,AR6
+                                           ; SOURCE LINE # 111
+                                           ; SOURCE LINE # 115
+0004 ED                MOV     A,R5
+0005 7807              MOV     R0,#07H
+0007         ?C0039:
+0007 CE                XCH     A,R6
+0008 C3                CLR     C
+0009 13                RRC     A
+000A CE                XCH     A,R6
+000B 13                RRC     A
+000C D8F9              DJNZ    R0,?C0039
+000E 44A0              ORL     A,#0A0H
+0010 54FE              ANL     A,#0FEH
+0012 FF                MOV     R7,A
+;---- Variable 'addr' assigned to Register 'R7' ----
+                                           ; SOURCE LINE # 117
+0013 120000      R     LCALL   _ReadI2C
+0016 900000      R     MOV     DPTR,#val
+0019 EF                MOV     A,R7
+001A F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 122
+001B 7F02              MOV     R7,#02H
+001D 120000      E     LCALL   _delay
+                                           ; SOURCE LINE # 123
+0020 900000      R     MOV     DPTR,#val
+0023 E0                MOVX    A,@DPTR
+0024 FF                MOV     R7,A
+                                           ; SOURCE LINE # 124
+0025 22                RET     
+             ; FUNCTION _ReadEEP (END)
+
+             ; FUNCTION _ReadI2C (BEGIN)
+                                           ; SOURCE LINE # 126
+0000 900000      R     MOV     DPTR,#addr
+0003 EF                MOV     A,R7
+0004 F0                MOVX    @DPTR,A
+0005 A3                INC     DPTR
+0006 ED                MOV     A,R5
+0007 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 127
+                                           ; SOURCE LINE # 130
+0008 120000      R     LCALL   I2CStart
+                                           ; SOURCE LINE # 131
+000B 900000      R     MOV     DPTR,#addr
+000E E0                MOVX    A,@DPTR
+000F FF                MOV     R7,A
+0010 120000      R     LCALL   _I2CWriteData
+                                           ; SOURCE LINE # 132
+0013 900000      R     MOV     DPTR,#index
+0016 E0                MOVX    A,@DPTR
+0017 FF                MOV     R7,A
+C51 COMPILER V9.60.0.0   I2C                                                               03/02/2020 12:07:33 PAGE 41  
+
+0018 120000      R     LCALL   _I2CWriteData
+                                           ; SOURCE LINE # 133
+001B 120000      R     LCALL   I2CStart
+                                           ; SOURCE LINE # 134
+001E 900000      R     MOV     DPTR,#addr
+0021 E0                MOVX    A,@DPTR
+0022 4401              ORL     A,#01H
+0024 FF                MOV     R7,A
+0025 120000      R     LCALL   _I2CWriteData
+                                           ; SOURCE LINE # 135
+0028 120000      R     LCALL   I2CReadData
+002B 900000      R     MOV     DPTR,#val
+002E EF                MOV     A,R7
+002F F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 136
+0030 120000      R     LCALL   I2CStop
+                                           ; SOURCE LINE # 138
+0033 900000      R     MOV     DPTR,#val
+0036 E0                MOVX    A,@DPTR
+0037 FF                MOV     R7,A
+                                           ; SOURCE LINE # 139
+0038 22                RET     
+             ; FUNCTION _ReadI2C (END)
+
+             ; FUNCTION _WriteI2C (BEGIN)
+                                           ; SOURCE LINE # 142
+0000 900000      R     MOV     DPTR,#addr
+0003 EF                MOV     A,R7
+0004 F0                MOVX    @DPTR,A
+0005 A3                INC     DPTR
+0006 ED                MOV     A,R5
+0007 F0                MOVX    @DPTR,A
+0008 A3                INC     DPTR
+0009 EB                MOV     A,R3
+000A F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 143
+                                           ; SOURCE LINE # 144
+000B 120000      R     LCALL   I2CStart
+                                           ; SOURCE LINE # 145
+000E 900000      R     MOV     DPTR,#addr
+0011 E0                MOVX    A,@DPTR
+0012 FF                MOV     R7,A
+0013 120000      R     LCALL   _I2CWriteData
+                                           ; SOURCE LINE # 146
+0016 900000      R     MOV     DPTR,#index
+0019 E0                MOVX    A,@DPTR
+001A FF                MOV     R7,A
+001B 120000      R     LCALL   _I2CWriteData
+                                           ; SOURCE LINE # 147
+001E 900000      R     MOV     DPTR,#val
+0021 E0                MOVX    A,@DPTR
+0022 FF                MOV     R7,A
+0023 120000      R     LCALL   _I2CWriteData
+                                           ; SOURCE LINE # 148
+0026 020000      R     LJMP    I2CStop
+             ; FUNCTION _WriteI2C (END)
+
+             ; FUNCTION dd (BEGIN)
+                                           ; SOURCE LINE # 254
+                                           ; SOURCE LINE # 255
+                                           ; SOURCE LINE # 259
+0000 22                RET     
+C51 COMPILER V9.60.0.0   I2C                                                               03/02/2020 12:07:33 PAGE 42  
+
+             ; FUNCTION dd (END)
+
+             ; FUNCTION I2CStart (BEGIN)
+                                           ; SOURCE LINE # 264
+                                           ; SOURCE LINE # 265
+                                           ; SOURCE LINE # 266
+0000 D291              SETB    P1_1
+0002 120000      R     LCALL   dd
+                                           ; SOURCE LINE # 267
+0005 D290              SETB    P1_0
+0007 120000      R     LCALL   dd
+                                           ; SOURCE LINE # 268
+000A C291              CLR     P1_1
+000C 120000      R     LCALL   dd
+                                           ; SOURCE LINE # 269
+000F C290              CLR     P1_0
+                                           ; SOURCE LINE # 270
+0011 22                RET     
+             ; FUNCTION I2CStart (END)
+
+             ; FUNCTION I2CStop (BEGIN)
+                                           ; SOURCE LINE # 272
+                                           ; SOURCE LINE # 273
+                                           ; SOURCE LINE # 274
+0000 C291              CLR     P1_1
+0002 120000      R     LCALL   dd
+                                           ; SOURCE LINE # 275
+0005 D290              SETB    P1_0
+0007 120000      R     LCALL   dd
+                                           ; SOURCE LINE # 276
+000A D291              SETB    P1_1
+                                           ; SOURCE LINE # 277
+000C 22                RET     
+             ; FUNCTION I2CStop (END)
+
+             ; FUNCTION _I2CWriteData (BEGIN)
+                                           ; SOURCE LINE # 279
+;---- Variable 'value' assigned to Register 'R7' ----
+                                           ; SOURCE LINE # 280
+                                           ; SOURCE LINE # 294
+0000 C290              CLR     P1_0
+0002 EF                MOV     A,R7
+0003 30E703            JNB     ACC.7,?C0008
+0006 D3                SETB    C
+0007 8001              SJMP    ?C0009
+0009         ?C0008:
+0009 C3                CLR     C
+000A         ?C0009:
+                                           ; SOURCE LINE # 295
+000A 120000      R     LCALL   L?0045
+000D EF                MOV     A,R7
+000E 30E603            JNB     ACC.6,?C0010
+0011 D3                SETB    C
+0012 8001              SJMP    ?C0011
+0014         ?C0010:
+0014 C3                CLR     C
+0015         ?C0011:
+                                           ; SOURCE LINE # 296
+0015 120000      R     LCALL   L?0045
+0018 EF                MOV     A,R7
+0019 30E503            JNB     ACC.5,?C0012
+001C D3                SETB    C
+C51 COMPILER V9.60.0.0   I2C                                                               03/02/2020 12:07:33 PAGE 43  
+
+001D 8001              SJMP    ?C0013
+001F         ?C0012:
+001F C3                CLR     C
+0020         ?C0013:
+                                           ; SOURCE LINE # 297
+0020 120000      R     LCALL   L?0046
+0023 EF                MOV     A,R7
+0024 30E403            JNB     ACC.4,?C0014
+0027 D3                SETB    C
+0028 8001              SJMP    ?C0015
+002A         ?C0014:
+002A C3                CLR     C
+002B         ?C0015:
+                                           ; SOURCE LINE # 299
+002B 120000      R     LCALL   L?0046
+002E EF                MOV     A,R7
+002F 30E303            JNB     ACC.3,?C0016
+0032 D3                SETB    C
+0033 8001              SJMP    ?C0017
+0035         ?C0016:
+0035 C3                CLR     C
+0036         ?C0017:
+                                           ; SOURCE LINE # 300
+0036 120000      R     LCALL   L?0046
+0039 EF                MOV     A,R7
+003A 30E203            JNB     ACC.2,?C0018
+003D D3                SETB    C
+003E 8001              SJMP    ?C0019
+0040         ?C0018:
+0040 C3                CLR     C
+0041         ?C0019:
+                                           ; SOURCE LINE # 301
+0041 120000      R     LCALL   L?0046
+0044 EF                MOV     A,R7
+0045 30E103            JNB     ACC.1,?C0020
+0048 D3                SETB    C
+0049 8001              SJMP    ?C0021
+004B         ?C0020:
+004B C3                CLR     C
+004C         ?C0021:
+                                           ; SOURCE LINE # 302
+004C 120000      R     LCALL   L?0046
+004F EF                MOV     A,R7
+0050 30E003            JNB     ACC.0,?C0022
+0053 D3                SETB    C
+0054 8001              SJMP    ?C0023
+0056         ?C0022:
+0056 C3                CLR     C
+0057         ?C0023:
+                                           ; SOURCE LINE # 305
+0057 120000      R     LCALL   L?0046
+                                           ; SOURCE LINE # 306
+005A C290              CLR     P1_0
+                                           ; SOURCE LINE # 307
+005C C290              CLR     P1_0
+                                           ; SOURCE LINE # 308
+005E D291              SETB    P1_1
+                                           ; SOURCE LINE # 310
+0060 D290              SETB    P1_0
+                                           ; SOURCE LINE # 311
+0062 D290              SETB    P1_0
+                                           ; SOURCE LINE # 312
+C51 COMPILER V9.60.0.0   I2C                                                               03/02/2020 12:07:33 PAGE 44  
+
+0064 D290              SETB    P1_0
+                                           ; SOURCE LINE # 313
+0066 C290              CLR     P1_0
+                                           ; SOURCE LINE # 314
+0068 22                RET     
+             ; FUNCTION _I2CWriteData (END)
+
+             ; FUNCTION I2CReadData (BEGIN)
+                                           ; SOURCE LINE # 316
+                                           ; SOURCE LINE # 317
+                                           ; SOURCE LINE # 319
+;---- Variable 'value' assigned to Register 'R7' ----
+0000 E4                CLR     A
+0001 FF                MOV     R7,A
+                                           ; SOURCE LINE # 321
+0002 D291              SETB    P1_1
+0004 120000      R     LCALL   dd
+                                           ; SOURCE LINE # 322
+0007 C290              CLR     P1_0
+                                           ; SOURCE LINE # 324
+;---- Variable 'i' assigned to Register 'R4/R5' ----
+0009 FD                MOV     R5,A
+000A FC                MOV     R4,A
+000B         ?C0025:
+                                           ; SOURCE LINE # 325
+000B D290              SETB    P1_0
+                                           ; SOURCE LINE # 326
+000D EF                MOV     A,R7
+000E 25E0              ADD     A,ACC
+0010 FF                MOV     R7,A
+                                           ; SOURCE LINE # 327
+0011 309103            JNB     P1_1,?C0028
+0014 4401              ORL     A,#01H
+0016 FF                MOV     R7,A
+0017         ?C0028:
+                                           ; SOURCE LINE # 328
+0017 C290              CLR     P1_0
+                                           ; SOURCE LINE # 329
+0019 0D                INC     R5
+001A BD0001            CJNE    R5,#00H,?C0040
+001D 0C                INC     R4
+001E         ?C0040:
+001E ED                MOV     A,R5
+001F 6408              XRL     A,#08H
+0021 4C                ORL     A,R4
+0022 70E7              JNZ     ?C0025
+0024         ?C0026:
+                                           ; SOURCE LINE # 330
+0024 120000      R     LCALL   dd
+                                           ; SOURCE LINE # 332
+0027 D290              SETB    P1_0
+                                           ; SOURCE LINE # 333
+0029 D290              SETB    P1_0
+                                           ; SOURCE LINE # 334
+002B D290              SETB    P1_0
+                                           ; SOURCE LINE # 335
+002D C290              CLR     P1_0
+                                           ; SOURCE LINE # 337
+                                           ; SOURCE LINE # 339
+002F 22                RET     
+             ; FUNCTION I2CReadData (END)
+
+C51 COMPILER V9.60.0.0   I2C                                                               03/02/2020 12:07:33 PAGE 45  
+
+             ; FUNCTION I2CReadDataWithACK (BEGIN)
+                                           ; SOURCE LINE # 341
+                                           ; SOURCE LINE # 342
+                                           ; SOURCE LINE # 344
+;---- Variable 'value' assigned to Register 'R7' ----
+0000 E4                CLR     A
+0001 FF                MOV     R7,A
+                                           ; SOURCE LINE # 346
+0002 D291              SETB    P1_1
+                                           ; SOURCE LINE # 347
+0004 C290              CLR     P1_0
+                                           ; SOURCE LINE # 349
+;---- Variable 'i' assigned to Register 'R4/R5' ----
+0006 FD                MOV     R5,A
+0007 FC                MOV     R4,A
+0008         ?C0030:
+                                           ; SOURCE LINE # 350
+0008 D290              SETB    P1_0
+                                           ; SOURCE LINE # 351
+000A EF                MOV     A,R7
+000B 25E0              ADD     A,ACC
+000D FF                MOV     R7,A
+                                           ; SOURCE LINE # 352
+000E 309103            JNB     P1_1,?C0033
+0011 4401              ORL     A,#01H
+0013 FF                MOV     R7,A
+0014         ?C0033:
+                                           ; SOURCE LINE # 353
+0014 C290              CLR     P1_0
+                                           ; SOURCE LINE # 354
+0016 0D                INC     R5
+0017 BD0001            CJNE    R5,#00H,?C0041
+001A 0C                INC     R4
+001B         ?C0041:
+001B ED                MOV     A,R5
+001C 6408              XRL     A,#08H
+001E 4C                ORL     A,R4
+001F 70E7              JNZ     ?C0030
+0021         ?C0031:
+                                           ; SOURCE LINE # 355
+0021 C291              CLR     P1_1
+                                           ; SOURCE LINE # 356
+0023 D290              SETB    P1_0
+                                           ; SOURCE LINE # 357
+0025 C290              CLR     P1_0
+                                           ; SOURCE LINE # 359
+                                           ; SOURCE LINE # 360
+0027 22                RET     
+             ; FUNCTION I2CReadDataWithACK (END)
+
+             ; FUNCTION _ReadI2CWORD (BEGIN)
+                                           ; SOURCE LINE # 362
+;---- Variable 'addr' assigned to Register 'R6' ----
+0000 AE07              MOV     R6,AR7
+;---- Variable 'index' assigned to Register 'R5' ----
+                                           ; SOURCE LINE # 363
+                                           ; SOURCE LINE # 366
+0002 120000      R     LCALL   I2CStart
+                                           ; SOURCE LINE # 367
+0005 120000      R     LCALL   _I2CWriteData
+                                           ; SOURCE LINE # 368
+0008 AF05              MOV     R7,AR5
+C51 COMPILER V9.60.0.0   I2C                                                               03/02/2020 12:07:33 PAGE 46  
+
+000A 120000      R     LCALL   _I2CWriteData
+                                           ; SOURCE LINE # 369
+000D 120000      R     LCALL   I2CStart
+                                           ; SOURCE LINE # 370
+0010 EE                MOV     A,R6
+0011 4401              ORL     A,#01H
+0013 FF                MOV     R7,A
+0014 120000      R     LCALL   _I2CWriteData
+                                           ; SOURCE LINE # 371
+0017 120000      R     LCALL   I2CReadDataWithACK
+001A 900000      R     MOV     DPTR,#val
+001D E4                CLR     A
+001E F0                MOVX    @DPTR,A
+001F A3                INC     DPTR
+0020 EF                MOV     A,R7
+0021 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 372
+0022 E0                MOVX    A,@DPTR
+0023 F8                MOV     R0,A
+0024 E4                CLR     A
+0025 F0                MOVX    @DPTR,A
+0026 E8                MOV     A,R0
+0027 900000      R     MOV     DPTR,#val
+002A F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 373
+002B 120000      R     LCALL   I2CReadData
+002E E0                MOVX    A,@DPTR
+002F F0                MOVX    @DPTR,A
+0030 A3                INC     DPTR
+0031 E0                MOVX    A,@DPTR
+0032 4F                ORL     A,R7
+0033 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 374
+0034 120000      R     LCALL   I2CStop
+                                           ; SOURCE LINE # 376
+0037 900000      R     MOV     DPTR,#val
+003A E0                MOVX    A,@DPTR
+003B FE                MOV     R6,A
+003C A3                INC     DPTR
+003D E0                MOVX    A,@DPTR
+003E FF                MOV     R7,A
+                                           ; SOURCE LINE # 377
+003F 22                RET     
+             ; FUNCTION _ReadI2CWORD (END)
+
+             ; FUNCTION _WriteAD5110 (BEGIN)
+                                           ; SOURCE LINE # 419
+;---- Variable 'dat' assigned to Register 'R4/R5' ----
+;---- Variable 'index' assigned to Register 'R2/R3' ----
+0000 AB07              MOV     R3,AR7
+0002 AA06              MOV     R2,AR6
+                                           ; SOURCE LINE # 420
+                                           ; SOURCE LINE # 424
+0004 ED                MOV     A,R5
+;---- Variable 'dat2' assigned to Register 'R1' ----
+0005 F9                MOV     R1,A
+                                           ; SOURCE LINE # 425
+0006 EC                MOV     A,R4
+;---- Variable 'dat1' assigned to Register 'R5' ----
+0007 FD                MOV     R5,A
+                                           ; SOURCE LINE # 427
+0008 AE02              MOV     R6,AR2
+C51 COMPILER V9.60.0.0   I2C                                                               03/02/2020 12:07:33 PAGE 47  
+
+000A EB                MOV     A,R3
+000B 7807              MOV     R0,#07H
+000D         ?C0042:
+000D CE                XCH     A,R6
+000E C3                CLR     C
+000F 13                RRC     A
+0010 CE                XCH     A,R6
+0011 13                RRC     A
+0012 D8F9              DJNZ    R0,?C0042
+0014 445E              ORL     A,#05EH
+0016 54FE              ANL     A,#0FEH
+0018 FF                MOV     R7,A
+;---- Variable 'addr' assigned to Register 'R7' ----
+                                           ; SOURCE LINE # 429
+0019 120000      R     LCALL   I2CStart
+                                           ; SOURCE LINE # 430
+001C 120000      R     LCALL   _I2CWriteData
+                                           ; SOURCE LINE # 431
+001F AF03              MOV     R7,AR3
+0021 120000      R     LCALL   _I2CWriteData
+                                           ; SOURCE LINE # 432
+0024 AF05              MOV     R7,AR5
+0026 120000      R     LCALL   _I2CWriteData
+                                           ; SOURCE LINE # 433
+0029 120000      R     LCALL   dd
+                                           ; SOURCE LINE # 434
+002C AF01              MOV     R7,AR1
+002E 120000      R     LCALL   _I2CWriteData
+                                           ; SOURCE LINE # 435
+0031 120000      R     LCALL   I2CStop
+                                           ; SOURCE LINE # 441
+0034 7F02              MOV     R7,#02H
+0036 020000      E     LJMP    _delay
+             ; FUNCTION _WriteAD5110 (END)
+
+             ; FUNCTION _ReadAD5110 (BEGIN)
+                                           ; SOURCE LINE # 444
+;---- Variable 'index' assigned to Register 'R4/R5' ----
+0000 AD07              MOV     R5,AR7
+0002 AC06              MOV     R4,AR6
+                                           ; SOURCE LINE # 445
+                                           ; SOURCE LINE # 449
+0004 ED                MOV     A,R5
+0005 7807              MOV     R0,#07H
+0007         ?C0043:
+0007 CE                XCH     A,R6
+0008 C3                CLR     C
+0009 13                RRC     A
+000A CE                XCH     A,R6
+000B 13                RRC     A
+000C D8F9              DJNZ    R0,?C0043
+000E 445E              ORL     A,#05EH
+0010 54FE              ANL     A,#0FEH
+0012 FF                MOV     R7,A
+;---- Variable 'addr' assigned to Register 'R7' ----
+                                           ; SOURCE LINE # 451
+0013 120000      R     LCALL   _ReadI2CWORD
+0016 900000      R     MOV     DPTR,#val
+0019 EE                MOV     A,R6
+001A F0                MOVX    @DPTR,A
+001B A3                INC     DPTR
+001C EF                MOV     A,R7
+C51 COMPILER V9.60.0.0   I2C                                                               03/02/2020 12:07:33 PAGE 48  
+
+001D F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 455
+001E 7F02              MOV     R7,#02H
+0020 120000      E     LCALL   _delay
+                                           ; SOURCE LINE # 456
+0023 900000      R     MOV     DPTR,#val
+0026 E0                MOVX    A,@DPTR
+0027 FE                MOV     R6,A
+0028 A3                INC     DPTR
+0029 E0                MOVX    A,@DPTR
+002A FF                MOV     R7,A
+                                           ; SOURCE LINE # 457
+002B 22                RET     
+             ; FUNCTION _ReadAD5110 (END)
+
+C51 COMPILER V9.60.0.0   I2C                                                               03/02/2020 12:07:33 PAGE 49  
+
+NAME                                    CLASS   MSPACE  TYPE    OFFSET  SIZE
+====                                    =====   ======  ====    ======  ====
+
+
+_SCALER_TIMER_EVENT_DP_LINK_STATUS_IRQ  E_CONST  -----  U_CHAR   -----  1
+_USER_TIMER_EVENT_GO_TO_POWER_SAVING .  E_CONST  -----  U_CHAR   -----  1
+_SCALER_TIMER_EVENT_AUDIO_LOAD_STABLE_  E_CONST  -----  U_CHAR   -----  1
+EnumBatteryStatus. . . . . . . . . . .  TYPEDEF  -----  U_CHAR   -----  1
+_SYSTEM_TIMER_EVENT_START. . . . . . .  E_CONST  -----  U_CHAR   -----  1
+EnumModeAction . . . . . . . . . . . .  TYPEDEF  -----  U_CHAR   -----  1
+DWORD. . . . . . . . . . . . . . . . .  TYPEDEF  -----  U_LONG   -----  4
+_POWER_ACTION_NORMAL_TO_NOSUPPORT_PS .  E_CONST  -----  U_CHAR   -----  1
+P4 . . . . . . . . . . . . . . . . . .  SFR      DATA   U_CHAR   00E8H  1
+_SYSTEM_TIMER_EVENT_JUDGE_BTH_STATE. .  E_CONST  -----  U_CHAR   -----  1
+_BATT_STATUS_CAPACITY_HIGH . . . . . .  E_CONST  -----  U_CHAR   -----  1
+_USER_TIMER_EVENT_OSD_DISABLE. . . . .  E_CONST  -----  U_CHAR   -----  1
+_BATT_STATUS_STOP_CHARGE . . . . . . .  E_CONST  -----  U_CHAR   -----  1
+_SYSTEM_TIMER_EVENT_RED_OFF. . . . . .  E_CONST  -----  U_CHAR   -----  1
+_SYSTEM_TIMER_EVENT_SOURCE_CLEAR_DETEC  E_CONST  -----  U_CHAR   -----  1
+_BATT_STATUS_ABNORMAL_MODE . . . . . .  E_CONST  -----  U_CHAR   -----  1
+EnumPowerAction. . . . . . . . . . . .  TYPEDEF  -----  U_CHAR   -----  1
+_USER_TIMER_EVENT_OSD_SHOW_NO_CABLE. .  E_CONST  -----  U_CHAR   -----  1
+_MODE_STATUS_NOSIGNAL. . . . . . . . .  E_CONST  -----  U_CHAR   -----  1
+_MODE_STATUS_NOSUPPORT . . . . . . . .  E_CONST  -----  U_CHAR   -----  1
+_MODE_ACTION_RESET_TO_DISPLAY_SETTING.  E_CONST  -----  U_CHAR   -----  1
+P1_0 . . . . . . . . . . . . . . . . .  ABSBIT   -----  BIT      0090H  1
+_delay . . . . . . . . . . . . . . . .  EXTERN   CODE   PROC     -----  -----
+_BATT_STATUS_CAPACITY_LEVEL1 . . . . .  E_CONST  -----  U_CHAR   -----  1
+_MODE_ACTION_NO_RESET_MODE . . . . . .  E_CONST  -----  U_CHAR   -----  1
+_USER_TIMER_EVENT_KEY_SCAN_READY . . .  E_CONST  -----  U_CHAR   -----  1
+P1_1 . . . . . . . . . . . . . . . . .  ABSBIT   -----  BIT      0091H  1
+_BATT_STATUS_CAPACITY_LEVEL2 . . . . .  E_CONST  -----  U_CHAR   -----  1
+_SYSTEM_TIMER_EVENT_GRN_RED_ON . . . .  E_CONST  -----  U_CHAR   -----  1
+_BATT_STATUS_CAPACITY_LEVEL3 . . . . .  E_CONST  -----  U_CHAR   -----  1
+_MODE_ACTION_RESET_TO_FACTORY_MODE . .  E_CONST  -----  U_CHAR   -----  1
+_POWER_ACTION_NOSUPPORT_PS_TO_OFF. . .  E_CONST  -----  U_CHAR   -----  1
+_BATT_STATUS_CAPACITY_LEVEL4 . . . . .  E_CONST  -----  U_CHAR   -----  1
+_SYSTEM_TIMER_EVENT_GRN_OFF. . . . . .  E_CONST  -----  U_CHAR   -----  1
+EnumMCUTimerEventID. . . . . . . . . .  TYPEDEF  -----  U_CHAR   -----  1
+_BATT_STATUS_TEMP_NORMAL . . . . . . .  E_CONST  -----  U_CHAR   -----  1
+_SCALER_TIMER_EVENT_NR_DETECTION_FINIS  E_CONST  -----  U_CHAR   -----  1
+_POWER_STATUS_AC_ON. . . . . . . . . .  E_CONST  -----  U_CHAR   -----  1
+_SCALER_TIMER_EVENT_END. . . . . . . .  E_CONST  -----  U_CHAR   -----  1
+_USER_TIMER_EVENT_SHOW_BURN_IN . . . .  E_CONST  -----  U_CHAR   -----  1
+StructBatteryInfoType. . . . . . . . .  TYPEDEF  -----  STRUCT   -----  4
+  b5BatteryStatus. . . . . . . . . . .  MEMBER   -----  FIELD    0000H  5.0
+  b1NoBattery. . . . . . . . . . . . .  MEMBER   -----  FIELD    0000H  1.5
+  b1AC_PLUG. . . . . . . . . . . . . .  MEMBER   -----  FIELD    0000H  1.6
+  b3BTHStatus. . . . . . . . . . . . .  MEMBER   -----  FIELD    0001H  3.0
+  b1BatteryCapacityLow . . . . . . . .  MEMBER   -----  FIELD    0001H  1.3
+  b1BatteryAbnormal. . . . . . . . . .  MEMBER   -----  FIELD    0001H  1.4
+  b2BatteryChargeStatus. . . . . . . .  MEMBER   -----  FIELD    0001H  2.5
+  BatteryCapacity. . . . . . . . . . .  MEMBER   -----  U_INT    0002H  2
+_USER_TIMER_EVENT_OSD_ENCODER_DEVIATIO  E_CONST  -----  U_CHAR   -----  1
+_SYSTEM_TIMER_EVENT_RED_BLINK. . . . .  E_CONST  -----  U_CHAR   -----  1
+_SCALER_TIMER_EVENT_DP_HOTPLUG_ASSERTED E_CONST  -----  U_CHAR   -----  1
+_POWER_STATUS_NOSUPPORT_SAVING . . . .  E_CONST  -----  U_CHAR   -----  1
+_SYSTEM_TIMER_EVENT_JUDGE_PSW_STATE. .  E_CONST  -----  U_CHAR   -----  1
+_USER_TIMER_EVENT_END. . . . . . . . .  E_CONST  -----  U_CHAR   -----  1
+_POWER_ACTION_NONE . . . . . . . . . .  E_CONST  -----  U_CHAR   -----  1
+_POWER_ACTION_AC_ON_TO_NORMAL. . . . .  E_CONST  -----  U_CHAR   -----  1
+C51 COMPILER V9.60.0.0   I2C                                                               03/02/2020 12:07:33 PAGE 50  
+
+NAME                                    CLASS   MSPACE  TYPE    OFFSET  SIZE
+====                                    =====   ======  ====    ======  ====
+
+
+_MODE_ACTION_RESET_TO_DISPLAY_SETTING_  E_CONST  -----  U_CHAR   -----  1
+StructTimerEventTableType. . . . . . .  TYPEDEF  -----  STRUCT   -----  3
+  b1EventValid . . . . . . . . . . . .  MEMBER   -----  FIELD    0000H  1.0
+  b7EventID. . . . . . . . . . . . . .  MEMBER   -----  FIELD    0000H  7.1
+  usTime . . . . . . . . . . . . . . .  MEMBER   -----  U_INT    0001H  2
+_USER_TIMER_EVENT_PANEL_BACKLIGHT_ON .  E_CONST  -----  U_CHAR   -----  1
+EnumModeStatus . . . . . . . . . . . .  TYPEDEF  -----  U_CHAR   -----  1
+_USER_TIMER_EVENT_CHECK. . . . . . . .  E_CONST  -----  U_CHAR   -----  1
+I2CReadDataWithACK . . . . . . . . . .  PUBLIC   CODE   PROC     0000H  -----
+  i. . . . . . . . . . . . . . . . . .  * REG *  DATA   INT      0004H  2
+  value. . . . . . . . . . . . . . . .  * REG *  DATA   U_CHAR   0007H  1
+_MODE_ACTION_RESET_TO_SEARCH . . . . .  E_CONST  -----  U_CHAR   -----  1
+_SYSTEM_TIMER_EVENT_GRN_BLINK. . . . .  E_CONST  -----  U_CHAR   -----  1
+_MODE_ACTION_RESET_TO_POWER_SAVING . .  E_CONST  -----  U_CHAR   -----  1
+_USER_TIMER_EVENT_OSD_DVR_REBOOT . . .  E_CONST  -----  U_CHAR   -----  1
+_SCALER_TIMER_EVENT_MHL_D0_READY_TO_TR  E_CONST  -----  U_CHAR   -----  1
+_SCALER_TIMER_EVENT_MHL_D1_READY_TO_TR  E_CONST  -----  U_CHAR   -----  1
+EnumPowerStatus. . . . . . . . . . . .  TYPEDEF  -----  U_CHAR   -----  1
+_USER_TIMER_EVENT_PANEL_USED_TIMER . .  E_CONST  -----  U_CHAR   -----  1
+_POWER_ACTION_AC_ON_TO_OFF . . . . . .  E_CONST  -----  U_CHAR   -----  1
+_SYSTEM_TIMER_EVENT_JUDGE_WDT_ECHO . .  E_CONST  -----  U_CHAR   -----  1
+_BATT_STATUS_LOW_CHARGE. . . . . . . .  E_CONST  -----  U_CHAR   -----  1
+_SYSTEM_TIMER_EVENT_JUDGE_POWER_STATE.  E_CONST  -----  U_CHAR   -----  1
+BYTE . . . . . . . . . . . . . . . . .  TYPEDEF  -----  U_CHAR   -----  1
+_MODE_ACTION_NONE. . . . . . . . . . .  E_CONST  -----  U_CHAR   -----  1
+I2CReadData. . . . . . . . . . . . . .  PUBLIC   CODE   PROC     0000H  -----
+  i. . . . . . . . . . . . . . . . . .  * REG *  DATA   INT      0004H  2
+  value. . . . . . . . . . . . . . . .  * REG *  DATA   U_CHAR   0007H  1
+_SCALER_TIMER_EVENT_TMDS_HDMI_PACKET_D  E_CONST  -----  U_CHAR   -----  1
+EnumSystemTimerEventID . . . . . . . .  TYPEDEF  -----  U_CHAR   -----  1
+_USER_TIMER_EVENT_LED_POWER_SAVING . .  E_CONST  -----  U_CHAR   -----  1
+_MODE_STATUS_INITIAL . . . . . . . . .  E_CONST  -----  U_CHAR   -----  1
+_ReadI2C . . . . . . . . . . . . . . .  PUBLIC   CODE   PROC     0000H  -----
+  addr . . . . . . . . . . . . . . . .  AUTO     XDATA  U_CHAR   0000H  1
+  index. . . . . . . . . . . . . . . .  AUTO     XDATA  U_CHAR   0001H  1
+  val. . . . . . . . . . . . . . . . .  AUTO     XDATA  U_CHAR   0002H  1
+_MODE_ACTION_RESET_TO_POWER_OFF. . . .  E_CONST  -----  U_CHAR   -----  1
+_SCALER_TIMER_EVENT_MHL_D0_ACTIVE_VBUS  E_CONST  -----  U_CHAR   -----  1
+_SYSTEM_TIMER_EVENT_JUDGE_DVR_COMM . .  E_CONST  -----  U_CHAR   -----  1
+WORD . . . . . . . . . . . . . . . . .  TYPEDEF  -----  U_INT    -----  2
+_SCALER_TIMER_EVENT_MHL_D1_ACTIVE_VBUS  E_CONST  -----  U_CHAR   -----  1
+_BATT_STATUS_TEMP_LOW. . . . . . . . .  E_CONST  -----  U_CHAR   -----  1
+_BATT_STATUS_AC_MODE . . . . . . . . .  E_CONST  -----  U_CHAR   -----  1
+_SCALER_TIMER_EVENT_PHASE_CNT_CHECK. .  E_CONST  -----  U_CHAR   -----  1
+_USER_TIMER_EVENT_HLWIN_TYPE5_MOVE . .  E_CONST  -----  U_CHAR   -----  1
+_USER_TIMER_EVENT_OSD_GET_MCU_VERSION.  E_CONST  -----  U_CHAR   -----  1
+_POWER_ACTION_NORMAL_TO_PS . . . . . .  E_CONST  -----  U_CHAR   -----  1
+_POWER_ACTION_PS_TO_NORMAL . . . . . .  E_CONST  -----  U_CHAR   -----  1
+StructModeInfoType . . . . . . . . . .  TYPEDEF  -----  STRUCT   -----  2
+  b5ModeState. . . . . . . . . . . . .  MEMBER   -----  FIELD    0000H  5.0
+  b1DisplaySettingReady. . . . . . . .  MEMBER   -----  FIELD    0000H  1.5
+  b1TimingConfirm. . . . . . . . . . .  MEMBER   -----  FIELD    0000H  1.6
+  b1ModeStateChanged . . . . . . . . .  MEMBER   -----  FIELD    0000H  1.7
+  b4ModeResetFlag. . . . . . . . . . .  MEMBER   -----  FIELD    0001H  4.0
+  b1NoWaitForActive. . . . . . . . . .  MEMBER   -----  FIELD    0001H  1.4
+  b1ActiveReady. . . . . . . . . . . .  MEMBER   -----  FIELD    0001H  1.5
+_USER_TIMER_EVENT_OSD_DISTANCE_RESET .  E_CONST  -----  U_CHAR   -----  1
+C51 COMPILER V9.60.0.0   I2C                                                               03/02/2020 12:07:33 PAGE 51  
+
+NAME                                    CLASS   MSPACE  TYPE    OFFSET  SIZE
+====                                    =====   ======  ====    ======  ====
+
+
+_SCALER_TIMER_EVENT_PHASE_CALIBRATION.  E_CONST  -----  U_CHAR   -----  1
+dd . . . . . . . . . . . . . . . . . .  PUBLIC   CODE   PROC     0000H  -----
+_POWER_STATUS_NONE . . . . . . . . . .  E_CONST  -----  U_CHAR   -----  1
+_SYSTEM_TIMER_EVENT_END. . . . . . . .  E_CONST  -----  U_CHAR   -----  1
+_MODE_STATUS_FACTORY . . . . . . . . .  E_CONST  -----  U_CHAR   -----  1
+_MODE_STATUS_DISPLAY_SETTING . . . . .  E_CONST  -----  U_CHAR   -----  1
+_I2CWriteData. . . . . . . . . . . . .  PUBLIC   CODE   PROC     0000H  -----
+  value. . . . . . . . . . . . . . . .  * REG *  DATA   U_CHAR   0007H  1
+_SYSTEM_TIMER_EVENT_RED_ON . . . . . .  E_CONST  -----  U_CHAR   -----  1
+Register . . . . . . . . . . . . . . .  TYPEDEF  -----  U_CHAR   -----  1
+_ReadAD5110. . . . . . . . . . . . . .  PUBLIC   CODE   PROC     0000H  -----
+  index. . . . . . . . . . . . . . . .  * REG *  DATA   U_INT    0004H  2
+  val. . . . . . . . . . . . . . . . .  AUTO     XDATA  U_INT    0000H  2
+  addr . . . . . . . . . . . . . . . .  * REG *  DATA   U_CHAR   0007H  1
+_WriteI2C. . . . . . . . . . . . . . .  PUBLIC   CODE   PROC     0000H  -----
+  addr . . . . . . . . . . . . . . . .  AUTO     XDATA  U_CHAR   0000H  1
+  index. . . . . . . . . . . . . . . .  AUTO     XDATA  U_CHAR   0001H  1
+  val. . . . . . . . . . . . . . . . .  AUTO     XDATA  U_CHAR   0002H  1
+_SYSTEM_TIMER_EVENT_JUDGE_AC_MODE. . .  E_CONST  -----  U_CHAR   -----  1
+StructPowerInfoType. . . . . . . . . .  TYPEDEF  -----  STRUCT   -----  2
+  b4PowerAction. . . . . . . . . . . .  MEMBER   -----  FIELD    0000H  4.0
+  b4PowerStatus. . . . . . . . . . . .  MEMBER   -----  FIELD    0000H  4.4
+  b1GDIIsolationFlag . . . . . . . . .  MEMBER   -----  FIELD    0001H  1.0
+  b1TopIsolationFlag . . . . . . . . .  MEMBER   -----  FIELD    0001H  1.1
+  b1AnalogIsolationFlag. . . . . . . .  MEMBER   -----  FIELD    0001H  1.2
+_USER_TIMER_EVENT_OSD_MCU_ENTRY_SLEEP_  E_CONST  -----  U_CHAR   -----  1
+I2CStart . . . . . . . . . . . . . . .  PUBLIC   CODE   PROC     0000H  -----
+_MODE_ACTION_RESET_TO_NOSIGNAL . . . .  E_CONST  -----  U_CHAR   -----  1
+_MODE_ACTION_RESET_TO_NOSUPPORT. . . .  E_CONST  -----  U_CHAR   -----  1
+_SCALER_TIMER_EVENT_COUNT. . . . . . .  E_CONST  -----  U_CHAR   -----  1
+_BATT_STATUS_START_CHARGE. . . . . . .  E_CONST  -----  U_CHAR   -----  1
+_SYSTEM_TIMER_EVENT_JUDGE_BATT_STATE .  E_CONST  -----  U_CHAR   -----  1
+EnumUserTimerEventID . . . . . . . . .  TYPEDEF  -----  U_CHAR   -----  1
+_POWER_ACTION_PS_TO_OFF. . . . . . . .  E_CONST  -----  U_CHAR   -----  1
+_USER_TIMER_EVENT_COUNT. . . . . . . .  E_CONST  -----  U_CHAR   -----  1
+_SCALER_TIMER_EVENT_START. . . . . . .  E_CONST  -----  U_CHAR   -----  1
+_SYSTEM_TIMER_EVENT_GRN_ON . . . . . .  E_CONST  -----  U_CHAR   -----  1
+_SYSTEM_TIMER_EVENT_JUDGE_TW8836_COMM.  E_CONST  -----  U_CHAR   -----  1
+_SCALER_TIMER_EVENT_DP_HDCP_LONG_HOTPL  E_CONST  -----  U_CHAR   -----  1
+RegisterInfo . . . . . . . . . . . . .  * TAG *  -----  STRUCT   -----  6
+  Min. . . . . . . . . . . . . . . . .  MEMBER   -----  INT      0000H  2
+  Max. . . . . . . . . . . . . . . . .  MEMBER   -----  INT      0002H  2
+  Default. . . . . . . . . . . . . . .  MEMBER   -----  INT      0004H  2
+_ReadEEP . . . . . . . . . . . . . . .  PUBLIC   CODE   PROC     0000H  -----
+  index. . . . . . . . . . . . . . . .  * REG *  DATA   U_INT    0004H  2
+  val. . . . . . . . . . . . . . . . .  AUTO     XDATA  U_CHAR   0000H  1
+  addr . . . . . . . . . . . . . . . .  * REG *  DATA   U_CHAR   0007H  1
+_BATT_STATUS_CAPACITY_LOW. . . . . . .  E_CONST  -----  U_CHAR   -----  1
+_USER_TIMER_EVENT_DO_AUTO_COLOR. . . .  E_CONST  -----  U_CHAR   -----  1
+_USER_TIMER_EVENT_START. . . . . . . .  E_CONST  -----  U_CHAR   -----  1
+_POWER_ACTION_NOSUPPORT_PS_TO_PS . . .  E_CONST  -----  U_CHAR   -----  1
+_WriteAD5110 . . . . . . . . . . . . .  PUBLIC   CODE   PROC     0000H  -----
+  index. . . . . . . . . . . . . . . .  * REG *  DATA   U_INT    0002H  2
+  dat. . . . . . . . . . . . . . . . .  * REG *  DATA   U_INT    0004H  2
+  addr . . . . . . . . . . . . . . . .  * REG *  DATA   U_CHAR   0007H  1
+  dat1 . . . . . . . . . . . . . . . .  * REG *  DATA   U_CHAR   0005H  1
+  dat2 . . . . . . . . . . . . . . . .  * REG *  DATA   U_CHAR   0001H  1
+C51 COMPILER V9.60.0.0   I2C                                                               03/02/2020 12:07:33 PAGE 52  
+
+NAME                                    CLASS   MSPACE  TYPE    OFFSET  SIZE
+====                                    =====   ======  ====    ======  ====
+
+
+_BATT_STATUS_NO_BATT . . . . . . . . .  E_CONST  -----  U_CHAR   -----  1
+_SCALER_TIMER_EVENT_MHL_D0_RECONNECT_1K E_CONST  -----  U_CHAR   -----  1
+_USER_TIMER_EVENT_OSD_DVR_SHUTDOWN . .  E_CONST  -----  U_CHAR   -----  1
+_MODE_STATUS_NONE. . . . . . . . . . .  E_CONST  -----  U_CHAR   -----  1
+_SCALER_TIMER_EVENT_MHL_D1_RECONNECT_1K E_CONST  -----  U_CHAR   -----  1
+_USER_TIMER_EVENT_OSD_CAMERA_VOLTAGE_DECE_CONST  -----  U_CHAR   -----  1
+_POWER_STATUS_SAVING . . . . . . . . .  E_CONST  -----  U_CHAR   -----  1
+_USER_TIMER_EVENT_KEY_REPEAT_ENABLE. .  E_CONST  -----  U_CHAR   -----  1
+_POWER_STATUS_NORMAL . . . . . . . . .  E_CONST  -----  U_CHAR   -----  1
+_BATT_STATUS_NONE. . . . . . . . . . .  E_CONST  -----  U_CHAR   -----  1
+_SYSTEM_TIMER_EVENT_GRN_ON_RED_BLINK .  E_CONST  -----  U_CHAR   -----  1
+_MODE_STATUS_SEARCH. . . . . . . . . .  E_CONST  -----  U_CHAR   -----  1
+I2CStop. . . . . . . . . . . . . . . .  PUBLIC   CODE   PROC     0000H  -----
+_POWER_STATUS_SAVING_BATTERY_MODE. . .  E_CONST  -----  U_CHAR   -----  1
+_SYSTEM_TIMER_EVENT_GRN_RED_BLINK. . .  E_CONST  -----  U_CHAR   -----  1
+_USER_TIMER_EVENT_PANEL_POWER_OFF. . .  E_CONST  -----  U_CHAR   -----  1
+_POWER_STATUS_NORMAL_BATTERY_MODE. . .  E_CONST  -----  U_CHAR   -----  1
+_MODE_STATUS_POWER_SAVING. . . . . . .  E_CONST  -----  U_CHAR   -----  1
+_USER_TIMER_EVENT_STANDBY_MODE . . . .  E_CONST  -----  U_CHAR   -----  1
+_WriteEEP. . . . . . . . . . . . . . .  PUBLIC   CODE   PROC     0000H  -----
+  index. . . . . . . . . . . . . . . .  AUTO     XDATA  U_INT    0000H  2
+  dat. . . . . . . . . . . . . . . . .  AUTO     XDATA  U_CHAR   0002H  1
+  addr . . . . . . . . . . . . . . . .  AUTO     XDATA  U_CHAR   0003H  1
+_USER_TIMER_EVENT_FACTORY_MODE . . . .  E_CONST  -----  U_CHAR   -----  1
+LongRegisterInfo . . . . . . . . . . .  * TAG *  -----  STRUCT   -----  6
+  Min. . . . . . . . . . . . . . . . .  MEMBER   -----  U_INT    0000H  2
+  Max. . . . . . . . . . . . . . . . .  MEMBER   -----  U_INT    0002H  2
+  Default. . . . . . . . . . . . . . .  MEMBER   -----  U_INT    0004H  2
+_MODE_STATUS_ACTIVE. . . . . . . . . .  E_CONST  -----  U_CHAR   -----  1
+_BATT_STATUS_TEMP_HIGH . . . . . . . .  E_CONST  -----  U_CHAR   -----  1
+_SCALER_TIMER_EVENT_DCC_HISTOGRAM_THD_  E_CONST  -----  U_CHAR   -----  1
+_USER_TIMER_EVENT_OSD_CAMERA_VOLTAGE_INCE_CONST  -----  U_CHAR   -----  1
+_USER_TIMER_EVENT_OSD_SHOW_POWER_SAVING E_CONST  -----  U_CHAR   -----  1
+_BATT_STATUS_FAST_CHARGE . . . . . . .  E_CONST  -----  U_CHAR   -----  1
+_USER_TIMER_EVENT_DISPLAY_INFO . . . .  E_CONST  -----  U_CHAR   -----  1
+_POWER_STATUS_NORMAL_NO_MATTERY_MODE .  E_CONST  -----  U_CHAR   -----  1
+_POWER_STATUS_OFF. . . . . . . . . . .  E_CONST  -----  U_CHAR   -----  1
+_USER_TIMER_EVENT_OSD_SHOW_NO_SIGNAL .  E_CONST  -----  U_CHAR   -----  1
+_SCALER_TIMER_EVENT_TMDS_VIDEO_DETECT.  E_CONST  -----  U_CHAR   -----  1
+_USER_TIMER_EVENT_LIGHT_SENSER_ON. . .  E_CONST  -----  U_CHAR   -----  1
+_SCALER_TIMER_EVENT_D0_PORT_DIGITAL_SW  E_CONST  -----  U_CHAR   -----  1
+_USER_TIMER_EVENT_BURN_IN_ON . . . . .  E_CONST  -----  U_CHAR   -----  1
+_SCALER_TIMER_EVENT_D1_PORT_DIGITAL_SW  E_CONST  -----  U_CHAR   -----  1
+_MODE_STATUS_POWER_OFF . . . . . . . .  E_CONST  -----  U_CHAR   -----  1
+_ReadI2CWORD . . . . . . . . . . . . .  PUBLIC   CODE   PROC     0000H  -----
+  addr . . . . . . . . . . . . . . . .  * REG *  DATA   U_CHAR   0006H  1
+  index. . . . . . . . . . . . . . . .  * REG *  DATA   U_CHAR   0005H  1
+  val. . . . . . . . . . . . . . . . .  AUTO     XDATA  U_INT    0000H  2
+_SCALER_TIMER_EVENT_MHL_D0_READY_TO_RE  E_CONST  -----  U_CHAR   -----  1
+_SYSTEM_TIMER_EVENT_COUNT. . . . . . .  E_CONST  -----  U_CHAR   -----  1
+_POWER_ACTION_NORMAL_TO_OFF. . . . . .  E_CONST  -----  U_CHAR   -----  1
+_POWER_ACTION_OFF_TO_NORMAL. . . . . .  E_CONST  -----  U_CHAR   -----  1
+_SCALER_TIMER_EVENT_MHL_D1_READY_TO_RE  E_CONST  -----  U_CHAR   -----  1
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    607    ----
+   CONSTANT SIZE    =   ----    ----
+C51 COMPILER V9.60.0.0   I2C                                                               03/02/2020 12:07:33 PAGE 53  
+
+   XDATA SIZE       =   ----      15
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
