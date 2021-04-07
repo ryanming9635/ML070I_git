@@ -24,10 +24,15 @@
 #define	EEP_Encorder4                              	0x21
 #define 	EEP_Decimal4    				0x22	
 
+#define	EEP_RotateNumberL                     	0x23
+#define 	EEP_RotateNumberM			0x24	
+#define 	EEP_RotateNumberH			0x25	
+
 #define	EEP_FWREV_MAJOR			0x04	//BYTE	1	F/W Rev.-major(Hex)	
 #define	EEP_FWREV_MINOR1			0x05	//BYTE	1	F/W Rev.-minor(Hex)
 #define	EEP_FWREV_MINOR2			0x06	//BYTE	1	F/W Rev.-minor(Hex)
 #define	EEP_DEBUGLEVEL				0x07	//BYTE	1	DebugLevel
+
 
 DWORD GetFWRevEE(void);
 void SaveFWRevEE(void);

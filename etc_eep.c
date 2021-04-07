@@ -98,5 +98,9 @@ void ClearBasicEE(void)
 
 	WriteEEP(EEP_Encorder4,1);
 	WriteEEP(EEP_Decimal4,0);
+
+	WriteEEP(EEP_RotateNumberL,0);
+	WriteEEP(EEP_RotateNumberM,0);
+	WriteEEP(EEP_RotateNumberH,0);
 		
 }

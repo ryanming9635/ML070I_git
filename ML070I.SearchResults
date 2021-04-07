@@ -1,4 +1,3 @@
----- bytFastEncoderMode Matches (3 in 2 files) ----
-CPU.c:31:extern BYTE bytFastEncoderMode;
-CPU.c:419:		if(bytFastEncoderMode==ON)	
-Main.c:39:BYTE bytFastEncoderMode=OFF;
+---- Printf("\r\n(TELI)ulongRotateNumber=%d",(WORD)u... Matches (2 in 2 files) ----
+Main.c:800:			Printf("\r\n(TELI)ulongRotateNumber=%d",(WORD)ulongRotateNumber);	
+Monitor.c:754:			Printf("\r\n(TELI)ulongRotateNumber=%d",(WORD)ulongRotateNumber);	

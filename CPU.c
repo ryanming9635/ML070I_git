@@ -82,6 +82,8 @@ BYTE bytHoldOn3SPowerOff=0;
 BYTE bytHoldOn3SPowerOffMode=0;
 WORD LED_FLASH_COUNT,Power_Msg_Count;
 short EncorderCount=0;
+BYTE bytEncorderCountTemp=0;
+extern DWORD ulongRotateNumber;
 
 extern BYTE 	KeyBuffer;
 
@@ -417,29 +419,56 @@ BYTE TempKey;
 			//else			//william-v1.42-961130
 			//ChangeKey=0;	//william-v1.42-961130
 		if(bytFastEncoderMode==ON)	
-			Time5ms=12;
+			Time5ms=48/*12*/;
 		else
 			Time5ms=48;
 
-			if((updn_reg[0] == 0) && (updn_reg[1] == 1) && (updn_reg[2] == 3)&& (updn_reg[3] == 2))  //UP Key	  
+			if((updn_reg[0] == 0) && (updn_reg[1] == 1) && (updn_reg[2] == 3)&& (updn_reg[3] == 2))  //UP Key					
+				{
 				   EncorderCount++; 		   
+				   bytEncorderCountTemp++;
+				}
 			if((updn_reg[0] == 1) && (updn_reg[1] == 3) && (updn_reg[2] == 2)&& (updn_reg[3] == 0))  //UP Key	  
+				{
 				   EncorderCount++; 		 
+				   bytEncorderCountTemp++;
+				}
 			 if((updn_reg[0] == 3) && (updn_reg[1] == 2) && (updn_reg[2] == 0)&& (updn_reg[3] == 1))	//UP Key	
-				  EncorderCount++;
+			 	{
+				  EncorderCount++;				  
+				  bytEncorderCountTemp++;
+			 	}
 			 if((updn_reg[0] == 2) && (updn_reg[1] == 0) && (updn_reg[2] == 1)&& (updn_reg[3] == 3))  //UP Key	  
-			   	EncorderCount++; 		
-			 
+			 	{
+			   	EncorderCount++; 					
+				bytEncorderCountTemp++;
+			 	}
 			if((updn_reg[0] == 0) && (updn_reg[1] == 2)&& (updn_reg[2] == 3)&& (updn_reg[3] == 1))	//DN Key	 
+				{
 				   EncorderCount--; 	 
+				   bytEncorderCountTemp++;
+				}
 			 if((updn_reg[0] == 2) && (updn_reg[1] == 3)&& (updn_reg[2] == 1)&& (updn_reg[3] == 0))  //DN Key	  
-				   EncorderCount--; 		
+			 	{
+				   EncorderCount--; 						   
+				   bytEncorderCountTemp++;
+			 	}
 			if((updn_reg[0] == 3) && (updn_reg[1] == 1)&& (updn_reg[2] == 0)&& (updn_reg[3] == 2))	//DN Key	
-				   EncorderCount--;
+				{
+				   EncorderCount--;				   
+				   bytEncorderCountTemp++;
+				}
 			if((updn_reg[0] == 1) && (updn_reg[1] == 0)&& (updn_reg[2] == 2)&& (updn_reg[3] == 3))	//DN Key	
+				{
 				   EncorderCount--; 
-
-				
+				   bytEncorderCountTemp++;
+				}
+			
+			if(bytEncorderCountTemp==200)	
+				{
+				  ulongRotateNumber++;
+				  bytEncorderCountTemp=0;
+				}
 			}
 		}
 

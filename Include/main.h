@@ -82,6 +82,9 @@ extern void MCUTimerDelayXms(WORD usNum);
 extern void SysPowerInitial(void);
 extern void UserInterfacePowerSwitch(EnumPowerAction enumSwitch);
 extern void SET_MCU_POWER_DOWN_MODE(void);
+void EncorderHandler_TELI(void);
+DWORD GetRotateNumber(void);
+void SaveRotateNumber(DWORD val);
 
 
 #endif	// __MAIN__

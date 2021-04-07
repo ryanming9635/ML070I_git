@@ -36,7 +36,7 @@ BYTE LowBatteryFlag;
 BYTE PowerOffToOnFlag;
 BYTE DVRChangeCurrent=0;
 BYTE Power_down_mode=_DontgoingToPD;
-BYTE bytFastEncoderMode=OFF;
+BYTE bytFastEncoderMode=ON/*OFF*/;
 float EncorderLen=0;
 WORD EncorderLen_Offset=0;
 BYTE EncorderLenint=0,EncorderCountPN=0,EncorderCountPN_offset=0;
@@ -45,7 +45,8 @@ WORD EncorderLenfloaat=0;
 //float Encorder1=100,Encorder2=100,Encorder3=100,Encorder4=100;
 float Encorder1=1,Encorder2=1,Encorder3=1,Encorder4=1;
 float Decimal1=0,Decimal2=0,Decimal3=0,Decimal4=0;
-
+DWORD ulongRotateNumber=0;
+	
 extern WORD BatteryBTH,BatteryVoltage;
 
 #if (_DEBUG_MESSAGE_BatteryBTH==ON)
@@ -354,7 +355,59 @@ void SetAD5110Step(BYTE newv)
 		        
 }
 
-void LoadEEPROM (void)
+DWORD GetRotateNumber(void)
+{
+	DWORD ret=0;
+	ret=ReadEEP(EEP_RotateNumberH);
+	ret<<=8;
+	
+	ret|=ReadEEP(EEP_RotateNumberM);
+	ret<<=8;	
+
+	ret|=ReadEEP(EEP_RotateNumberL);
+
+	#if(_DEBUG_EncorderHandler==ON)
+	Printf("\r\nGetRotateNumber=%01x%04x",(WORD)(ret>>16),(WORD)ret);
+	#endif
+
+	return ret;
+}
+
+void SaveRotateNumber(DWORD val)
+{
+	DWORD temp=0;
+
+	temp=ReadEEP(EEP_RotateNumberH);
+	temp<<=8;
+	temp|=ReadEEP(EEP_RotateNumberM);
+	temp<<=8;	
+	temp|=ReadEEP(EEP_RotateNumberL);
+
+	if(temp!=val)
+	{	
+
+	if(val>999999)
+		{
+		val-=999999 ;///>99999 clean to 0
+
+		#if(_DEBUG_EncorderHandler==ON)
+		Printf("\r\nSaveRotateNumber>999999");
+		#endif
+		}
+	WriteEEP(EEP_RotateNumberL,(val&0xff));
+	val>>=8;
+	WriteEEP(EEP_RotateNumberM,(val&0xff));
+	val>>=8;
+	WriteEEP(EEP_RotateNumberH,(val&0xff));
+
+	#if(_DEBUG_EncorderHandler==ON)
+	Printf("\r\nSaveRotateNumber=%d",(WORD)val);
+	#endif
+	}
+
+}
+
+void 	LoadEEPROM (void)
 {
 	 PowerFlag = ReadEEP(EEP_Powerflag);
 	 CameraVolt= ReadEEP(EEP_CameraVolt);
@@ -372,6 +425,13 @@ void LoadEEPROM (void)
 
 	Encorder4= ((ReadEEP(EEP_Encorder4)>>4)*10)+(0x0f&ReadEEP(EEP_Encorder4));
 	Decimal4= ((ReadEEP(EEP_Decimal4)>>4)*10)+(0x0f&ReadEEP(EEP_Decimal4));
+
+
+	ulongRotateNumber=ReadEEP(EEP_RotateNumberH);
+	ulongRotateNumber<<=8;
+	ulongRotateNumber|=ReadEEP(EEP_RotateNumberM);	
+	ulongRotateNumber<<=8;
+	ulongRotateNumber|=ReadEEP(EEP_RotateNumberL);	
 
 	if(ReadEEP(EEP_LowBattery_Flag))
 		SET_BATTERY_CAPACITY_LOW_FLAG();
@@ -731,11 +791,306 @@ float EncorderOffset1,EncorderOffset2,EncorderOffset3/*,EncorderOffset4*/;
 	//GetKey(0);
 }
 
+	void EncorderHandler_TELI(void)
+	{
+	WORD EncorderCountTemp,temp_val;
+#if (HS_DEBUG==ON)
+	WORD temp_EncorderCountTemp;
+#endif
+	
+	//BYTE param[4];
+	float EncorderParaTemp1,EncorderParaTemp2,EncorderParaTemp3,EncorderParaTemp4;
+	float EncorderOffset1,EncorderOffset2,EncorderOffset3/*,EncorderOffset4*/;
+		
+		if(ChangeKey)
+		{	
+		#if (HS_DEBUG==ON)
+			Printf("\r\n(TELI)EncorderCount=%d",(WORD)EncorderCount);
+			Printf("\r\nGetRotateNumber=%01x%04x",(WORD)(ulongRotateNumber>>16),(WORD)ulongRotateNumber);			
+		#endif
+			//Printf("\r\nEncorderLen_Offset0=%d ",(WORD)EncorderLen_Offset);
+			//Printf("\r\nEncorderCountPN0=%d ",(WORD)EncorderCountPN);
+		#if 1//ryan@20200430
+	//		EncorderParaTemp1=(Encorder1+(Decimal1))*0.01f;
+	//		EncorderParaTemp2=(Encorder2+(Decimal2))*0.01f;
+	//		EncorderParaTemp3=(Encorder3+(Decimal3))*0.01f;
+	//		EncorderParaTemp4=(Encorder4+(Decimal4))*0.01f;
+			EncorderParaTemp1=(Encorder1+(Decimal1*0.01));
+			EncorderParaTemp2=(Encorder2+(Decimal2*0.01));
+			EncorderParaTemp3=(Encorder3+(Decimal3*0.01));
+			EncorderParaTemp4=(Encorder4+(Decimal4*0.01));
+	
+		#else
+			EncorderParaTemp1=(Encorder1)*0.01f;
+			EncorderParaTemp2=(Encorder2)*0.01f;
+			EncorderParaTemp3=(Encorder3)*0.01f;
+			EncorderParaTemp4=(Encorder4)*0.01f;
+		#endif
+			//EncorderParaTemp1=(Encorder1*0.01f)+Decimal1;
+			//EncorderParaTemp2=(Encorder2*0.01f)+Decimal2;
+			//EncorderParaTemp3=(Encorder3*0.01f)+Decimal3;
+			//EncorderParaTemp4=(Encorder4*0.01f)+Decimal4;
+			
+		#if 0
+			Printf("\r\nEncorder1=%d ",(WORD)Encorder1);
+			Printf("\r\nEncorder2=%d ",(WORD)Encorder2);
+			Printf("\r\nEncorder3=%d ",(WORD)Encorder3);
+			Printf("\r\nEncorder4=%d ",(WORD)Encorder4);
+			
+			Printf("\r\nEncorderParaTemp1=%d ",(WORD)(EncorderParaTemp1*100));
+			Printf("\r\nEncorderParaTemp2=%d ",(WORD)(EncorderParaTemp2*100));
+			Printf("\r\nEncorderParaTemp3=%d ",(WORD)(EncorderParaTemp3*100));
+			Printf("\r\nEncorderParaTemp4=%d ",(WORD)(EncorderParaTemp4*100));
+		#endif
+		#if 0
+			EncorderOffset1=(30.625*EncorderParaTemp1*(240-EncorderLen_Offset))/1000;
+			EncorderOffset2=EncorderOffset1+(32.091*EncorderParaTemp2*(450-240-EncorderLen_Offset))/1000;
+			EncorderOffset3=EncorderOffset2+(33.504*EncorderParaTemp3*(780-450-EncorderLen_Offset)/1000);
+			//EncorderOffset4=EncorderOffset3+(33.504*((EncorderParaTemp3+EncorderParaTemp4)/2)*(780-600)/1000);
+		#else
+			
+			EncorderOffset1=(30.625*EncorderParaTemp1*240)/1000;
+			EncorderOffset2=EncorderOffset1+(32.091*EncorderParaTemp2*(450-240))/1000;
+			EncorderOffset3=EncorderOffset2+(33.504*EncorderParaTemp3*(780-450)/1000);
+		#endif
+		#if 0
+			Printf("\r\nEncorderOffset1=%d ",(WORD)(EncorderOffset1*100));
+			Printf("\r\nEncorderOffset2=%d ",(WORD)(EncorderOffset2*100));
+			Printf("\r\nEncorderOffset3=%d ",(WORD)(EncorderOffset3*100));
+		#endif
+			//Printf("\r\nEncorderOffset4=%d ",(WORD)(EncorderOffset4*100));
+			
+			if(EncorderCount>=0)
+				{
+				EncorderCountPN=0;
+				EncorderCountTemp=(EncorderCount/2);
+				}
+			else
+				{
+				EncorderCountPN=1;
+				EncorderCountTemp=(0-EncorderCount)/2;
+				}
+			
+			//EncorderCountTemp+=450;
+			//EncorderCount
+		#if 0
+			if(EncorderCount>=0)
+				EncorderCountPN=0;
+			else
+				EncorderCountPN=1;
+		#endif
+		#if 0
+			if(EncorderCountTemp>EncorderLen_Offset)
+				{
+				EncorderCountPN=0;
+				temp_EncorderCountTemp=EncorderCountTemp-EncorderLen_Offset;
+				}
+			else
+				{
+				EncorderCountPN=1;
+				temp_EncorderCountTemp=EncorderLen_Offset-EncorderCountTemp;
+				}
+		#endif
+			if(EncorderCountTemp<=240&&EncorderCountTemp>=0)
+				{
+				
+			#if (HS_DEBUG==ON)
+				Printf("\r\n(TELI)EncorderCountTemp=%d ",(WORD)EncorderCountTemp);
+				Printf("\r\n(TELI)EncorderLen_Offset=%d ",(WORD)EncorderLen_Offset);
+				Printf("\r\n(TELI)EncorderCountPN=%d ",(WORD)EncorderCountPN);
+			#endif
+				//if(EncorderCountPN==1)
+			#if 0
+					EncorderLen=(30.625*EncorderParaTemp1*(temp_EncorderCountTemp))/1000;
+			#else
+				EncorderLen=(30.625*EncorderParaTemp1*EncorderCountTemp)/1000;
+			#endif
+					//EncorderLen=(30.625*EncorderParaTemp1*(EncorderCountTemp-EncorderLen_Offset))/1000;
+					
+				//EncorderLen=(30.625*1*EncorderCountTemp)/1000;
+				temp_val=30.625*EncorderParaTemp1*EncorderCountTemp;
+				EncorderLenint=EncorderLen+0.05f;
+				//Printf("\r\nEncorderLenTemp=%d ",(WORD)EncorderLenTemp);
+				//EncorderLenint=EncorderLen;		
+			#if (_2ND_DECIMAL==ON)//ryan@20200505
+				EncorderLenfloaat=(EncorderLen+0.05)*100;
+				EncorderLenfloaat%=100;
+			#else
+				EncorderLenfloaat=(EncorderLen+0.05)*10;
+				EncorderLenfloaat%=10;
+			#endif
+			#if 0
+				Printf("\r\nEncorderCountTemp=%d ",(WORD)EncorderCountTemp);
+				Printf("\r\nEncorderLen=%d ",(WORD)EncorderLen);
+				Printf("\r\nEncorderLenint=%d ",(WORD)EncorderLenint);			
+				Printf("\r\ntemp_val=%d ",(WORD)temp_val);
+				Printf("\r\nEncorderCount=%d ",(WORD)EncorderCount);
+				Printf("\r\nEncorderLenTemp=%d.%dm ",(WORD)EncorderLenint,(WORD)EncorderLenfloaat);
+			#endif
+				}
+			else if(EncorderCountTemp>240&&EncorderCountTemp<=450)
+				{
+		
+			#if 0
+				EncorderLen=EncorderOffset1+(32.091*EncorderParaTemp2*(temp_EncorderCountTemp-(240-EncorderLen_Offset))/1000);
+			#else
+				EncorderLen=EncorderOffset1+(32.091*EncorderParaTemp2*(EncorderCountTemp-240)/1000);
+			#endif
+				
+			#if (HS_DEBUG==ON)
+				Printf("\r\n(TELI)temp_EncorderCountTemp=%d ",(WORD)(temp_EncorderCountTemp-(240-EncorderLen_Offset)));
+				Printf("\r\n(TELI)EncorderLen_Offset=%d ",(WORD)EncorderLen_Offset);
+				Printf("\r\n(TELI)temp_EncorderCountTemp=%d ",(WORD)temp_EncorderCountTemp);
+				Printf("\r\n(TELI)EncorderLen=%d ",(WORD)EncorderLen);
+				//EncorderLen=7.35+(32.091*1*(EncorderCountTemp-240)/1000);
+				Printf("\r\n(TELI)EncorderCount=%d ",(WORD)EncorderCount);
+			#endif
+				EncorderLenint=EncorderLen+0.05f;			
+			#if (HS_DEBUG==ON)
+				Printf("\r\n(TELI)EncorderLenint=%d ",(WORD)EncorderLenint);
+			#endif
+				//EncorderLenint=EncorderLen;
+			#if (_2ND_DECIMAL==ON)//ryan@20200505
+				EncorderLenfloaat=(EncorderLen+0.05)*100;
+				EncorderLenfloaat%=100;
+			#else
+				EncorderLenfloaat=(EncorderLen+0.05)*10;
+				EncorderLenfloaat%=10;
+			#endif
+				
+			#if (HS_DEBUG==ON)
+				Printf("\r\n(TELI)EncorderLenTemp=%d.%dm ",(WORD)EncorderLenint,(WORD)EncorderLenfloaat);
+			#endif			
+				}
+		#if 1
+			else if(EncorderCountTemp>450&&EncorderCountTemp<=780)
+				{
+			#if 0
+				EncorderLen=EncorderOffset2+(33.504*1*(temp_EncorderCountTemp-(450-EncorderLen_Offset))/1000);
+			#else			
+				EncorderLen=EncorderOffset2+(33.504*EncorderParaTemp3*(EncorderCountTemp-450)/1000);
+			#endif
+				
+			#if (HS_DEBUG==ON)
+				Printf("\r\n(TELI)EncorderCount=%d ",(WORD)EncorderCount);
+			#endif
+				
+				EncorderLenint=EncorderLen+0.05f;
+				//Printf("\r\nEncorderLenTemp=%d ",(WORD)EncorderLenTemp);
+				//EncorderLenint=EncorderLen;
+			#if (_2ND_DECIMAL==ON)//ryan@20200505
+				EncorderLenfloaat=(EncorderLen+0.05)*100;
+				EncorderLenfloaat%=100;
+			#else
+				EncorderLenfloaat=(EncorderLen+0.05)*10;
+				EncorderLenfloaat%=10;
+			#endif
+				
+			#if (HS_DEBUG==ON)
+				Printf("\r\n(TELI)EncorderLenTemp=%d.%dm ",(WORD)EncorderLenint,(WORD)EncorderLenfloaat);
+			#endif
+				}
+		#else
+			else if(EncorderCountTemp>450&&EncorderCountTemp<=600)
+				{
+				EncorderLen=14.089+(33.504*EncorderParaTemp3*(EncorderCountTemp-450)/1000);
+				//EncorderLen=14.089+(33.504*1*(EncorderCountTemp-450)/1000);
+				Printf("\r\nEncorderCount=%d ",(WORD)EncorderCount);
+	
+				EncorderLenint=EncorderLen+0.05f;
+				//Printf("\r\nEncorderLenTemp=%d ",(WORD)EncorderLenTemp);
+				//EncorderLenint=EncorderLen;
+				EncorderLenfloaat=(EncorderLen+0.05)*10;
+				EncorderLenfloaat%=10;
+				Printf("\r\nEncorderLenTemp=%d.%dm ",(WORD)EncorderLenint,(WORD)EncorderLenfloaat);
+				}		
+			else if(EncorderCountTemp>600&&EncorderCountTemp<=780)
+				{
+				EncorderLen=19.089+(33.504*((EncorderParaTemp3+EncorderParaTemp4)/2)*(EncorderCountTemp-600)/1000);
+				//EncorderLen=14.089+(33.504*1*(EncorderCountTemp-450)/1000);
+				Printf("\r\nEncorderCount=%d ",(WORD)EncorderCount);
+	
+				EncorderLenint=EncorderLen+0.05f;
+				//Printf("\r\nEncorderLenTemp=%d ",(WORD)EncorderLenTemp);
+				//EncorderLenint=EncorderLen;
+				EncorderLenfloaat=(EncorderLen+0.05)*10;
+				EncorderLenfloaat%=10;
+				Printf("\r\nEncorderLenTemp=%d.%dm ",(WORD)EncorderLenint,(WORD)EncorderLenfloaat);
+				}
+		#endif
+			else if(EncorderCountTemp>780)
+				{
+			#if 0
+				EncorderLen=EncorderOffset3+(34.896*1*(EncorderCountTemp-(780-EncorderLen_Offset))/1000);
+			#else
+				EncorderLen=EncorderOffset3+(34.896*EncorderParaTemp4*(EncorderCountTemp-780)/1000);
+			#endif
+	
+			#if (HS_DEBUG==ON)	
+				Printf("\r\n(TELI)EncorderCount=%d ",(WORD)EncorderCount);
+	
+				Printf("\r\n(TELI)EncorderLen=%d ",(WORD)EncorderLen);
+			#endif
+				EncorderLenint=EncorderLen+0.05f;
+			#if (HS_DEBUG==ON)
+				Printf("\r\n(TELI)EncorderLenint=%d ",(WORD)EncorderLenint);
+			#endif
+				//EncorderLenint=EncorderLen;
+			#if (_2ND_DECIMAL==ON)//ryan@20200505
+				EncorderLenfloaat=(EncorderLen+0.05)*100;
+			#if (HS_DEBUG==ON)
+				Printf("\r\n(TELI)EncorderLenfloaat=%d ",(WORD)EncorderLenfloaat);
+			#endif
+				EncorderLenfloaat%=100;
+			#if (HS_DEBUG==ON)		
+				Printf("\r\n(TELI)EncorderLenTemp=%d.%dm ",(WORD)EncorderLenint,(WORD)EncorderLenfloaat);
+			#endif
+			#else
+				EncorderLenfloaat=(EncorderLen+0.05)*10;
+			#if (HS_DEBUG==ON)
+				Printf("\r\n(TELI)EncorderLenfloaat=%d ",(WORD)EncorderLenfloaat);
+			#endif
+				EncorderLenfloaat%=10;			
+			#if (HS_DEBUG==ON)
+				Printf("\r\n(TELI)EncorderLenTemp=%d.%dm ",(WORD)EncorderLenint,(WORD)EncorderLenfloaat);
+			#endif
+			#endif			
+				}
+				
+			ChangeKey=0;
+			//param[0]=EncorderLenint;
+			//param[1]=EncorderLenfloaat;
+			//param[2]=EncorderCountPN;
+			//protocol_send_cmd_with_param_num(0x0a, (BYTE *)param, 3);
+			//protocol_send_cmd_with_param_num(0x80, (BYTE *)param, 3);
+			 if(GET_DVR_SystemReadyNotic()==_TRUE)
+				{
+			 MCU_SendCmdToDVR(MCU_PROTOCOL_CMD_REGULAR_DATA);
+			  MCUTimerCancelTimerEvent( _SYSTEM_TIMER_EVENT_REPLAY_REGULAR_DATA);
+			  MCUTimerActiveTimerEvent(SEC(1), _SYSTEM_TIMER_EVENT_REPLAY_REGULAR_DATA);
+				}
+		#if (_DEBUG_EncorderHandler==ON)//ryan@20200505
+			Printf("\r\n(TELI)EncorderLenint=%d ",(WORD)EncorderLenint);
+			Printf("\r\n(TELI)EncorderLenfloaat=%d ",(WORD)EncorderLenfloaat);
+		#endif
+		}
+		//GetKey(0);
+	}
+
 	//bit CCFL_status;	
 void main_loop(void)
 {
 
 	Printf("\r\nStart Main Loop...");
+
+	if(bytFastEncoderMode==ON)
+		{
+		ulongRotateNumber=GetRotateNumber();
+		Printf("\r\n(TELI Mode)");
+		}
+	else	
+		Printf("\r\n(REX Mode)");
+	
 	//---------------------------------------------------------------
 	//			             Main Loop
 	//---------------------------------------------------------------
@@ -752,6 +1107,10 @@ void main_loop(void)
 	//	SysJudgeHandler();	
 		SysPowerHandler();	
 		Scankey();
+		
+		if(bytFastEncoderMode==ON)
+		EncorderHandler_TELI();
+		else			
 		EncorderHandler();
 
 	
@@ -837,6 +1196,9 @@ void WaitPowerOn(void)
 	P3M1=0x00;//p3.4 and P3.5 set output ryan@20210226
 	bytHoldOn3SPowerOff=OFF;
 
+	if(bytFastEncoderMode==ON)
+	SaveRotateNumber(ulongRotateNumber);
+	
 	while(1) 
 	{
 

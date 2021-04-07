@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.0.0   ETC_EEP                                                           03/23/2021 14:24:37 PAGE 1   
+C51 COMPILER V9.60.0.0   ETC_EEP                                                           04/07/2021 16:56:08 PAGE 1   
 
 
 C51 COMPILER V9.60.0.0, COMPILATION OF MODULE ETC_EEP
@@ -22,6 +22,7 @@ line level    source
   12          #include "main.h"
   13          #include "i2c.h"
   14          #include "printf.h"
+*** WARNING C320 IN LINE 44 OF .\Include\printf.h: DEBUG is defined 
   15          #include "etc_eep.h"
   16          
   17          DWORD GetFWRevEE()
@@ -61,18 +62,18 @@ line level    source
   51   1        WriteEEP(EEP_FWREV_MAJOR, MCU_FW_Major );
   52   1        WriteEEP(EEP_FWREV_MINOR1, MCU_FW_Sub0 );
   53   1        WriteEEP(EEP_FWREV_MINOR2, MCU_FW_Sub1);
-  54   1      
-C51 COMPILER V9.60.0.0   ETC_EEP                                                           03/23/2021 14:24:37 PAGE 2   
+C51 COMPILER V9.60.0.0   ETC_EEP                                                           04/07/2021 16:56:08 PAGE 2   
 
+  54   1      
   55   1      }
   56          
   57          #if (_DEBUG_MESSAGE_Monitor==ON)
-              
-              void SaveDebugLevelEE(BYTE dl)
-              {
-                WriteEEP(EEP_DEBUGLEVEL, dl);
-              }
-              #endif
+  58          
+  59          void SaveDebugLevelEE(BYTE dl)
+  60          {
+  61   1        WriteEEP(EEP_DEBUGLEVEL, dl);
+  62   1      }
+  63          #endif
   64          
   65          //===================================================================
   66          
@@ -110,19 +111,25 @@ line level    source
   98   1      
   99   1        WriteEEP(EEP_Encorder4,1);
  100   1        WriteEEP(EEP_Decimal4,0);
- 101   1          
- 102   1      }
+ 101   1      
+ 102   1        WriteEEP(EEP_RotateNumberL,0);
+ 103   1        WriteEEP(EEP_RotateNumberM,0);
+ 104   1        WriteEEP(EEP_RotateNumberH,0);
+ 105   1          
+ 106   1      }
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    333    ----
+   CODE SIZE        =    366    ----
    CONSTANT SIZE    =     18    ----
    XDATA SIZE       =   ----       1
    PDATA SIZE       =   ----    ----
    DATA SIZE        =   ----    ----
    IDATA SIZE       =   ----    ----
+C51 COMPILER V9.60.0.0   ETC_EEP                                                           04/07/2021 16:56:08 PAGE 3   
+
    BIT SIZE         =   ----    ----
 END OF MODULE INFORMATION.
 
 
-C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
+C51 COMPILATION COMPLETE.  1 WARNING(S),  0 ERROR(S)

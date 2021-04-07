@@ -47,6 +47,7 @@ extern BYTE	CameraVolt;
 extern BYTE	PWR_START_flag;
 extern WORD BTH_Temp,Battery_Voltage_Temp;
 extern WORD BatteryBTH,BatteryVoltage;
+extern DWORD ulongRotateNumber;
 
 //void Loader(BYTE);
 
@@ -746,6 +747,10 @@ void Monitor(void)
 
 	Printf("\r\nEncorder4=%02x",(WORD)ReadEEP(EEP_Encorder4));	
 	Printf("\r\nDecimal4=%02x",(WORD)ReadEEP(EEP_Decimal4));	
+
+	Printf("\r\nGetRotateNumber=%01x%04x",(WORD)(ulongRotateNumber>>16),(WORD)ulongRotateNumber);
+
+		
 	}
 		/*
 	else if( !stricmp( argv[0], "&" ) ) {
