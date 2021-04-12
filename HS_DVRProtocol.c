@@ -36,6 +36,7 @@ extern BYTE PWR_START_flag;
 extern StructBatteryInfoType g_stBatteryInfo ;
 extern BYTE DVRChangeCurrent;
 extern BYTE bytHoldOn3SPowerOff;
+extern BYTE bytFastEncoderMode;
 
 void DvrReceivePaser(void)
 {
@@ -90,7 +91,11 @@ if ( RS2_ready())
 				case MCU_PROTOCOL_CMD_DVR_SHUTDOWN:
 				case	MCU_PROTOCOL_PROTOCOL_CMD_ENTER_ISP:
 				case MCU_PROTOCOL_CMD_DC12V_PWR_START:	
-				case	MCU_PROTOCOL_CMD_SET_CHARGE_CURRENT:
+				case	MCU_PROTOCOL_CMD_SET_CHARGE_CURRENT:				
+				case	MCU_PROTOCOL_CMD_GET_ENCODER_COUNT:
+				case	MCU_PROTOCOL_CMD_RESET_ENCODER_COUNT:
+				case	MCU_PROTOCOL_CMD_SET_MODELE_TYPE:
+
 				      protocol_state = PROTOCOL_STATE_LENGTH;
 				      break;
 					default:
@@ -116,6 +121,9 @@ if ( RS2_ready())
 				case	MCU_PROTOCOL_PROTOCOL_CMD_ENTER_ISP:	
 				case	MCU_PROTOCOL_CMD_DC12V_PWR_START:
 				case	MCU_PROTOCOL_CMD_SET_CHARGE_CURRENT:
+					case	MCU_PROTOCOL_CMD_GET_ENCODER_COUNT:
+					case	MCU_PROTOCOL_CMD_RESET_ENCODER_COUNT:
+					case	MCU_PROTOCOL_CMD_SET_MODELE_TYPE:
 					
 						if (protocol_len == 0)
 						{
@@ -152,6 +160,9 @@ if ( RS2_ready())
 				case	MCU_PROTOCOL_PROTOCOL_CMD_ENTER_ISP:						
 					case	MCU_PROTOCOL_CMD_DC12V_PWR_START:
 					case	MCU_PROTOCOL_CMD_SET_CHARGE_CURRENT:
+						case	MCU_PROTOCOL_CMD_GET_ENCODER_COUNT:
+						case	MCU_PROTOCOL_CMD_RESET_ENCODER_COUNT:
+						case	MCU_PROTOCOL_CMD_SET_MODELE_TYPE:
 						
 
 				      protocol_data[protocol_data_count] = c;
@@ -460,6 +471,29 @@ if ( RS2_ready())
 					SET_BATTERY_CHARGE_STATE(_BATT_STATUS_NONE);///reset charge current 
 
 
+						break;
+					case MCU_PROTOCOL_CMD_GET_ENCODER_COUNT:
+							#if(_DEBUG_MESSAGE_UART_Protocol==ON)	
+							GraphicsPrint(GREEN,"\r\n(CMD:MCU_PROTOCOL_CMD_GET_ENCODER_COUNT)");	
+							#endif
+							MCUTimerActiveTimerEvent(SEC(1),_USER_TIMER_EVENT_GET_ENCODER_COUNT);
+						break;
+					case MCU_PROTOCOL_CMD_RESET_ENCODER_COUNT:
+							#if(_DEBUG_MESSAGE_UART_Protocol==ON)	
+							GraphicsPrint(GREEN,"\r\n(CMD:MCU_PROTOCOL_CMD_RESET_ENCODER_COUNT)");	
+							#endif
+							MCUTimerActiveTimerEvent(SEC(1),_USER_TIMER_EVENT_RESET_ENCODER_COUNT);
+						break;
+					case MCU_PROTOCOL_CMD_SET_MODELE_TYPE:
+
+							if(protocol_data[0]==ON)										
+								bytFastEncoderMode=ON;
+							else
+								bytFastEncoderMode=OFF;
+
+							#if(_DEBUG_MESSAGE_UART_Protocol==ON)	
+							GraphicsPrint(CYAN,"\r\n(CMD:MCU_PROTOCOL_CMD_SET_MODELE_TYPE=%d)",(WORD)bytFastEncoderMode);	
+							#endif	
 						break;
 					default:
 						break;

@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.0.0   MONITOR                                                           04/07/2021 16:56:09 PAGE 1   
+C51 COMPILER V9.60.0.0   MONITOR                                                           04/12/2021 16:41:58 PAGE 1   
 
 
 C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MONITOR
@@ -62,7 +62,7 @@ line level    source
   51          
   52          //void Loader(BYTE);
   53          
-C51 COMPILER V9.60.0.0   MONITOR                                                           04/07/2021 16:56:09 PAGE 2   
+C51 COMPILER V9.60.0.0   MONITOR                                                           04/12/2021 16:41:58 PAGE 2   
 
   54          //=============================================================================
   55          //
@@ -126,7 +126,7 @@ line level    source
  112   1        return 0;
  113   1      }
  114          
-C51 COMPILER V9.60.0.0   MONITOR                                                           04/07/2021 16:56:09 PAGE 3   
+C51 COMPILER V9.60.0.0   MONITOR                                                           04/12/2021 16:41:58 PAGE 3   
 
  115          BYTE Asc2Bin(PDATA_P BYTE *s)
  116          {
@@ -190,7 +190,7 @@ line level    source
  174              MonRdata = ReadI2C(MonAddress, MonIndex);
  175          
  176            if( echo )
-C51 COMPILER V9.60.0.0   MONITOR                                                           04/07/2021 16:56:09 PAGE 4   
+C51 COMPILER V9.60.0.0   MONITOR                                                           04/12/2021 16:41:58 PAGE 4   
 
  177              Printf("\r\nRead %2xh:%2xh", (WORD)MonIndex, (WORD)MonRdata); 
  178            
@@ -254,7 +254,7 @@ line level    source
  236   2        }
  237   1      
  238   1        if( echo ) {
-C51 COMPILER V9.60.0.0   MONITOR                                                           04/07/2021 16:56:09 PAGE 5   
+C51 COMPILER V9.60.0.0   MONITOR                                                           04/12/2021 16:41:58 PAGE 5   
 
  239   2          Printf("Write %2xh:%2xh ", (WORD)MonIndex, (WORD)MonWdata);
  240   2          Printf("==> Read %2xh:%2xh", (WORD)MonIndex, (WORD)MonRdata);
@@ -318,7 +318,7 @@ line level    source
  298            else  {
  299              Printf("   --> Missing parameter !!!");
  300              return;
-C51 COMPILER V9.60.0.0   MONITOR                                                           04/07/2021 16:56:09 PAGE 6   
+C51 COMPILER V9.60.0.0   MONITOR                                                           04/12/2021 16:41:58 PAGE 6   
 
  301            }
  302            Slave = Asc2Bin(argv[1]);
@@ -382,7 +382,7 @@ line level    source
  360                for(i=MonIndex; i<=ToMonIndex; i++) {
  361                  MonRdata = ReadI2C(Slave, i);
  362                      Printf("\r\n<R>%2x[%2x]=%2x", (WORD)Slave, (WORD)i, (WORD)MonRdata);
-C51 COMPILER V9.60.0.0   MONITOR                                                           04/07/2021 16:56:09 PAGE 7   
+C51 COMPILER V9.60.0.0   MONITOR                                                           04/12/2021 16:41:58 PAGE 7   
 
  363                }
  364              }
@@ -446,7 +446,7 @@ line level    source
  422   2          MonRdata = ReadTW88(MonIndex);
  423   2        }
  424   1        else {
-C51 COMPILER V9.60.0.0   MONITOR                                                           04/07/2021 16:56:09 PAGE 8   
+C51 COMPILER V9.60.0.0   MONITOR                                                           04/12/2021 16:41:58 PAGE 8   
 
  425   2          MonRdata = ReadI2C(Slave, MonIndex);
  426   2          MonWdata = (MonRdata & (~mask)) | (MonMask & mask);
@@ -510,7 +510,7 @@ line level    source
  484   1        Printf("\r\n   R ii             ; Read AD5110 data");
  485   1        Printf("\r\n   W ii dd          ; Write AD5110 data");
  486   1        Printf("\r\n   D [ii] [cc]      ; Dump");
-C51 COMPILER V9.60.0.0   MONITOR                                                           04/07/2021 16:56:09 PAGE 9   
+C51 COMPILER V9.60.0.0   MONITOR                                                           04/12/2021 16:41:58 PAGE 9   
 
  487   1        Printf("\r\n   C aa             ; Change I2C address");
  488   1        Printf("\r\n   M ?              ; Current Input");
@@ -574,7 +574,7 @@ line level    source
  546   2        //--- end of string
  547   2        case '\r':
  548   2      
-C51 COMPILER V9.60.0.0   MONITOR                                                           04/07/2021 16:56:09 PAGE 10  
+C51 COMPILER V9.60.0.0   MONITOR                                                           04/12/2021 16:41:58 PAGE 10  
 
  549   2          if( incnt==0 ) {
  550   3            Prompt();
@@ -638,7 +638,7 @@ line level    source
  608   2            MonIncDecI2C(0);
  609   2          break;
  610   2      
-C51 COMPILER V9.60.0.0   MONITOR                                                           04/07/2021 16:56:09 PAGE 11  
+C51 COMPILER V9.60.0.0   MONITOR                                                           04/12/2021 16:41:58 PAGE 11  
 
  611   2        case '<':
  612   2          if( incnt ) {
@@ -702,7 +702,7 @@ line level    source
  670   1        else if( !stricmp( argv[0], "O" ) )   indirect=1; 
  671   1      
  672   1        else if( !stricmp( argv[0], "," ) )   indirect=0; 
-C51 COMPILER V9.60.0.0   MONITOR                                                           04/07/2021 16:56:09 PAGE 12  
+C51 COMPILER V9.60.0.0   MONITOR                                                           04/12/2021 16:41:58 PAGE 12  
 
  673   1        else if( !stricmp( argv[0], ">" ) )   indirect=0; 
  674   1        else if( !stricmp( argv[0], "<" ) )   indirect=0; 
@@ -766,7 +766,7 @@ line level    source
  732   2        //   CameraVolt= ReadEEP(EEP_CameraVolt);
  733   2        //  PWR_START_flag= ReadEEP(EEP_DC12_PWR_START);    
  734   2      
-C51 COMPILER V9.60.0.0   MONITOR                                                           04/07/2021 16:56:09 PAGE 13  
+C51 COMPILER V9.60.0.0   MONITOR                                                           04/12/2021 16:41:58 PAGE 13  
 
  735   2          Printf("\r\nPowerFlag=%02x",(WORD)ReadEEP(EEP_Powerflag));  
  736   2          Printf("\r\nCameraVolt=%d",(WORD)ReadEEP(EEP_CameraVolt));  
@@ -830,7 +830,7 @@ line level    source
  794   2        
  795   2        }
  796   1        else if( !stricmp( argv[0], "R" ) ) {
-C51 COMPILER V9.60.0.0   MONITOR                                                           04/07/2021 16:56:09 PAGE 14  
+C51 COMPILER V9.60.0.0   MONITOR                                                           04/12/2021 16:41:58 PAGE 14  
 
  797   2        
  798   2          //ret=ReadAD5110(Asc2Bin(argv[1]));
@@ -894,7 +894,7 @@ line level    source
  854   1      
  855   1                MonRdata = ReadI2C(Slave, MonIndex);
  856   1      
-C51 COMPILER V9.60.0.0   MONITOR                                                           04/07/2021 16:56:09 PAGE 15  
+C51 COMPILER V9.60.0.0   MONITOR                                                           04/12/2021 16:41:58 PAGE 15  
 
  857   1                Printf("\r\n<R>%2x[%2x]=%2x", (WORD)Slave, (WORD)MonIndex, (WORD)MonRdata);
  858   1      
@@ -958,7 +958,7 @@ line level    source
                 }
               #endif  
  918   1      
-C51 COMPILER V9.60.0.0   MONITOR                                                           04/07/2021 16:56:09 PAGE 16  
+C51 COMPILER V9.60.0.0   MONITOR                                                           04/12/2021 16:41:58 PAGE 16  
 
  919   1        //---------------------------------------------------
  920   1        else if( !stricmp( argv[0], "POWER" ) ) {
@@ -1022,7 +1022,7 @@ line level    source
  978   1        else if ( !stricmp( argv[0], "DEBUG" ) ) {
  979   2          if( argc==2 ) {
  980   3            DebugLevel = Asc2Bin(argv[1]);
-C51 COMPILER V9.60.0.0   MONITOR                                                           04/07/2021 16:56:09 PAGE 17  
+C51 COMPILER V9.60.0.0   MONITOR                                                           04/12/2021 16:41:58 PAGE 17  
 
  981   3            SaveDebugLevelEE(DebugLevel);
  982   3          }
@@ -1086,7 +1086,7 @@ line level    source
 1040   3      //      DisplayLogo();
 1041   3          }
 1042   2          else if( !stricmp( argv[1], "end" ) ) {
-C51 COMPILER V9.60.0.0   MONITOR                                                           04/07/2021 16:56:09 PAGE 18  
+C51 COMPILER V9.60.0.0   MONITOR                                                           04/12/2021 16:41:58 PAGE 18  
 
 1043   3              Puts("\r\nIf you'd like to exit, press any Key....");
 1044   3            while ( !RS_ready() ){
@@ -1150,7 +1150,7 @@ line level    source
                     k = 0;
                     DisplayChinese();
                     if ( argc == 3 )
-C51 COMPILER V9.60.0.0   MONITOR                                                           04/07/2021 16:56:09 PAGE 19  
+C51 COMPILER V9.60.0.0   MONITOR                                                           04/12/2021 16:41:58 PAGE 19  
 
                       i = Asc2Bin(argv[2]);
                     else i = 0;
@@ -1214,7 +1214,7 @@ line level    source
                       BYTE i, j, k;
                       Puts("\r\nIf you'd like to exit, press any Key....");
                     j = 0;
-C51 COMPILER V9.60.0.0   MONITOR                                                           04/07/2021 16:56:09 PAGE 20  
+C51 COMPILER V9.60.0.0   MONITOR                                                           04/12/2021 16:41:58 PAGE 20  
 
                     k = 0;
                     DisplayKorean();
@@ -1278,7 +1278,7 @@ line level    source
 1226   3            }
 1227   2          else
 1228   2            {
-C51 COMPILER V9.60.0.0   MONITOR                                                           04/07/2021 16:56:09 PAGE 21  
+C51 COMPILER V9.60.0.0   MONITOR                                                           04/12/2021 16:41:58 PAGE 21  
 
 1229   3            SET_PWM(_STOP_PWM, _STOP_PWM);
 1230   3            Puts("\r\nSTOP PWM");
@@ -1342,7 +1342,7 @@ line level    source
 1288   2          }
 1289   1          else if( !stricmp( argv[0], "BTH" ) ) {
 1290   2      
-C51 COMPILER V9.60.0.0   MONITOR                                                           04/07/2021 16:56:09 PAGE 22  
+C51 COMPILER V9.60.0.0   MONITOR                                                           04/12/2021 16:41:58 PAGE 22  
 
 1291   2            if(Asc2Bin(argv[1]==0))
 1292   2            BTH_Temp=40;
@@ -1406,7 +1406,7 @@ line level    source
 1350   1        //---------------- serial tx test with some number -----------------------------------
 1351   1        else if( !stricmp( argv[0], "TX" ) ) {
 1352   2          MonTxDump();
-C51 COMPILER V9.60.0.0   MONITOR                                                           04/07/2021 16:56:09 PAGE 23  
+C51 COMPILER V9.60.0.0   MONITOR                                                           04/12/2021 16:41:58 PAGE 23  
 
 1353   2        }
 1354   1        //---------------- OSD FONTtest for parallel -----------------------------------
@@ -1470,7 +1470,7 @@ MODULE INFORMATION:   STATIC OVERLAYABLE
    DATA SIZE        =      1    ----
    IDATA SIZE       =   ----    ----
    BIT SIZE         =      3    ----
-C51 COMPILER V9.60.0.0   MONITOR                                                           04/07/2021 16:56:09 PAGE 24  
+C51 COMPILER V9.60.0.0   MONITOR                                                           04/12/2021 16:41:58 PAGE 24  
 
 END OF MODULE INFORMATION.
 

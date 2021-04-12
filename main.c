@@ -36,7 +36,7 @@ BYTE LowBatteryFlag;
 BYTE PowerOffToOnFlag;
 BYTE DVRChangeCurrent=0;
 BYTE Power_down_mode=_DontgoingToPD;
-BYTE bytFastEncoderMode=ON/*OFF*/;
+BYTE bytFastEncoderMode=OFF;
 float EncorderLen=0;
 WORD EncorderLen_Offset=0;
 BYTE EncorderLenint=0,EncorderCountPN=0,EncorderCountPN_offset=0;
@@ -168,6 +168,7 @@ void MCU_SendCmdToDVR(BYTE ucType)
 {
 	BYTE buf[7]={0,0,0,0,0,0,0};
 	WORD val;
+	DWORD encoder;
 switch(ucType)
 {
 	case MCU_PROTOCOL_CMD_REPLY_MCU_FW:	//Reply MCU firmware version
@@ -288,7 +289,28 @@ switch(ucType)
 	case MCU_PROTOCOL_CMD_SLEEP_WAKE_UP:
 		mcuLib_ProtocolSendCmdWithParamNum(MCU_PROTOCOL_CMD_SLEEP_WAKE_UP,buf,1);	
 		break;
-
+	case MCU_PROTOCOL_CMD_GET_ENCODER_COUNT:
+		encoder=ulongRotateNumber;
+		
+		buf[0]=encoder/100000;
+		buf[0]<<=4;
+		encoder%=100000;
+		buf[0]|=encoder/10000;
+		encoder%=10000;
+		
+		buf[1]=encoder/1000;		
+		buf[1]<<=4;	
+		encoder%=1000;		
+		buf[1]|=encoder/100;
+		encoder%=100;
+		
+		buf[2]=encoder/10;		
+		buf[2]<<=4;	
+		encoder%=10;		
+		buf[2]|=encoder;
+			
+		mcuLib_ProtocolSendCmdWithParamNum(MCU_PROTOCOL_CMD_GET_ENCODER_COUNT,buf,3);	
+		break;
 default:
 	break;
 		
@@ -367,7 +389,7 @@ DWORD GetRotateNumber(void)
 	ret|=ReadEEP(EEP_RotateNumberL);
 
 	#if(_DEBUG_EncorderHandler==ON)
-	Printf("\r\nGetRotateNumber=%01x%04x",(WORD)(ret>>16),(WORD)ret);
+	Printf("\r\nGetRotateNumber=%02x%04x",(WORD)(ret>>16),(WORD)ret);
 	#endif
 
 	return ret;
@@ -797,15 +819,21 @@ float EncorderOffset1,EncorderOffset2,EncorderOffset3/*,EncorderOffset4*/;
 #if (HS_DEBUG==ON)
 	WORD temp_EncorderCountTemp;
 #endif
+	short EncorderCount_T;
 	
 	//BYTE param[4];
 	float EncorderParaTemp1,EncorderParaTemp2,EncorderParaTemp3,EncorderParaTemp4;
 	float EncorderOffset1,EncorderOffset2,EncorderOffset3/*,EncorderOffset4*/;
-		
+
+	
+			
 		if(ChangeKey)
 		{	
+
+			EncorderCount_T=(EncorderCount)/6.6;
+			
 		#if (HS_DEBUG==ON)
-			Printf("\r\n(TELI)EncorderCount=%d",(WORD)EncorderCount);
+			Printf("\r\n(TELI)EncorderCount_T=%d",(WORD)((EncorderCount_T)));
 			Printf("\r\nGetRotateNumber=%01x%04x",(WORD)(ulongRotateNumber>>16),(WORD)ulongRotateNumber);			
 		#endif
 			//Printf("\r\nEncorderLen_Offset0=%d ",(WORD)EncorderLen_Offset);
@@ -860,15 +888,15 @@ float EncorderOffset1,EncorderOffset2,EncorderOffset3/*,EncorderOffset4*/;
 		#endif
 			//Printf("\r\nEncorderOffset4=%d ",(WORD)(EncorderOffset4*100));
 			
-			if(EncorderCount>=0)
+			if(EncorderCount_T>=0)
 				{
 				EncorderCountPN=0;
-				EncorderCountTemp=(EncorderCount/2);
+				EncorderCountTemp=(EncorderCount_T/2);
 				}
 			else
 				{
 				EncorderCountPN=1;
-				EncorderCountTemp=(0-EncorderCount)/2;
+				EncorderCountTemp=(0-EncorderCount_T)/2;
 				}
 			
 			//EncorderCountTemp+=450;
@@ -943,7 +971,7 @@ float EncorderOffset1,EncorderOffset2,EncorderOffset3/*,EncorderOffset4*/;
 				Printf("\r\n(TELI)temp_EncorderCountTemp=%d ",(WORD)temp_EncorderCountTemp);
 				Printf("\r\n(TELI)EncorderLen=%d ",(WORD)EncorderLen);
 				//EncorderLen=7.35+(32.091*1*(EncorderCountTemp-240)/1000);
-				Printf("\r\n(TELI)EncorderCount=%d ",(WORD)EncorderCount);
+				Printf("\r\n(TELI)EncorderCount_T=%d ",(WORD)EncorderCount_T);
 			#endif
 				EncorderLenint=EncorderLen+0.05f;			
 			#if (HS_DEBUG==ON)
@@ -972,7 +1000,7 @@ float EncorderOffset1,EncorderOffset2,EncorderOffset3/*,EncorderOffset4*/;
 			#endif
 				
 			#if (HS_DEBUG==ON)
-				Printf("\r\n(TELI)EncorderCount=%d ",(WORD)EncorderCount);
+				Printf("\r\n(TELI)EncorderCount_T=%d ",(WORD)EncorderCount_T);
 			#endif
 				
 				EncorderLenint=EncorderLen+0.05f;
@@ -1027,7 +1055,7 @@ float EncorderOffset1,EncorderOffset2,EncorderOffset3/*,EncorderOffset4*/;
 			#endif
 	
 			#if (HS_DEBUG==ON)	
-				Printf("\r\n(TELI)EncorderCount=%d ",(WORD)EncorderCount);
+				Printf("\r\n(TELI)EncorderCount_T=%d ",(WORD)EncorderCount_T);
 	
 				Printf("\r\n(TELI)EncorderLen=%d ",(WORD)EncorderLen);
 			#endif

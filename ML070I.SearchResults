@@ -1,3 +1,11 @@
----- Printf("\r\n(TELI)ulongRotateNumber=%d",(WORD)u... Matches (2 in 2 files) ----
-Main.c:800:			Printf("\r\n(TELI)ulongRotateNumber=%d",(WORD)ulongRotateNumber);	
-Monitor.c:754:			Printf("\r\n(TELI)ulongRotateNumber=%d",(WORD)ulongRotateNumber);	
+---- bytFastEncoderMode Matches (10 in 3 files) ----
+CPU.c:31:extern BYTE bytFastEncoderMode;
+CPU.c:421:		if(bytFastEncoderMode==ON)	
+HS_DVRProtocol.c:39:extern BYTE bytFastEncoderMode;
+HS_DVRProtocol.c:490:								bytFastEncoderMode=ON;
+HS_DVRProtocol.c:492:								bytFastEncoderMode=OFF;
+HS_DVRProtocol.c:495:							GraphicsPrint(CYAN,"\r\n(CMD:MCU_PROTOCOL_CMD_SET_MODELE_TYPE=%d)",(WORD)bytFastEncoderMode);	
+Main.c:39:BYTE bytFastEncoderMode=OFF;
+Main.c:1108:	if(bytFastEncoderMode==ON)
+Main.c:1133:		if(bytFastEncoderMode==ON)
+Main.c:1221:	if(bytFastEncoderMode==ON)

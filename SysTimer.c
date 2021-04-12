@@ -74,6 +74,7 @@ extern StructPowerInfoType idata g_stPowerInfo;
 extern BYTE day,hour,minute,second;
 extern StructDVRInfoType g_stDVRInfo;
 extern BYTE Power_down_mode;
+extern DWORD ulongRotateNumber;
 
 
 //--------------------------------------------------
@@ -389,7 +390,21 @@ switch(ucEventID)
 			GraphicsPrint(YELLOW,"(GET_MCU_VERSION)");	
 			#endif
 			break;
-
+	case _USER_TIMER_EVENT_GET_ENCODER_COUNT:
+			MCU_SendCmdToDVR(MCU_PROTOCOL_CMD_GET_ENCODER_COUNT);	
+			#if(_DEBUG_MESSAGE_UserInterfaceTimerEvent==ON)
+			GraphicsPrint(YELLOW,"(GET_ENCODER_COUNT)");	
+			#endif
+			break;
+	case _USER_TIMER_EVENT_RESET_ENCODER_COUNT:
+			#if(_DEBUG_MESSAGE_UserInterfaceTimerEvent==ON)
+			GraphicsPrint(YELLOW,"(RESET_ENCODER_COUNT)");	
+			#endif
+			WriteEEP(EEP_RotateNumberL,0);
+			WriteEEP(EEP_RotateNumberM,0);
+			WriteEEP(EEP_RotateNumberH,0);
+			ulongRotateNumber=0;
+			break;
 	case _USER_TIMER_EVENT_OSD_DVR_FACTORY_MODE:
 
 				if(GET_AC_PLUG()==_TRUE)

@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.0.0   I2C                                                               04/07/2021 16:56:09 PAGE 1   
+C51 COMPILER V9.60.0.0   I2C                                                               04/12/2021 16:41:57 PAGE 1   
 
 
 C51 COMPILER V9.60.0.0, COMPILATION OF MODULE I2C
@@ -62,7 +62,7 @@ line level    source
   51   1        I2CWriteData(dat);
   52   1        I2CStop();
   53   1      
-C51 COMPILER V9.60.0.0   I2C                                                               04/07/2021 16:56:09 PAGE 2   
+C51 COMPILER V9.60.0.0   I2C                                                               04/12/2021 16:41:57 PAGE 2   
 
   54   1        #ifdef DEBUG_EEP
                   dPrintf("Write %02xh to [Adrs(%02xh)Index(%02xh)\r\n", (WORD)dat, (WORD)addr, (WORD)index );
@@ -126,7 +126,7 @@ line level    source
  113          
  114          void I2CStop()
  115          {
-C51 COMPILER V9.60.0.0   I2C                                                               04/07/2021 16:56:09 PAGE 3   
+C51 COMPILER V9.60.0.0   I2C                                                               04/12/2021 16:41:57 PAGE 3   
 
  116   1        I2C_SDA = 0;  dd();
  117   1        I2C_SCL = 1;  dd();
@@ -190,7 +190,7 @@ line level    source
  175   1        I2C_SCL=0;  I2C_SDA=(value & 0x80)? 1:0;  I2C_SCL=1;  dd();
  176   1        I2C_SCL=0;  I2C_SDA=(value & 0x40)? 1:0;  I2C_SCL=1;  dd();
  177   1        I2C_SCL=0;  I2C_SDA=(value & 0x20)? 1:0;  I2C_SCL=1;  dd();
-C51 COMPILER V9.60.0.0   I2C                                                               04/07/2021 16:56:09 PAGE 4   
+C51 COMPILER V9.60.0.0   I2C                                                               04/12/2021 16:41:57 PAGE 4   
 
  178   1        I2C_SCL=0;  I2C_SDA=(value & 0x10)? 1:0;  I2C_SCL=1;  dd();
  179   1      
@@ -254,7 +254,7 @@ line level    source
  237   1        AD5110_I2CWriteData((BYTE)index);
  238   1        AD5110_I2CWriteData(dat);
  239   1        I2CStop();
-C51 COMPILER V9.60.0.0   I2C                                                               04/07/2021 16:56:09 PAGE 5   
+C51 COMPILER V9.60.0.0   I2C                                                               04/12/2021 16:41:57 PAGE 5   
 
  240   1      
  241   1        #ifdef DEBUG_EEP

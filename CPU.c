@@ -82,6 +82,7 @@ BYTE bytHoldOn3SPowerOff=0;
 BYTE bytHoldOn3SPowerOffMode=0;
 WORD LED_FLASH_COUNT,Power_Msg_Count;
 short EncorderCount=0;
+
 BYTE bytEncorderCountTemp=0;
 extern DWORD ulongRotateNumber;
 
@@ -419,7 +420,7 @@ BYTE TempKey;
 			//else			//william-v1.42-961130
 			//ChangeKey=0;	//william-v1.42-961130
 		if(bytFastEncoderMode==ON)	
-			Time5ms=48/*12*/;
+			Time5ms=12;
 		else
 			Time5ms=48;
 
