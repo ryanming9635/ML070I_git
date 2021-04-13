@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.0.0   SYSPOWER                                                          04/12/2021 16:41:58 PAGE 1   
+C51 COMPILER V9.60.0.0   SYSPOWER                                                          04/13/2021 10:16:19 PAGE 1   
 
 
 C51 COMPILER V9.60.0.0, COMPILATION OF MODULE SYSPOWER
@@ -62,7 +62,7 @@ line level    source
   51          void SysPowerSwitch(EnumPowerAction enumSwitch);
   52          void UserInterfacePowerSwitch(EnumPowerAction enumSwitch);
   53          void UserInterfaceBatteryChargeMode(EnumBatteryStatus enumSwitch);
-C51 COMPILER V9.60.0.0   SYSPOWER                                                          04/12/2021 16:41:58 PAGE 2   
+C51 COMPILER V9.60.0.0   SYSPOWER                                                          04/13/2021 10:16:19 PAGE 2   
 
   54          
   55          extern void MCUTimerCancelTimerEvent(BYTE ucEventID);
@@ -126,7 +126,7 @@ line level    source
  113   3                          break;
  114   3      
  115   3                      case _POWER_STATUS_NOSUPPORT_SAVING:
-C51 COMPILER V9.60.0.0   SYSPOWER                                                          04/12/2021 16:41:58 PAGE 3   
+C51 COMPILER V9.60.0.0   SYSPOWER                                                          04/13/2021 10:16:19 PAGE 3   
 
  116   3                          break;
  117   3                      case _POWER_STATUS_NORMAL:     
@@ -190,7 +190,7 @@ line level    source
  175          
  176          void UserInterfaceBatteryChargeMode(EnumBatteryStatus enumSwitch)
  177          {
-C51 COMPILER V9.60.0.0   SYSPOWER                                                          04/12/2021 16:41:58 PAGE 4   
+C51 COMPILER V9.60.0.0   SYSPOWER                                                          04/13/2021 10:16:19 PAGE 4   
 
  178   1      
  179   1        MCUTimerCancelTimerEvent(_SYSTEM_TIMER_EVENT_GRN_BLINK);
@@ -254,7 +254,7 @@ line level    source
  237   3                
  238   3              }
  239   2            else
-C51 COMPILER V9.60.0.0   SYSPOWER                                                          04/12/2021 16:41:58 PAGE 5   
+C51 COMPILER V9.60.0.0   SYSPOWER                                                          04/13/2021 10:16:19 PAGE 5   
 
  240   2              {
  241   3                if((PowerFlag==OFF)&&(STAT1_Flag==OFF)&&(STAT2_Flag==ON))
@@ -318,7 +318,7 @@ line level    source
  299   3                else
  300   3                MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_ON_RED_OFF);//Update LED Status
  301   3                  
-C51 COMPILER V9.60.0.0   SYSPOWER                                                          04/12/2021 16:41:58 PAGE 6   
+C51 COMPILER V9.60.0.0   SYSPOWER                                                          04/13/2021 10:16:19 PAGE 6   
 
  302   3              }
  303   2                break;          
@@ -382,7 +382,7 @@ line level    source
  361   1      
  362   1        
  363   1          switch(enumSwitch)
-C51 COMPILER V9.60.0.0   SYSPOWER                                                          04/12/2021 16:41:58 PAGE 7   
+C51 COMPILER V9.60.0.0   SYSPOWER                                                          04/13/2021 10:16:19 PAGE 7   
 
  364   1          {
  365   2              case _POWER_ACTION_AC_ON_TO_NORMAL:
@@ -446,7 +446,7 @@ line level    source
  423   2          CLR_PWCTRL();
  424   2          CLR_AC_MODE();
  425   2          CLR_BAT_SYS();
-C51 COMPILER V9.60.0.0   SYSPOWER                                                          04/12/2021 16:41:58 PAGE 8   
+C51 COMPILER V9.60.0.0   SYSPOWER                                                          04/13/2021 10:16:19 PAGE 8   
 
  426   2          CLR_PCON_CAM();
  427   2          //#if (_DEBUG_MESSAGE_Monitor==ON)
@@ -510,7 +510,7 @@ line level    source
  485   2              case _POWER_ACTION_NORMAL_TO_OFF:
  486   2              case _POWER_ACTION_AC_ON_TO_OFF:
  487   2        case _POWER_ACTION_DVR_POWER_OFF: 
-C51 COMPILER V9.60.0.0   SYSPOWER                                                          04/12/2021 16:41:58 PAGE 9   
+C51 COMPILER V9.60.0.0   SYSPOWER                                                          04/13/2021 10:16:19 PAGE 9   
 
  488   2            case _POWER_ACTION_PS_TO_OFF:
  489   2          UserInterfacePowerSwitch(enumSwitch); 

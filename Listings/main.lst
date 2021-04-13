@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.0.0   MAIN                                                              04/12/2021 16:41:58 PAGE 1   
+C51 COMPILER V9.60.0.0   MAIN                                                              04/13/2021 10:16:19 PAGE 1   
 
 
 C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
@@ -62,7 +62,7 @@ line level    source
   51          
   52          #if (_DEBUG_MESSAGE_BatteryBTH==ON)
   53          WORD BTH_Temp=250;
-C51 COMPILER V9.60.0.0   MAIN                                                              04/12/2021 16:41:58 PAGE 2   
+C51 COMPILER V9.60.0.0   MAIN                                                              04/13/2021 10:16:19 PAGE 2   
 
   54          #endif
   55          #if (_DEBUG_MESSAGE_BatteryVoltage==ON)
@@ -126,7 +126,7 @@ line level    source
  113   1      }
  114          
  115          void enter_isp(void)
-C51 COMPILER V9.60.0.0   MAIN                                                              04/12/2021 16:41:58 PAGE 3   
+C51 COMPILER V9.60.0.0   MAIN                                                              04/13/2021 10:16:19 PAGE 3   
 
  116          {
  117   1              // Clear the magic mark
@@ -190,7 +190,7 @@ line level    source
  175   2          buf[0]=ReadEEP(EEP_FWREV_MAJOR);      //FWVER
  176   2          buf[1]=ReadEEP(EEP_FWREV_MINOR1);
  177   2          buf[2]=ReadEEP(EEP_FWREV_MINOR2);
-C51 COMPILER V9.60.0.0   MAIN                                                              04/12/2021 16:41:58 PAGE 4   
+C51 COMPILER V9.60.0.0   MAIN                                                              04/13/2021 10:16:19 PAGE 4   
 
  178   2          mcuLib_ProtocolSendCmdWithParamNum(MCU_PROTOCOL_CMD_REPLY_MCU_FW,buf,3);  
  179   2          break;
@@ -254,7 +254,7 @@ line level    source
  235   2          #endif
  236   2          buf[4]=((EncorderLenint/10)<<4)|(EncorderLenint%10);   
  237   2      
-C51 COMPILER V9.60.0.0   MAIN                                                              04/12/2021 16:41:58 PAGE 5   
+C51 COMPILER V9.60.0.0   MAIN                                                              04/13/2021 10:16:19 PAGE 5   
 
  238   2          #if (_2ND_DECIMAL==ON)//ryan@20200505
  239   2          buf[5]=((EncorderLenfloaat/10)<<4)|(EncorderLenfloaat%10);
@@ -312,13 +312,13 @@ line level    source
  289   2        case MCU_PROTOCOL_CMD_SLEEP_WAKE_UP:
  290   2          mcuLib_ProtocolSendCmdWithParamNum(MCU_PROTOCOL_CMD_SLEEP_WAKE_UP,buf,1); 
  291   2          break;
- 292   2        case MCU_PROTOCOL_CMD_GET_ENCODER_COUNT:
+ 292   2        case MCU_PROTOCOL_CMD_REPLY_ENCODER_COUNT:
  293   2          encoder=ulongRotateNumber;
  294   2          
  295   2          buf[0]=encoder/100000;
  296   2          buf[0]<<=4;
  297   2          encoder%=100000;
-C51 COMPILER V9.60.0.0   MAIN                                                              04/12/2021 16:41:58 PAGE 6   
+C51 COMPILER V9.60.0.0   MAIN                                                              04/13/2021 10:16:19 PAGE 6   
 
  298   2          buf[0]|=encoder/10000;
  299   2          encoder%=10000;
@@ -334,7 +334,7 @@ line level    source
  309   2          encoder%=10;    
  310   2          buf[2]|=encoder;
  311   2            
- 312   2          mcuLib_ProtocolSendCmdWithParamNum(MCU_PROTOCOL_CMD_GET_ENCODER_COUNT,buf,3); 
+ 312   2          mcuLib_ProtocolSendCmdWithParamNum(MCU_PROTOCOL_CMD_REPLY_ENCODER_COUNT,buf,3); 
  313   2          break;
  314   2      default:
  315   2        break;
@@ -382,7 +382,7 @@ line level    source
  357   1        else {
  358   2          a = toRange->Max - toRange->Default;
  359   2          b = fromRange->Max - fromRange->Default;
-C51 COMPILER V9.60.0.0   MAIN                                                              04/12/2021 16:41:58 PAGE 7   
+C51 COMPILER V9.60.0.0   MAIN                                                              04/13/2021 10:16:19 PAGE 7   
 
  360   2          // prevent divide by zero
  361   2          if( b==0 )    return (FALSE);
@@ -446,7 +446,7 @@ line level    source
  419   2        WriteEEP(EEP_RotateNumberL,(val&0xff));
  420   2        val>>=8;
  421   2        WriteEEP(EEP_RotateNumberM,(val&0xff));
-C51 COMPILER V9.60.0.0   MAIN                                                              04/12/2021 16:41:58 PAGE 8   
+C51 COMPILER V9.60.0.0   MAIN                                                              04/13/2021 10:16:19 PAGE 8   
 
  422   2        val>>=8;
  423   2        WriteEEP(EEP_RotateNumberH,(val&0xff));
@@ -510,7 +510,7 @@ line level    source
  481   3            WriteEEP(EEP_Powerflag,ON);
  482   3            PowerFlag=ON;
  483   3      
-C51 COMPILER V9.60.0.0   MAIN                                                              04/12/2021 16:41:58 PAGE 9   
+C51 COMPILER V9.60.0.0   MAIN                                                              04/13/2021 10:16:19 PAGE 9   
 
  484   3            
  485   3            WriteEEP(EEP_PowerOffToOnflag,OFF);
@@ -574,7 +574,7 @@ line level    source
  543   1        if(ChangeKey)
  544   1        { 
  545   2          #if (HS_DEBUG==ON)
-C51 COMPILER V9.60.0.0   MAIN                                                              04/12/2021 16:41:58 PAGE 10  
+C51 COMPILER V9.60.0.0   MAIN                                                              04/13/2021 10:16:19 PAGE 10  
 
  546   2          Printf("\r\nEncorderCount=%d",(WORD)EncorderCount);
  547   2          #endif
@@ -638,7 +638,7 @@ line level    source
  605   2          else
  606   2            {
  607   3            EncorderCountPN=1;
-C51 COMPILER V9.60.0.0   MAIN                                                              04/12/2021 16:41:58 PAGE 11  
+C51 COMPILER V9.60.0.0   MAIN                                                              04/13/2021 10:16:19 PAGE 11  
 
  608   3            EncorderCountTemp=(0-EncorderCount)/2;
  609   3            }
@@ -702,7 +702,7 @@ line level    source
  667   2          else if(EncorderCountTemp>240&&EncorderCountTemp<=450)
  668   2            {
  669   3        
-C51 COMPILER V9.60.0.0   MAIN                                                              04/12/2021 16:41:58 PAGE 12  
+C51 COMPILER V9.60.0.0   MAIN                                                              04/13/2021 10:16:19 PAGE 12  
 
  670   3            #if 0
                     EncorderLen=EncorderOffset1+(32.091*EncorderParaTemp2*(temp_EncorderCountTemp-(240-EncorderLen_Offset))
@@ -766,7 +766,7 @@ line level    source
  728   3            }
  729   2          #else
                   else if(EncorderCountTemp>450&&EncorderCountTemp<=600)
-C51 COMPILER V9.60.0.0   MAIN                                                              04/12/2021 16:41:58 PAGE 13  
+C51 COMPILER V9.60.0.0   MAIN                                                              04/13/2021 10:16:19 PAGE 13  
 
                     {
                     EncorderLen=14.089+(33.504*EncorderParaTemp3*(EncorderCountTemp-450)/1000);
@@ -830,7 +830,7 @@ line level    source
                     #if (HS_DEBUG==ON)
                     Printf("\r\nEncorderLenTemp=%d.%dm ",(WORD)EncorderLenint,(WORD)EncorderLenfloaat);
                     #endif
-C51 COMPILER V9.60.0.0   MAIN                                                              04/12/2021 16:41:58 PAGE 14  
+C51 COMPILER V9.60.0.0   MAIN                                                              04/13/2021 10:16:19 PAGE 14  
 
                     #endif      
  794   3            }
@@ -894,7 +894,7 @@ line level    source
                     EncorderParaTemp1=(Encorder1)*0.01f;
                     EncorderParaTemp2=(Encorder2)*0.01f;
                     EncorderParaTemp3=(Encorder3)*0.01f;
-C51 COMPILER V9.60.0.0   MAIN                                                              04/12/2021 16:41:58 PAGE 15  
+C51 COMPILER V9.60.0.0   MAIN                                                              04/13/2021 10:16:19 PAGE 15  
 
                     EncorderParaTemp4=(Encorder4)*0.01f;
                   #endif
@@ -958,7 +958,7 @@ line level    source
                       temp_EncorderCountTemp=EncorderCountTemp-EncorderLen_Offset;
                       }
                     else
-C51 COMPILER V9.60.0.0   MAIN                                                              04/12/2021 16:41:58 PAGE 16  
+C51 COMPILER V9.60.0.0   MAIN                                                              04/13/2021 10:16:19 PAGE 16  
 
                       {
                       EncorderCountPN=1;
@@ -1022,7 +1022,7 @@ line level    source
  974   3              Printf("\r\n(TELI)EncorderCount_T=%d ",(WORD)EncorderCount_T);
  975   3            #endif
  976   3              EncorderLenint=EncorderLen+0.05f;     
-C51 COMPILER V9.60.0.0   MAIN                                                              04/12/2021 16:41:58 PAGE 17  
+C51 COMPILER V9.60.0.0   MAIN                                                              04/13/2021 10:16:19 PAGE 17  
 
  977   3            #if (HS_DEBUG==ON)
  978   3              Printf("\r\n(TELI)EncorderLenint=%d ",(WORD)EncorderLenint);
@@ -1086,7 +1086,7 @@ line level    source
                       {
                       EncorderLen=19.089+(33.504*((EncorderParaTemp3+EncorderParaTemp4)/2)*(EncorderCountTemp-600)/1000);
                       //EncorderLen=14.089+(33.504*1*(EncorderCountTemp-450)/1000);
-C51 COMPILER V9.60.0.0   MAIN                                                              04/12/2021 16:41:58 PAGE 18  
+C51 COMPILER V9.60.0.0   MAIN                                                              04/13/2021 10:16:19 PAGE 18  
 
                       Printf("\r\nEncorderCount=%d ",(WORD)EncorderCount);
                 
@@ -1150,7 +1150,7 @@ line level    source
 1098   3              MCUTimerActiveTimerEvent(SEC(1), _SYSTEM_TIMER_EVENT_REPLAY_REGULAR_DATA);
 1099   3              }
 1100   2          #if (_DEBUG_EncorderHandler==ON)//ryan@20200505
-C51 COMPILER V9.60.0.0   MAIN                                                              04/12/2021 16:41:58 PAGE 19  
+C51 COMPILER V9.60.0.0   MAIN                                                              04/13/2021 10:16:19 PAGE 19  
 
 1101   2            Printf("\r\n(TELI)EncorderLenint=%d ",(WORD)EncorderLenint);
 1102   2            Printf("\r\n(TELI)EncorderLenfloaat=%d ",(WORD)EncorderLenfloaat);
@@ -1214,7 +1214,7 @@ line level    source
 1160   1      Printf("\r\nStart Boot...");
 1161   1      
 1162   1      main_init();
-C51 COMPILER V9.60.0.0   MAIN                                                              04/12/2021 16:41:58 PAGE 20  
+C51 COMPILER V9.60.0.0   MAIN                                                              04/13/2021 10:16:19 PAGE 20  
 
 1163   1      
 1164   1      //set panel 
@@ -1278,7 +1278,7 @@ line level    source
 1222   1        //CLR_BATTERY_CAPACITY_HIGH_FLAG();
 1223   1        Power_down_mode=_DontgoingToPD;
 1224   1        P3M1=0x00;//p3.4 and P3.5 set output ryan@20210226
-C51 COMPILER V9.60.0.0   MAIN                                                              04/12/2021 16:41:58 PAGE 21  
+C51 COMPILER V9.60.0.0   MAIN                                                              04/13/2021 10:16:19 PAGE 21  
 
 1225   1        bytHoldOn3SPowerOff=OFF;
 1226   1      
@@ -1342,7 +1342,7 @@ line level    source
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-C51 COMPILER V9.60.0.0   MAIN                                                              04/12/2021 16:41:58 PAGE 22  
+C51 COMPILER V9.60.0.0   MAIN                                                              04/13/2021 10:16:19 PAGE 22  
 
    CODE SIZE        =   7482    ----
    CONSTANT SIZE    =    784    ----

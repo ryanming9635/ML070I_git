@@ -26,9 +26,10 @@
 
 #define MCU_PROTOCOL_CMD_SET_CHARGE_CURRENT	0x85	//change the BAT of charge current for testing , 0:300mA 1:1A
 
-#define MCU_PROTOCOL_CMD_GET_ENCODER_COUNT		0x86	//Get encoding count
-#define MCU_PROTOCOL_CMD_RESET_ENCODER_COUNT	0x87	//Reset encoding count
-#define MCU_PROTOCOL_CMD_SET_MODELE_TYPE			0x88	//Set module type
+#define MCU_PROTOCOL_CMD_GET_ENCODER_COUNT			0x86	//Get encoding count
+#define MCU_PROTOCOL_CMD_REPLY_ENCODER_COUNT		0x87	//Reply encoding count
+#define MCU_PROTOCOL_CMD_RESET_ENCODER_COUNT		0x88	//Reset encoding count
+#define MCU_PROTOCOL_CMD_SET_MODELE_TYPE				0x89	//Set module type
 
 //MCU to DVR command 
 #define MCU_PROTOCOL_CMD_REPLY_MCU_FW  			0x80	//Reply MCU firmware version

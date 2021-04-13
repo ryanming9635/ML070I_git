@@ -476,7 +476,7 @@ if ( RS2_ready())
 							#if(_DEBUG_MESSAGE_UART_Protocol==ON)	
 							GraphicsPrint(GREEN,"\r\n(CMD:MCU_PROTOCOL_CMD_GET_ENCODER_COUNT)");	
 							#endif
-							MCUTimerActiveTimerEvent(SEC(1),_USER_TIMER_EVENT_GET_ENCODER_COUNT);
+							MCUTimerActiveTimerEvent(SEC(1),_USER_TIMER_EVENT_REPLY_ENCODER_COUNT);
 						break;
 					case MCU_PROTOCOL_CMD_RESET_ENCODER_COUNT:
 							#if(_DEBUG_MESSAGE_UART_Protocol==ON)	

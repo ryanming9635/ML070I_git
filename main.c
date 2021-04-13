@@ -289,7 +289,7 @@ switch(ucType)
 	case MCU_PROTOCOL_CMD_SLEEP_WAKE_UP:
 		mcuLib_ProtocolSendCmdWithParamNum(MCU_PROTOCOL_CMD_SLEEP_WAKE_UP,buf,1);	
 		break;
-	case MCU_PROTOCOL_CMD_GET_ENCODER_COUNT:
+	case MCU_PROTOCOL_CMD_REPLY_ENCODER_COUNT:
 		encoder=ulongRotateNumber;
 		
 		buf[0]=encoder/100000;
@@ -309,7 +309,7 @@ switch(ucType)
 		encoder%=10;		
 		buf[2]|=encoder;
 			
-		mcuLib_ProtocolSendCmdWithParamNum(MCU_PROTOCOL_CMD_GET_ENCODER_COUNT,buf,3);	
+		mcuLib_ProtocolSendCmdWithParamNum(MCU_PROTOCOL_CMD_REPLY_ENCODER_COUNT,buf,3);	
 		break;
 default:
 	break;

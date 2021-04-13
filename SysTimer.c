@@ -390,10 +390,10 @@ switch(ucEventID)
 			GraphicsPrint(YELLOW,"(GET_MCU_VERSION)");	
 			#endif
 			break;
-	case _USER_TIMER_EVENT_GET_ENCODER_COUNT:
-			MCU_SendCmdToDVR(MCU_PROTOCOL_CMD_GET_ENCODER_COUNT);	
+	case _USER_TIMER_EVENT_REPLY_ENCODER_COUNT:
+			MCU_SendCmdToDVR(MCU_PROTOCOL_CMD_REPLY_ENCODER_COUNT);	
 			#if(_DEBUG_MESSAGE_UserInterfaceTimerEvent==ON)
-			GraphicsPrint(YELLOW,"(GET_ENCODER_COUNT)");	
+			GraphicsPrint(YELLOW,"(REPLY_ENCODER_COUNT)");	
 			#endif
 			break;
 	case _USER_TIMER_EVENT_RESET_ENCODER_COUNT:
