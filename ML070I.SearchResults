@@ -1,4 +1,37 @@
----- _USER_TIMER_EVENT_REPLY_ENCODER_COUNT Matches (3 in 3 files) ----
-HS_DVRProtocol.c:479:							MCUTimerActiveTimerEvent(SEC(1),_USER_TIMER_EVENT_REPLY_ENCODER_COUNT);
-SysTimer.c:393:	case _USER_TIMER_EVENT_REPLY_ENCODER_COUNT:
-Typedefs.h (include):241:    _USER_TIMER_EVENT_REPLY_ENCODER_COUNT,    
+---- ulongRotateNumber Matches (39 in 5 files) ----
+CPU.c:87:extern DWORD ulongRotateNumber;
+CPU.c:472:						  ulongRotateNumber++;
+CPU.c:480:					  ulongRotateNumber++;
+HS_DVRProtocol.c:40:extern DWORD ulongRotateNumber;
+HS_DVRProtocol.c:497:							ulongRotateNumber=ReadEEP(EEP_RotateNumberH);
+HS_DVRProtocol.c:498:							ulongRotateNumber<<=8;
+HS_DVRProtocol.c:499:							ulongRotateNumber|=ReadEEP(EEP_RotateNumberM);	
+HS_DVRProtocol.c:500:							ulongRotateNumber<<=8;
+HS_DVRProtocol.c:501:							ulongRotateNumber|=ReadEEP(EEP_RotateNumberL);	
+HS_DVRProtocol.c:505:								ulongRotateNumber=ReadEEP(EEP_RotateNumberRH);
+HS_DVRProtocol.c:506:								ulongRotateNumber<<=8;
+HS_DVRProtocol.c:507:								ulongRotateNumber|=ReadEEP(EEP_RotateNumberRM);	
+HS_DVRProtocol.c:508:								ulongRotateNumber<<=8;
+HS_DVRProtocol.c:509:								ulongRotateNumber|=ReadEEP(EEP_RotateNumberRL);
+Main.c:48:DWORD ulongRotateNumber=0;
+Main.c:293:		encoder=ulongRotateNumber;
+Main.c:313:			GraphicsPrint(RED,"(ulongRotateNumber=%d)",(WORD)ulongRotateNumber);
+Main.c:511:	ulongRotateNumber=ReadEEP(EEP_RotateNumberH);
+Main.c:512:	ulongRotateNumber<<=8;
+Main.c:513:	ulongRotateNumber|=ReadEEP(EEP_RotateNumberM);	
+Main.c:514:	ulongRotateNumber<<=8;
+Main.c:515:	ulongRotateNumber|=ReadEEP(EEP_RotateNumberL);	
+Main.c:519:		ulongRotateNumber=ReadEEP(EEP_RotateNumberRH);
+Main.c:520:		ulongRotateNumber<<=8;
+Main.c:521:		ulongRotateNumber|=ReadEEP(EEP_RotateNumberRM);	
+Main.c:522:		ulongRotateNumber<<=8;
+Main.c:523:		ulongRotateNumber|=ReadEEP(EEP_RotateNumberRL);
+Main.c:906:			Printf("\r\nGetRotateNumber=%01x%04x",(WORD)(ulongRotateNumber>>16),(WORD)ulongRotateNumber);			
+Main.c:1185:		ulongRotateNumber=GetRotateNumber();
+Main.c:1193:	ulongRotateNumber=GetRotateNumber();
+Main.c:1300:	SaveRotateNumber(ulongRotateNumber);
+Monitor.c:50:extern DWORD ulongRotateNumber;
+Monitor.c:751:	Printf("\r\nGetRotateNumber=%01x%04x",(WORD)(ulongRotateNumber>>16),(WORD)ulongRotateNumber);
+SysTimer.c:77:extern DWORD ulongRotateNumber;
+SysTimer.c:409:			ulongRotateNumber=0;
+SysTimer.c:416:				ulongRotateNumber=0;

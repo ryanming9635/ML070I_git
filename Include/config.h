@@ -21,7 +21,7 @@
 //-----------------------------------------------------------------------------
 #define KEILC						// Keil C 5.0
 
-#if 1
+#if 0
 #define HS_DEBUG                        ON
 #else
 #define HS_DEBUG                        OFF

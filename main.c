@@ -308,6 +308,10 @@ switch(ucType)
 		buf[2]<<=4;	
 		encoder%=10;		
 		buf[2]|=encoder;
+
+			#if(_DEBUG_MESSAGE_SysTimerEvent==ON)
+			GraphicsPrint(RED,"(ulongRotateNumber=%d)",(WORD)ulongRotateNumber);
+			#endif	
 			
 		mcuLib_ProtocolSendCmdWithParamNum(MCU_PROTOCOL_CMD_REPLY_ENCODER_COUNT,buf,3);	
 		break;
@@ -380,24 +384,47 @@ void SetAD5110Step(BYTE newv)
 DWORD GetRotateNumber(void)
 {
 	DWORD ret=0;
-	ret=ReadEEP(EEP_RotateNumberH);
-	ret<<=8;
-	
-	ret|=ReadEEP(EEP_RotateNumberM);
-	ret<<=8;	
 
-	ret|=ReadEEP(EEP_RotateNumberL);
+	if(bytFastEncoderMode==ON)
+	{
+		ret=ReadEEP(EEP_RotateNumberH);
+		ret<<=8;
+		
+		ret|=ReadEEP(EEP_RotateNumberM);
+		ret<<=8;	
 
-	#if(_DEBUG_EncorderHandler==ON)
-	Printf("\r\nGetRotateNumber=%02x%04x",(WORD)(ret>>16),(WORD)ret);
+		ret|=ReadEEP(EEP_RotateNumberL);
+
+		#if(_DEBUG_EncorderHandler==ON)
+		Printf("\r\nGetRotateNumber=%02x%04x",(WORD)(ret>>16),(WORD)ret);
+		#endif
+	}
+	else
+	{
+		ret=ReadEEP(EEP_RotateNumberRH);
+		ret<<=8;
+		
+		ret|=ReadEEP(EEP_RotateNumberRM);
+		ret<<=8;	
+
+		ret|=ReadEEP(EEP_RotateNumberRL);
+
+		#if(_DEBUG_EncorderHandler==ON)
+		Printf("\r\nGetRotateNumberREX=%02x%04x",(WORD)(ret>>16),(WORD)ret);
 	#endif
 
+	}
+
+	
 	return ret;
 }
 
 void SaveRotateNumber(DWORD val)
 {
 	DWORD temp=0;
+
+	if(bytFastEncoderMode==ON)
+		{
 
 	temp=ReadEEP(EEP_RotateNumberH);
 	temp<<=8;
@@ -426,9 +453,40 @@ void SaveRotateNumber(DWORD val)
 	Printf("\r\nSaveRotateNumber=%d",(WORD)val);
 	#endif
 	}
+		}
+	else
+		{
+		temp=ReadEEP(EEP_RotateNumberRH);
+		temp<<=8;
+		temp|=ReadEEP(EEP_RotateNumberRM);
+		temp<<=8;	
+		temp|=ReadEEP(EEP_RotateNumberRL);
+		
+		if(temp!=val)
+		{	
+		
+		if(val>999999)
+			{
+			val-=999999 ;///>99999 clean to 0
+		
+	#if(_DEBUG_EncorderHandler==ON)
+			Printf("\r\nSaveRotateNumberREX>999999");
+	#endif
+			}
+		WriteEEP(EEP_RotateNumberRL,(val&0xff));
+		val>>=8;
+		WriteEEP(EEP_RotateNumberRM,(val&0xff));
+		val>>=8;
+		WriteEEP(EEP_RotateNumberRH,(val&0xff));
+		
+#if(_DEBUG_EncorderHandler==ON)
+		Printf("\r\nSaveRotateNumberREX=%d",(WORD)val);
+#endif
 
+		}
+
+	}
 }
-
 void 	LoadEEPROM (void)
 {
 	 PowerFlag = ReadEEP(EEP_Powerflag);
@@ -448,13 +506,24 @@ void 	LoadEEPROM (void)
 	Encorder4= ((ReadEEP(EEP_Encorder4)>>4)*10)+(0x0f&ReadEEP(EEP_Encorder4));
 	Decimal4= ((ReadEEP(EEP_Decimal4)>>4)*10)+(0x0f&ReadEEP(EEP_Decimal4));
 
-
+	if(bytFastEncoderMode==ON)
+		{
 	ulongRotateNumber=ReadEEP(EEP_RotateNumberH);
 	ulongRotateNumber<<=8;
 	ulongRotateNumber|=ReadEEP(EEP_RotateNumberM);	
 	ulongRotateNumber<<=8;
 	ulongRotateNumber|=ReadEEP(EEP_RotateNumberL);	
+		}
+	else
+		{
+		ulongRotateNumber=ReadEEP(EEP_RotateNumberRH);
+		ulongRotateNumber<<=8;
+		ulongRotateNumber|=ReadEEP(EEP_RotateNumberRM);	
+		ulongRotateNumber<<=8;
+		ulongRotateNumber|=ReadEEP(EEP_RotateNumberRL);
 
+		}
+	
 	if(ReadEEP(EEP_LowBattery_Flag))
 		SET_BATTERY_CAPACITY_LOW_FLAG();
 
@@ -1110,7 +1179,7 @@ void main_loop(void)
 {
 
 	Printf("\r\nStart Main Loop...");
-
+/*
 	if(bytFastEncoderMode==ON)
 		{
 		ulongRotateNumber=GetRotateNumber();
@@ -1118,7 +1187,10 @@ void main_loop(void)
 		}
 	else	
 		Printf("\r\n(REX Mode)");
-	
+
+		
+	*/
+	ulongRotateNumber=GetRotateNumber();
 	//---------------------------------------------------------------
 	//			             Main Loop
 	//---------------------------------------------------------------
@@ -1224,7 +1296,7 @@ void WaitPowerOn(void)
 	P3M1=0x00;//p3.4 and P3.5 set output ryan@20210226
 	bytHoldOn3SPowerOff=OFF;
 
-	if(bytFastEncoderMode==ON)
+	//if(bytFastEncoderMode==ON)
 	SaveRotateNumber(ulongRotateNumber);
 	
 	while(1) 

@@ -28,6 +28,10 @@
 #define 	EEP_RotateNumberM			0x24	
 #define 	EEP_RotateNumberH			0x25	
 
+#define	EEP_RotateNumberRL                    0x26 //REX
+#define 	EEP_RotateNumberRM			0x27	//REX
+#define 	EEP_RotateNumberRH			0x28	//REX
+
 #define	EEP_FWREV_MAJOR			0x04	//BYTE	1	F/W Rev.-major(Hex)	
 #define	EEP_FWREV_MINOR1			0x05	//BYTE	1	F/W Rev.-minor(Hex)
 #define	EEP_FWREV_MINOR2			0x06	//BYTE	1	F/W Rev.-minor(Hex)

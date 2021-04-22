@@ -83,7 +83,7 @@ BYTE bytHoldOn3SPowerOffMode=0;
 WORD LED_FLASH_COUNT,Power_Msg_Count;
 short EncorderCount=0;
 
-BYTE bytEncorderCountTemp=0;
+WORD bytEncorderCountTemp=0;
 extern DWORD ulongRotateNumber;
 
 extern BYTE 	KeyBuffer;
@@ -464,11 +464,22 @@ BYTE TempKey;
 				   EncorderCount--; 
 				   bytEncorderCountTemp++;
 				}
-			
-			if(bytEncorderCountTemp==200)	
+
+			if(bytFastEncoderMode==ON)
 				{
-				  ulongRotateNumber++;
-				  bytEncorderCountTemp=0;
+					if(bytEncorderCountTemp>=400)	
+						{
+						  ulongRotateNumber++;
+						  bytEncorderCountTemp=0;
+						}
+				}
+			else
+				{
+					if(bytEncorderCountTemp>=60)	
+					{
+					  ulongRotateNumber++;
+					  bytEncorderCountTemp=0;
+					}
 				}
 			}
 		}

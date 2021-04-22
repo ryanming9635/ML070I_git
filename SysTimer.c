@@ -75,6 +75,7 @@ extern BYTE day,hour,minute,second;
 extern StructDVRInfoType g_stDVRInfo;
 extern BYTE Power_down_mode;
 extern DWORD ulongRotateNumber;
+extern BYTE bytFastEncoderMode;
 
 
 //--------------------------------------------------
@@ -400,10 +401,20 @@ switch(ucEventID)
 			#if(_DEBUG_MESSAGE_UserInterfaceTimerEvent==ON)
 			GraphicsPrint(YELLOW,"(RESET_ENCODER_COUNT)");	
 			#endif
+			if(bytFastEncoderMode==ON)
+				{
 			WriteEEP(EEP_RotateNumberL,0);
 			WriteEEP(EEP_RotateNumberM,0);
 			WriteEEP(EEP_RotateNumberH,0);
 			ulongRotateNumber=0;
+				}
+			else
+				{
+				WriteEEP(EEP_RotateNumberRL,0);
+				WriteEEP(EEP_RotateNumberRM,0);
+				WriteEEP(EEP_RotateNumberRH,0);
+				ulongRotateNumber=0;
+				}
 			break;
 	case _USER_TIMER_EVENT_OSD_DVR_FACTORY_MODE:
 

@@ -102,5 +102,10 @@ void ClearBasicEE(void)
 	WriteEEP(EEP_RotateNumberL,0);
 	WriteEEP(EEP_RotateNumberM,0);
 	WriteEEP(EEP_RotateNumberH,0);
+
+WriteEEP(EEP_RotateNumberRL,0);
+WriteEEP(EEP_RotateNumberRM,0);
+WriteEEP(EEP_RotateNumberRH,0);
+
 		
 }

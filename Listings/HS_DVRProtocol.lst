@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.0.0   HS_DVRPROTOCOL                                                    04/13/2021 10:16:18 PAGE 1   
+C51 COMPILER V9.60.0.0   HS_DVRPROTOCOL                                                    04/22/2021 09:18:52 PAGE 1   
 
 
 C51 COMPILER V9.60.0.0, COMPILATION OF MODULE HS_DVRPROTOCOL
@@ -20,7 +20,6 @@ line level    source
   10          #include "i2c.h"
   11          #include "main.h"
   12          #include "printf.h"
-*** WARNING C320 IN LINE 44 OF .\Include\printf.h: DEBUG is defined 
   13          #include "CPU.h"
   14          #include "HS_DVRProtocol.h"
   15          #include "keyremo.h"
@@ -48,266 +47,267 @@ line level    source
   37          extern BYTE DVRChangeCurrent;
   38          extern BYTE bytHoldOn3SPowerOff;
   39          extern BYTE bytFastEncoderMode;
-  40          
-  41          void DvrReceivePaser(void)
-  42          {
-  43   1      
-  44   1      if ( RS2_ready())
-  45   1        {
-  46   2          BYTE c= RS2_rx();
-  47   2          
-  48   2          if (c == 0x7E)
-  49   2          { 
-  50   3            #if(_DEBUG_MESSAGE_UART_Protocol==ON)
-  51   3            GraphicsPrint(CYAN,"\r\n(GOT UART DATA)");
-  52   3            #endif
-  53   3            protocol_escape_flag = 0;
-C51 COMPILER V9.60.0.0   HS_DVRPROTOCOL                                                    04/13/2021 10:16:18 PAGE 2   
+  40          extern DWORD ulongRotateNumber;
+  41          
+  42          void DvrReceivePaser(void)
+  43          {
+  44   1      
+  45   1      if ( RS2_ready())
+  46   1        {
+  47   2          BYTE c= RS2_rx();
+  48   2          
+  49   2          if (c == 0x7E)
+  50   2          { 
+  51   3            #if(_DEBUG_MESSAGE_UART_Protocol==ON)
+                    GraphicsPrint(CYAN,"\r\n(GOT UART DATA)");
+                    #endif
+  54   3            protocol_escape_flag = 0;
+C51 COMPILER V9.60.0.0   HS_DVRPROTOCOL                                                    04/22/2021 09:18:52 PAGE 2   
 
-  54   3            protocol_state = PROTOCOL_STATE_TYPE;
-  55   3            protocol_chksum = 0;
-  56   3            return; 
-  57   3          }
-  58   2          
-  59   2          if (c == 0x7D)
-  60   2          {
-  61   3            protocol_escape_flag = 1;
-  62   3            return;
-  63   3          }
-  64   2          
-  65   2          if (protocol_escape_flag)
-  66   2          {
-  67   3            protocol_escape_flag = 0;
-  68   3            c |= 0x70;
-  69   3          }
-  70   2      
-  71   2          if (protocol_state != PROTOCOL_STATE_CHECKSUM)
-  72   2          {
-  73   3            protocol_chksum ^= c;
-  74   3          }
-  75   2      
-  76   2          switch (protocol_state)
-  77   2          {
-  78   3            case PROTOCOL_STATE_TYPE:
-  79   3              protocol_type = c;
-  80   3              switch (protocol_type)
-  81   3              {
-  82   4              case MCU_PROTOCOL_CMD_SYS_READY_NOTICE:
-  83   4              case MCU_PROTOCOL_CMD_WATCH_DOG_KICK:
-  84   4              case MCU_PROTOCOL_CMD_ENTRY_SLEEP:
-  85   4              case MCU_PROTOCOL_CMD_DISTANCE_RESET:
-  86   4              case MCU_PROTOCOL_CMD_ENCODER_SET:           
-  87   4              case MCU_PROTOCOL_CMD_CAMERA_VOLTAGE:
-  88   4              case MCU_PROTOCOL_CMD_WDT_SETTING:
-  89   4              case MCU_PROTOCOL_CMD_GET_MCU_FW:
-  90   4              case MCU_PROTOCOL_CMD_DVR_REBOOT:
-  91   4              case MCU_PROTOCOL_CMD_DVR_SHUTDOWN:
-  92   4              case  MCU_PROTOCOL_PROTOCOL_CMD_ENTER_ISP:
-  93   4              case MCU_PROTOCOL_CMD_DC12V_PWR_START:  
-  94   4              case  MCU_PROTOCOL_CMD_SET_CHARGE_CURRENT:        
-  95   4              case  MCU_PROTOCOL_CMD_GET_ENCODER_COUNT:
-  96   4              case  MCU_PROTOCOL_CMD_RESET_ENCODER_COUNT:
-  97   4              case  MCU_PROTOCOL_CMD_SET_MODELE_TYPE:
-  98   4      
-  99   4                    protocol_state = PROTOCOL_STATE_LENGTH;
- 100   4                    break;
- 101   4                default:
- 102   4                   protocol_state = PROTOCOL_STATE_NONE;
- 103   4                   break;
- 104   4              }
- 105   3              break;
- 106   3      
- 107   3            case PROTOCOL_STATE_LENGTH:
- 108   3              protocol_len = c;
- 109   3              switch (protocol_type)
- 110   3              {
- 111   4                case MCU_PROTOCOL_CMD_SYS_READY_NOTICE:
- 112   4                case MCU_PROTOCOL_CMD_WATCH_DOG_KICK:
- 113   4                case MCU_PROTOCOL_CMD_ENTRY_SLEEP:
- 114   4                case MCU_PROTOCOL_CMD_DISTANCE_RESET:
- 115   4                case MCU_PROTOCOL_CMD_ENCODER_SET:           
-C51 COMPILER V9.60.0.0   HS_DVRPROTOCOL                                                    04/13/2021 10:16:18 PAGE 3   
+  55   3            protocol_state = PROTOCOL_STATE_TYPE;
+  56   3            protocol_chksum = 0;
+  57   3            return; 
+  58   3          }
+  59   2          
+  60   2          if (c == 0x7D)
+  61   2          {
+  62   3            protocol_escape_flag = 1;
+  63   3            return;
+  64   3          }
+  65   2          
+  66   2          if (protocol_escape_flag)
+  67   2          {
+  68   3            protocol_escape_flag = 0;
+  69   3            c |= 0x70;
+  70   3          }
+  71   2      
+  72   2          if (protocol_state != PROTOCOL_STATE_CHECKSUM)
+  73   2          {
+  74   3            protocol_chksum ^= c;
+  75   3          }
+  76   2      
+  77   2          switch (protocol_state)
+  78   2          {
+  79   3            case PROTOCOL_STATE_TYPE:
+  80   3              protocol_type = c;
+  81   3              switch (protocol_type)
+  82   3              {
+  83   4              case MCU_PROTOCOL_CMD_SYS_READY_NOTICE:
+  84   4              case MCU_PROTOCOL_CMD_WATCH_DOG_KICK:
+  85   4              case MCU_PROTOCOL_CMD_ENTRY_SLEEP:
+  86   4              case MCU_PROTOCOL_CMD_DISTANCE_RESET:
+  87   4              case MCU_PROTOCOL_CMD_ENCODER_SET:           
+  88   4              case MCU_PROTOCOL_CMD_CAMERA_VOLTAGE:
+  89   4              case MCU_PROTOCOL_CMD_WDT_SETTING:
+  90   4              case MCU_PROTOCOL_CMD_GET_MCU_FW:
+  91   4              case MCU_PROTOCOL_CMD_DVR_REBOOT:
+  92   4              case MCU_PROTOCOL_CMD_DVR_SHUTDOWN:
+  93   4              case  MCU_PROTOCOL_PROTOCOL_CMD_ENTER_ISP:
+  94   4              case MCU_PROTOCOL_CMD_DC12V_PWR_START:  
+  95   4              case  MCU_PROTOCOL_CMD_SET_CHARGE_CURRENT:        
+  96   4              case  MCU_PROTOCOL_CMD_GET_ENCODER_COUNT:
+  97   4              case  MCU_PROTOCOL_CMD_RESET_ENCODER_COUNT:
+  98   4              case  MCU_PROTOCOL_CMD_SET_MODELE_TYPE:
+  99   4      
+ 100   4                    protocol_state = PROTOCOL_STATE_LENGTH;
+ 101   4                    break;
+ 102   4                default:
+ 103   4                   protocol_state = PROTOCOL_STATE_NONE;
+ 104   4                   break;
+ 105   4              }
+ 106   3              break;
+ 107   3      
+ 108   3            case PROTOCOL_STATE_LENGTH:
+ 109   3              protocol_len = c;
+ 110   3              switch (protocol_type)
+ 111   3              {
+ 112   4                case MCU_PROTOCOL_CMD_SYS_READY_NOTICE:
+ 113   4                case MCU_PROTOCOL_CMD_WATCH_DOG_KICK:
+ 114   4                case MCU_PROTOCOL_CMD_ENTRY_SLEEP:
+ 115   4                case MCU_PROTOCOL_CMD_DISTANCE_RESET:
+ 116   4                case MCU_PROTOCOL_CMD_ENCODER_SET:           
+C51 COMPILER V9.60.0.0   HS_DVRPROTOCOL                                                    04/22/2021 09:18:52 PAGE 3   
 
- 116   4                case MCU_PROTOCOL_CMD_CAMERA_VOLTAGE:
- 117   4                case MCU_PROTOCOL_CMD_WDT_SETTING:
- 118   4                case MCU_PROTOCOL_CMD_GET_MCU_FW:
- 119   4                case MCU_PROTOCOL_CMD_DVR_REBOOT:
- 120   4                case MCU_PROTOCOL_CMD_DVR_SHUTDOWN:
- 121   4              case  MCU_PROTOCOL_PROTOCOL_CMD_ENTER_ISP:  
- 122   4              case  MCU_PROTOCOL_CMD_DC12V_PWR_START:
- 123   4              case  MCU_PROTOCOL_CMD_SET_CHARGE_CURRENT:
- 124   4                case  MCU_PROTOCOL_CMD_GET_ENCODER_COUNT:
- 125   4                case  MCU_PROTOCOL_CMD_RESET_ENCODER_COUNT:
- 126   4                case  MCU_PROTOCOL_CMD_SET_MODELE_TYPE:
- 127   4                
- 128   4                  if (protocol_len == 0)
- 129   4                  {
- 130   5                    protocol_state = PROTOCOL_STATE_CHECKSUM;
- 131   5                  }
- 132   4                  else
- 133   4                  {   
- 134   5                    protocol_data_count = 0;
- 135   5                    protocol_state = PROTOCOL_STATE_DATA;
- 136   5                    
- 137   5                  #if(_DEBUG_MESSAGE_UART_Protocol==ON) 
- 138   5                  GraphicsPrint(CYAN,"(1)");
- 139   5                   #endif
- 140   5                  }
- 141   4                  break;            
- 142   4                default:
- 143   4                  protocol_state = PROTOCOL_STATE_NONE;
- 144   4                  break;
- 145   4              }
- 146   3              break;
- 147   3      
- 148   3            case PROTOCOL_STATE_DATA:
- 149   3              switch (protocol_type) {
- 150   4                case MCU_PROTOCOL_CMD_SYS_READY_NOTICE:
- 151   4                case MCU_PROTOCOL_CMD_WATCH_DOG_KICK:
- 152   4                case MCU_PROTOCOL_CMD_ENTRY_SLEEP:
- 153   4                case MCU_PROTOCOL_CMD_DISTANCE_RESET:
- 154   4                case MCU_PROTOCOL_CMD_ENCODER_SET:           
- 155   4                case MCU_PROTOCOL_CMD_CAMERA_VOLTAGE:
- 156   4                case MCU_PROTOCOL_CMD_WDT_SETTING:
- 157   4                case MCU_PROTOCOL_CMD_GET_MCU_FW:
- 158   4                case MCU_PROTOCOL_CMD_DVR_REBOOT:
- 159   4                case MCU_PROTOCOL_CMD_DVR_SHUTDOWN:
- 160   4              case  MCU_PROTOCOL_PROTOCOL_CMD_ENTER_ISP:            
- 161   4                case  MCU_PROTOCOL_CMD_DC12V_PWR_START:
- 162   4                case  MCU_PROTOCOL_CMD_SET_CHARGE_CURRENT:
- 163   4                  case  MCU_PROTOCOL_CMD_GET_ENCODER_COUNT:
- 164   4                  case  MCU_PROTOCOL_CMD_RESET_ENCODER_COUNT:
- 165   4                  case  MCU_PROTOCOL_CMD_SET_MODELE_TYPE:
- 166   4                  
- 167   4      
- 168   4                    protocol_data[protocol_data_count] = c;
- 169   4                  protocol_data_count++;
- 170   4                   if (protocol_data_count == protocol_len) {
- 171   5                    protocol_state = PROTOCOL_STATE_CHECKSUM;
- 172   5                    #if(_DEBUG_MESSAGE_UART_Protocol==ON) 
- 173   5                       GraphicsPrint(CYAN,"(2)");
- 174   5                    #endif
- 175   5                  }
- 176   4                  #if(_DEBUG_MESSAGE_UART_Protocol==ON) 
- 177   4                   GraphicsPrint(CYAN,"(3)");
-C51 COMPILER V9.60.0.0   HS_DVRPROTOCOL                                                    04/13/2021 10:16:18 PAGE 4   
+ 117   4                case MCU_PROTOCOL_CMD_CAMERA_VOLTAGE:
+ 118   4                case MCU_PROTOCOL_CMD_WDT_SETTING:
+ 119   4                case MCU_PROTOCOL_CMD_GET_MCU_FW:
+ 120   4                case MCU_PROTOCOL_CMD_DVR_REBOOT:
+ 121   4                case MCU_PROTOCOL_CMD_DVR_SHUTDOWN:
+ 122   4              case  MCU_PROTOCOL_PROTOCOL_CMD_ENTER_ISP:  
+ 123   4              case  MCU_PROTOCOL_CMD_DC12V_PWR_START:
+ 124   4              case  MCU_PROTOCOL_CMD_SET_CHARGE_CURRENT:
+ 125   4                case  MCU_PROTOCOL_CMD_GET_ENCODER_COUNT:
+ 126   4                case  MCU_PROTOCOL_CMD_RESET_ENCODER_COUNT:
+ 127   4                case  MCU_PROTOCOL_CMD_SET_MODELE_TYPE:
+ 128   4                
+ 129   4                  if (protocol_len == 0)
+ 130   4                  {
+ 131   5                    protocol_state = PROTOCOL_STATE_CHECKSUM;
+ 132   5                  }
+ 133   4                  else
+ 134   4                  {   
+ 135   5                    protocol_data_count = 0;
+ 136   5                    protocol_state = PROTOCOL_STATE_DATA;
+ 137   5                    
+ 138   5                  #if(_DEBUG_MESSAGE_UART_Protocol==ON) 
+                          GraphicsPrint(CYAN,"(1)");
+                           #endif
+ 141   5                  }
+ 142   4                  break;            
+ 143   4                default:
+ 144   4                  protocol_state = PROTOCOL_STATE_NONE;
+ 145   4                  break;
+ 146   4              }
+ 147   3              break;
+ 148   3      
+ 149   3            case PROTOCOL_STATE_DATA:
+ 150   3              switch (protocol_type) {
+ 151   4                case MCU_PROTOCOL_CMD_SYS_READY_NOTICE:
+ 152   4                case MCU_PROTOCOL_CMD_WATCH_DOG_KICK:
+ 153   4                case MCU_PROTOCOL_CMD_ENTRY_SLEEP:
+ 154   4                case MCU_PROTOCOL_CMD_DISTANCE_RESET:
+ 155   4                case MCU_PROTOCOL_CMD_ENCODER_SET:           
+ 156   4                case MCU_PROTOCOL_CMD_CAMERA_VOLTAGE:
+ 157   4                case MCU_PROTOCOL_CMD_WDT_SETTING:
+ 158   4                case MCU_PROTOCOL_CMD_GET_MCU_FW:
+ 159   4                case MCU_PROTOCOL_CMD_DVR_REBOOT:
+ 160   4                case MCU_PROTOCOL_CMD_DVR_SHUTDOWN:
+ 161   4              case  MCU_PROTOCOL_PROTOCOL_CMD_ENTER_ISP:            
+ 162   4                case  MCU_PROTOCOL_CMD_DC12V_PWR_START:
+ 163   4                case  MCU_PROTOCOL_CMD_SET_CHARGE_CURRENT:
+ 164   4                  case  MCU_PROTOCOL_CMD_GET_ENCODER_COUNT:
+ 165   4                  case  MCU_PROTOCOL_CMD_RESET_ENCODER_COUNT:
+ 166   4                  case  MCU_PROTOCOL_CMD_SET_MODELE_TYPE:
+ 167   4                  
+ 168   4      
+ 169   4                    protocol_data[protocol_data_count] = c;
+ 170   4                  protocol_data_count++;
+ 171   4                   if (protocol_data_count == protocol_len) {
+ 172   5                    protocol_state = PROTOCOL_STATE_CHECKSUM;
+ 173   5                    #if(_DEBUG_MESSAGE_UART_Protocol==ON) 
+                               GraphicsPrint(CYAN,"(2)");
+                            #endif
+ 176   5                  }
+ 177   4                  #if(_DEBUG_MESSAGE_UART_Protocol==ON) 
+                           GraphicsPrint(CYAN,"(3)");
+C51 COMPILER V9.60.0.0   HS_DVRPROTOCOL                                                    04/22/2021 09:18:52 PAGE 4   
 
- 178   4                   #endif
- 179   4                
- 180   4                   break;
- 181   4                default:
- 182   4                  protocol_state = PROTOCOL_STATE_NONE;
- 183   4                  break;
- 184   4              }
- 185   3              break;
- 186   3      
- 187   3            case PROTOCOL_STATE_CHECKSUM:
- 188   3              if (protocol_chksum == c)
- 189   3              {
- 190   4      
- 191   4            #if(_DEBUG_MESSAGE_UART_Protocol==ON) 
- 192   4            GraphicsPrint(CYAN,"\r\n(Work CMD=%02x)",(WORD)protocol_type);
- 193   4            #endif        
- 194   4                switch (protocol_type)
- 195   4                {
- 196   5                case MCU_PROTOCOL_CMD_SYS_READY_NOTICE:           
- 197   5                  #if(_DEBUG_MESSAGE_UART_Protocol==ON) 
- 198   5                   GraphicsPrint(CYAN,"\r\n(CMD:SYS READY)");
- 199   5                  #endif
- 200   5                  SET_DVR_SystemReadyNotic();
- 201   5                  SET_BATTERY_CHARGE_STATE(_BATT_STATUS_NONE);
- 202   5                    if(GET_DVR_Reboot()==_TRUE) 
- 203   5                    {
- 204   6                     CLR_DVR_Reboot();  
- 205   6                     UserInterfaceBatteryChargeMode(_BATT_STATUS_DVR_ON);
- 206   6                     MCUTimerCancelTimerEvent( _USER_TIMER_EVENT_OSD_DVR_REBOOT);
- 207   6                    }
- 208   5                  if(GET_DVR_WDTkickDisable()==_FALSE)
- 209   5                  MCUTimerActiveTimerEvent(SEC(10), _SYSTEM_TIMER_EVENT_JUDGE_WDT_ECHO);
- 210   5                  P3M1=0x00|0x30;//p3.4 and P3.5 set push pull mode ryan@20210223
- 211   5                  break;
- 212   5                case MCU_PROTOCOL_CMD_WATCH_DOG_KICK:
- 213   5                  #if(_DEBUG_MESSAGE_UART_Protocol==ON) 
- 214   5                  GraphicsPrint(CYAN,"\r\n(CMD:WDT kick)"); 
- 215   5                  #endif
- 216   5                  MCUTimerCancelTimerEvent( _SYSTEM_TIMER_EVENT_JUDGE_WDT_ECHO);  
- 217   5                  if(GET_DVR_WDTkickDisable()==_FALSE)
- 218   5                  MCUTimerActiveTimerEvent(SEC(10), _SYSTEM_TIMER_EVENT_JUDGE_WDT_ECHO);  
- 219   5                  break;
- 220   5                case MCU_PROTOCOL_CMD_ENTRY_SLEEP:  
- 221   5                  #if(_DEBUG_MESSAGE_UART_Protocol==ON) 
- 222   5                  GraphicsPrint(CYAN,"\r\n(CMD:ENTRY_SLEEP)");  
- 223   5                  #endif            
- 224   5                  //SET_DVR_EntrySleepMode();
- 225   5                  MCUTimerActiveTimerEvent(SEC(1),_USER_TIMER_EVENT_OSD_MCU_ENTRY_SLEEP_MODE);
- 226   5                  break;
- 227   5                case MCU_PROTOCOL_CMD_DISTANCE_RESET:
- 228   5                  #if(_DEBUG_MESSAGE_UART_Protocol==ON) 
- 229   5                  GraphicsPrint(CYAN,"\r\n(CMD:DISTANCE_RESET)"); 
- 230   5                  #endif                        
- 231   5                  //SET_DVR_DistanceReset();          
- 232   5                  MCUTimerActiveTimerEvent(SEC(0.1),_USER_TIMER_EVENT_OSD_DISTANCE_RESET);
- 233   5                  break;
- 234   5                case MCU_PROTOCOL_CMD_ENCODER_SET:  
- 235   5                  #if(_DEBUG_MESSAGE_UART_Protocol==ON) 
- 236   5                  GraphicsPrint(CYAN,"\r\n (CMD:ENCODER_SET)"); 
- 237   5                  Printf("\r\n Encorder1=%02x",(WORD)protocol_data[0]);
- 238   5                  Printf("\r\n Decimal1=%02x",(WORD)protocol_data[1]);        
- 239   5                  Printf("\r\n Encorder2=%02x",(WORD)protocol_data[2]);
-C51 COMPILER V9.60.0.0   HS_DVRPROTOCOL                                                    04/13/2021 10:16:18 PAGE 5   
+                           #endif
+ 180   4                
+ 181   4                   break;
+ 182   4                default:
+ 183   4                  protocol_state = PROTOCOL_STATE_NONE;
+ 184   4                  break;
+ 185   4              }
+ 186   3              break;
+ 187   3      
+ 188   3            case PROTOCOL_STATE_CHECKSUM:
+ 189   3              if (protocol_chksum == c)
+ 190   3              {
+ 191   4      
+ 192   4            #if(_DEBUG_MESSAGE_UART_Protocol==ON) 
+                    GraphicsPrint(CYAN,"\r\n(Work CMD=%02x)",(WORD)protocol_type);
+                    #endif        
+ 195   4                switch (protocol_type)
+ 196   4                {
+ 197   5                case MCU_PROTOCOL_CMD_SYS_READY_NOTICE:           
+ 198   5                  #if(_DEBUG_MESSAGE_UART_Protocol==ON) 
+                           GraphicsPrint(CYAN,"\r\n(CMD:SYS READY)");
+                          #endif
+ 201   5                  SET_DVR_SystemReadyNotic();
+ 202   5                  SET_BATTERY_CHARGE_STATE(_BATT_STATUS_NONE);
+ 203   5                    if(GET_DVR_Reboot()==_TRUE) 
+ 204   5                    {
+ 205   6                     CLR_DVR_Reboot();  
+ 206   6                     UserInterfaceBatteryChargeMode(_BATT_STATUS_DVR_ON);
+ 207   6                     MCUTimerCancelTimerEvent( _USER_TIMER_EVENT_OSD_DVR_REBOOT);
+ 208   6                    }
+ 209   5                  if(GET_DVR_WDTkickDisable()==_FALSE)
+ 210   5                  MCUTimerActiveTimerEvent(SEC(10), _SYSTEM_TIMER_EVENT_JUDGE_WDT_ECHO);
+ 211   5                  P3M1=0x00|0x30;//p3.4 and P3.5 set push pull mode ryan@20210223
+ 212   5                  break;
+ 213   5                case MCU_PROTOCOL_CMD_WATCH_DOG_KICK:
+ 214   5                  #if(_DEBUG_MESSAGE_UART_Protocol==ON) 
+                          GraphicsPrint(CYAN,"\r\n(CMD:WDT kick)"); 
+                          #endif
+ 217   5                  MCUTimerCancelTimerEvent( _SYSTEM_TIMER_EVENT_JUDGE_WDT_ECHO);  
+ 218   5                  if(GET_DVR_WDTkickDisable()==_FALSE)
+ 219   5                  MCUTimerActiveTimerEvent(SEC(10), _SYSTEM_TIMER_EVENT_JUDGE_WDT_ECHO);  
+ 220   5                  break;
+ 221   5                case MCU_PROTOCOL_CMD_ENTRY_SLEEP:  
+ 222   5                  #if(_DEBUG_MESSAGE_UART_Protocol==ON) 
+                          GraphicsPrint(CYAN,"\r\n(CMD:ENTRY_SLEEP)");  
+                          #endif            
+ 225   5                  //SET_DVR_EntrySleepMode();
+ 226   5                  MCUTimerActiveTimerEvent(SEC(1),_USER_TIMER_EVENT_OSD_MCU_ENTRY_SLEEP_MODE);
+ 227   5                  break;
+ 228   5                case MCU_PROTOCOL_CMD_DISTANCE_RESET:
+ 229   5                  #if(_DEBUG_MESSAGE_UART_Protocol==ON) 
+                          GraphicsPrint(CYAN,"\r\n(CMD:DISTANCE_RESET)"); 
+                          #endif                        
+ 232   5                  //SET_DVR_DistanceReset();          
+ 233   5                  MCUTimerActiveTimerEvent(SEC(0.1),_USER_TIMER_EVENT_OSD_DISTANCE_RESET);
+ 234   5                  break;
+ 235   5                case MCU_PROTOCOL_CMD_ENCODER_SET:  
+ 236   5                  #if(_DEBUG_MESSAGE_UART_Protocol==ON) 
+                          GraphicsPrint(CYAN,"\r\n (CMD:ENCODER_SET)"); 
+                          Printf("\r\n Encorder1=%02x",(WORD)protocol_data[0]);
+                          Printf("\r\n Decimal1=%02x",(WORD)protocol_data[1]);        
+                          Printf("\r\n Encorder2=%02x",(WORD)protocol_data[2]);
+C51 COMPILER V9.60.0.0   HS_DVRPROTOCOL                                                    04/22/2021 09:18:52 PAGE 5   
 
- 240   5                  Printf("\r\n Decimal2=%02x",(WORD)protocol_data[3]);        
- 241   5                  Printf("\r\n Encorder3=%02x",(WORD)protocol_data[4]);
- 242   5                  Printf("\r\n Decimal3=%02x",(WORD)protocol_data[5]);        
- 243   5                  Printf("\r\n Encorder4=%02x",(WORD)protocol_data[6]);
- 244   5                  Printf("\r\n Decimal4=%02x",(WORD)protocol_data[7]);        
- 245   5                  #endif
- 246   5      
- 247   5                  Encorder1=((protocol_data[0]>>4)*10)+(0x0f&protocol_data[0]);
- 248   5                  Decimal1=((protocol_data[1]>>4)*10)+(0x0f&protocol_data[1]);
- 249   5                  
- 250   5                  Encorder2=((protocol_data[2]>>4)*10)+(0x0f&protocol_data[2]);
- 251   5                  Decimal2=((protocol_data[3]>>4)*10)+(0x0f&protocol_data[3]);
- 252   5                  
- 253   5                  Encorder3=((protocol_data[4]>>4)*10)+(0x0f&protocol_data[4]);
- 254   5                  Decimal3=((protocol_data[5]>>4)*10)+(0x0f&protocol_data[5]);
- 255   5                  
- 256   5                  Encorder4=((protocol_data[6]>>4)*10)+(0x0f&protocol_data[6]);
- 257   5                  Decimal4=((protocol_data[7]>>4)*10)+(0x0f&protocol_data[7]);
- 258   5      
- 259   5                  WriteEEP(EEP_Encorder1,protocol_data[0]);
- 260   5                  WriteEEP(EEP_Decimal1,protocol_data[1]);
- 261   5      
- 262   5                  WriteEEP(EEP_Encorder2,protocol_data[2]);
- 263   5                  WriteEEP(EEP_Decimal2,protocol_data[3]);
- 264   5      
- 265   5                  WriteEEP(EEP_Encorder3,protocol_data[4]);
- 266   5                  WriteEEP(EEP_Decimal3,protocol_data[5]);
- 267   5      
- 268   5                  WriteEEP(EEP_Encorder4,protocol_data[6]);
- 269   5                  WriteEEP(EEP_Decimal4,protocol_data[7]);
- 270   5      
- 271   5                  MCUTimerActiveTimerEvent(SEC(1),_USER_TIMER_EVENT_OSD_ENCODER_DEVIATION_SETTING);           
- 272   5      
- 273   5                  break;
- 274   5      
- 275   5                case MCU_PROTOCOL_CMD_CAMERA_VOLTAGE: 
- 276   5                  #if(_DEBUG_MESSAGE_UART_Protocol==ON) 
- 277   5                  GraphicsPrint(CYAN,"\r\n(CMD:CAMERA_VOLTAGE)"); 
- 278   5                  #endif    
- 279   5      
- 280   5                  #if 1
- 281   5                  if(protocol_data[0]<5)
- 282   5                  protocol_data[0]=5;
- 283   5                  
- 284   5                  CameraVolt=((protocol_data[0]-5)*10)+(protocol_data[1]);
- 285   5      
- 286   5                  if(CameraVolt>40)
- 287   5                    CameraVolt=40;
- 288   5                  else 
- 289   5                        CameraVolt=(40-CameraVolt);
- 290   5                  MCUTimerReactiveTimerEvent(SEC(0.5),_USER_TIMER_EVENT_OSD_SET_CAMERA_VOLTAGE);
- 291   5                  #else
+                          Printf("\r\n Decimal2=%02x",(WORD)protocol_data[3]);        
+                          Printf("\r\n Encorder3=%02x",(WORD)protocol_data[4]);
+                          Printf("\r\n Decimal3=%02x",(WORD)protocol_data[5]);        
+                          Printf("\r\n Encorder4=%02x",(WORD)protocol_data[6]);
+                          Printf("\r\n Decimal4=%02x",(WORD)protocol_data[7]);        
+                          #endif
+ 247   5      
+ 248   5                  Encorder1=((protocol_data[0]>>4)*10)+(0x0f&protocol_data[0]);
+ 249   5                  Decimal1=((protocol_data[1]>>4)*10)+(0x0f&protocol_data[1]);
+ 250   5                  
+ 251   5                  Encorder2=((protocol_data[2]>>4)*10)+(0x0f&protocol_data[2]);
+ 252   5                  Decimal2=((protocol_data[3]>>4)*10)+(0x0f&protocol_data[3]);
+ 253   5                  
+ 254   5                  Encorder3=((protocol_data[4]>>4)*10)+(0x0f&protocol_data[4]);
+ 255   5                  Decimal3=((protocol_data[5]>>4)*10)+(0x0f&protocol_data[5]);
+ 256   5                  
+ 257   5                  Encorder4=((protocol_data[6]>>4)*10)+(0x0f&protocol_data[6]);
+ 258   5                  Decimal4=((protocol_data[7]>>4)*10)+(0x0f&protocol_data[7]);
+ 259   5      
+ 260   5                  WriteEEP(EEP_Encorder1,protocol_data[0]);
+ 261   5                  WriteEEP(EEP_Decimal1,protocol_data[1]);
+ 262   5      
+ 263   5                  WriteEEP(EEP_Encorder2,protocol_data[2]);
+ 264   5                  WriteEEP(EEP_Decimal2,protocol_data[3]);
+ 265   5      
+ 266   5                  WriteEEP(EEP_Encorder3,protocol_data[4]);
+ 267   5                  WriteEEP(EEP_Decimal3,protocol_data[5]);
+ 268   5      
+ 269   5                  WriteEEP(EEP_Encorder4,protocol_data[6]);
+ 270   5                  WriteEEP(EEP_Decimal4,protocol_data[7]);
+ 271   5      
+ 272   5                  MCUTimerActiveTimerEvent(SEC(1),_USER_TIMER_EVENT_OSD_ENCODER_DEVIATION_SETTING);           
+ 273   5      
+ 274   5                  break;
+ 275   5      
+ 276   5                case MCU_PROTOCOL_CMD_CAMERA_VOLTAGE: 
+ 277   5                  #if(_DEBUG_MESSAGE_UART_Protocol==ON) 
+                          GraphicsPrint(CYAN,"\r\n(CMD:CAMERA_VOLTAGE)"); 
+                          #endif    
+ 280   5      
+ 281   5                  #if 1
+ 282   5                  if(protocol_data[0]<5)
+ 283   5                  protocol_data[0]=5;
+ 284   5                  
+ 285   5                  CameraVolt=((protocol_data[0]-5)*10)+(protocol_data[1]);
+ 286   5      
+ 287   5                  if(CameraVolt>40)
+ 288   5                    CameraVolt=40;
+ 289   5                  else 
+ 290   5                        CameraVolt=(40-CameraVolt);
+ 291   5                  MCUTimerReactiveTimerEvent(SEC(0.5),_USER_TIMER_EVENT_OSD_SET_CAMERA_VOLTAGE);
+ 292   5                  #else
                           if(protocol_data[0])
                             {
                               if(CameraVolt)
@@ -318,7 +318,7 @@ line level    source
                               {
                               CameraVolt=0;
                               }
-C51 COMPILER V9.60.0.0   HS_DVRPROTOCOL                                                    04/13/2021 10:16:18 PAGE 6   
+C51 COMPILER V9.60.0.0   HS_DVRPROTOCOL                                                    04/22/2021 09:18:52 PAGE 6   
 
                               MCUTimerReactiveTimerEvent(SEC(0.5),_USER_TIMER_EVENT_OSD_CAMERA_VOLTAGE_INC);
                             }
@@ -335,220 +335,237 @@ line level    source
                             MCUTimerReactiveTimerEvent(SEC(0.5),_USER_TIMER_EVENT_OSD_CAMERA_VOLTAGE_DEC);
                             }
                           #endif
- 317   5                  break;
- 318   5      
- 319   5                case MCU_PROTOCOL_CMD_WDT_SETTING:  
- 320   5                  #if(_DEBUG_MESSAGE_UART_Protocol==ON) 
- 321   5                  GraphicsPrint(CYAN,"\r\n(CMD:WDT_SETTING)");  
- 322   5                  #endif                  
- 323   5      
- 324   5                  if(protocol_data[0]==0)
- 325   5                    {
- 326   6                    CLR_DVR_WDTkickDisable();
- 327   6                    #if(_DEBUG_MESSAGE_UART_Protocol==ON) 
- 328   6                    GraphicsPrint(CYAN,"\r\n(CMD:WDT_Enable=1)"); 
- 329   6                    #endif
- 330   6                    }
- 331   5                  else if(protocol_data[0]==1)
- 332   5                    {
- 333   6                    MCUTimerCancelTimerEvent( _SYSTEM_TIMER_EVENT_JUDGE_WDT_ECHO);
- 334   6                    SET_DVR_WDTkickDisable();
- 335   6                    #if(_DEBUG_MESSAGE_UART_Protocol==ON) 
- 336   6                    GraphicsPrint(CYAN,"\r\n(CMD:WDT_Enable=0)"); 
- 337   6                    #endif
- 338   6                    }
- 339   5                  break;
- 340   5      
- 341   5                case MCU_PROTOCOL_CMD_GET_MCU_FW:           
- 342   5                  #if(_DEBUG_MESSAGE_UART_Protocol==ON) 
- 343   5                  GraphicsPrint(CYAN,"\r\n(CMD:GET_MCU_FW)"); 
- 344   5                  #endif                        
- 345   5                  MCUTimerActiveTimerEvent(SEC(1),_USER_TIMER_EVENT_OSD_GET_MCU_VERSION);
- 346   5                  break;
- 347   5      
- 348   5                case MCU_PROTOCOL_CMD_DVR_REBOOT: 
- 349   5                  #if(_DEBUG_MESSAGE_UART_Protocol==ON) 
- 350   5                  GraphicsPrint(CYAN,"\r\n(CMD:DVR_REBOOT)"); 
- 351   5                  #endif  
- 352   5                  
- 353   5                    if(protocol_data[0]==0)
- 354   5                    {
- 355   6                    CLR_DVR_SystemReadyNotic();
- 356   6                    MCUTimerCancelTimerEvent( _SYSTEM_TIMER_EVENT_JUDGE_WDT_ECHO);
- 357   6                    //MCUTimerActiveTimerEvent(SEC(60), _SYSTEM_TIMER_EVENT_JUDGE_WDT_ECHO);  
- 358   6      
- 359   6                    MCUTimerCancelTimerEvent(_SYSTEM_TIMER_EVENT_GRN_BLINK);
- 360   6                    MCUTimerCancelTimerEvent(_SYSTEM_TIMER_EVENT_GRN_2S_BLINK);
- 361   6                    MCUTimerCancelTimerEvent( _SYSTEM_TIMER_EVENT_RED_BLINK);
- 362   6                    MCUTimerCancelTimerEvent( _SYSTEM_TIMER_EVENT_GRN_RED_BLINK);
- 363   6                    MCUTimerCancelTimerEvent( _SYSTEM_TIMER_EVENT_GRN_ON_RED_BLINK);
-C51 COMPILER V9.60.0.0   HS_DVRPROTOCOL                                                    04/13/2021 10:16:18 PAGE 7   
+ 318   5                  break;
+ 319   5      
+ 320   5                case MCU_PROTOCOL_CMD_WDT_SETTING:  
+ 321   5                  #if(_DEBUG_MESSAGE_UART_Protocol==ON) 
+                          GraphicsPrint(CYAN,"\r\n(CMD:WDT_SETTING)");  
+                          #endif                  
+ 324   5      
+ 325   5                  if(protocol_data[0]==0)
+ 326   5                    {
+ 327   6                    CLR_DVR_WDTkickDisable();
+ 328   6                    #if(_DEBUG_MESSAGE_UART_Protocol==ON) 
+                            GraphicsPrint(CYAN,"\r\n(CMD:WDT_Enable=1)"); 
+                            #endif
+ 331   6                    }
+ 332   5                  else if(protocol_data[0]==1)
+ 333   5                    {
+ 334   6                    MCUTimerCancelTimerEvent( _SYSTEM_TIMER_EVENT_JUDGE_WDT_ECHO);
+ 335   6                    SET_DVR_WDTkickDisable();
+ 336   6                    #if(_DEBUG_MESSAGE_UART_Protocol==ON) 
+                            GraphicsPrint(CYAN,"\r\n(CMD:WDT_Enable=0)"); 
+                            #endif
+ 339   6                    }
+ 340   5                  break;
+ 341   5      
+ 342   5                case MCU_PROTOCOL_CMD_GET_MCU_FW:           
+ 343   5                  #if(_DEBUG_MESSAGE_UART_Protocol==ON) 
+                          GraphicsPrint(CYAN,"\r\n(CMD:GET_MCU_FW)"); 
+                          #endif                        
+ 346   5                  MCUTimerActiveTimerEvent(SEC(1),_USER_TIMER_EVENT_OSD_GET_MCU_VERSION);
+ 347   5                  break;
+ 348   5      
+ 349   5                case MCU_PROTOCOL_CMD_DVR_REBOOT: 
+ 350   5                  #if(_DEBUG_MESSAGE_UART_Protocol==ON) 
+                          GraphicsPrint(CYAN,"\r\n(CMD:DVR_REBOOT)"); 
+                          #endif  
+ 353   5                  
+ 354   5                    if(protocol_data[0]==0)
+ 355   5                    {
+ 356   6                    CLR_DVR_SystemReadyNotic();
+ 357   6                    MCUTimerCancelTimerEvent( _SYSTEM_TIMER_EVENT_JUDGE_WDT_ECHO);
+ 358   6                    //MCUTimerActiveTimerEvent(SEC(60), _SYSTEM_TIMER_EVENT_JUDGE_WDT_ECHO);  
+ 359   6      
+ 360   6                    MCUTimerCancelTimerEvent(_SYSTEM_TIMER_EVENT_GRN_BLINK);
+ 361   6                    MCUTimerCancelTimerEvent(_SYSTEM_TIMER_EVENT_GRN_2S_BLINK);
+ 362   6                    MCUTimerCancelTimerEvent( _SYSTEM_TIMER_EVENT_RED_BLINK);
+ 363   6                    MCUTimerCancelTimerEvent( _SYSTEM_TIMER_EVENT_GRN_RED_BLINK);
+ 364   6                    MCUTimerCancelTimerEvent( _SYSTEM_TIMER_EVENT_GRN_ON_RED_BLINK);
+C51 COMPILER V9.60.0.0   HS_DVRPROTOCOL                                                    04/22/2021 09:18:52 PAGE 7   
 
- 364   6                    MCUTimerCancelTimerEvent( _SYSTEM_TIMER_EVENT_GRN_2S_BLINK_RED_ON);
- 365   6      
- 366   6                    MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_RED_BLINK);//Update LED Status
- 367   6                    
- 368   6                    }
- 369   5                    else if(protocol_data[0]==1)
- 370   5                    {
- 371   6                    SET_DVR_Reboot();
- 372   6                    MCUTimerActiveTimerEvent(SEC(1),_USER_TIMER_EVENT_OSD_DVR_REBOOT);
- 373   6                    MCUTimerCancelTimerEvent( _SYSTEM_TIMER_EVENT_JUDGE_WDT_ECHO);
- 374   6                    }
- 375   5                    else if(protocol_data[0]==2)
- 376   5                    {
- 377   6                    SET_DVR_Reboot();
- 378   6                    SET_DVR_RebootAndPower();
- 379   6                    MCUTimerActiveTimerEvent(SEC(1),_USER_TIMER_EVENT_OSD_DVR_REBOOT);
- 380   6                    MCUTimerCancelTimerEvent( _SYSTEM_TIMER_EVENT_JUDGE_WDT_ECHO);
- 381   6                    }
- 382   5      
- 383   5                  break;
- 384   5      
- 385   5                case MCU_PROTOCOL_CMD_DVR_SHUTDOWN:
- 386   5                  #if(_DEBUG_MESSAGE_UART_Protocol==ON) 
- 387   5                  GraphicsPrint(CYAN,"\r\n(CMD:DVR_SHUTDOWN)"); 
- 388   5                  #endif  
- 389   5                  
- 390   5                    if((protocol_data[0]==1))
- 391   5                      {
- 392   6                      CLR_DVR_Shutdown();
- 393   6                      bytHoldOn3SPowerOff=OFF;
- 394   6                      #if(_DEBUG_MESSAGE_UART_Protocol==ON) 
- 395   6                      GraphicsPrint(GREEN,"\r\n(CMD:bytHoldOn3SPowerOff=OFF)"); 
- 396   6                      #endif
- 397   6                      }
- 398   5                    else if((PowerFlag==ON)&&(protocol_data[0]==0))
- 399   5                    {
- 400   6                    CLR_DVR_Shutdown();
- 401   6                    PowerFlag=OFF;
- 402   6                    WriteEEP(EEP_Powerflag,PowerFlag);
- 403   6      
- 404   6                    if(GET_DVR_EntrySleepMode()==TRUE)
- 405   6                    CLR_DVR_EntrySleepMode();
- 406   6                    }
- 407   5                    if((PowerFlag==ON)&&(protocol_data[0]==2))
- 408   5                    {
- 409   6                    SET_BATTERY_CAPACITY_LOW_FLAG();
- 410   6                    CLR_DVR_Shutdown();
- 411   6                    PowerFlag=OFF;
- 412   6                    WriteEEP(EEP_Powerflag,PowerFlag);
- 413   6                    if(ReadEEP(EEP_LowBattery_Flag)==OFF)
- 414   6                    WriteEEP(EEP_LowBattery_Flag,ON);
- 415   6                    #if(_DEBUG_MESSAGE_UART_Protocol==ON) 
- 416   6                    GraphicsPrint(RED,"\r\n(CMD:LOW Batt volt. shutdown)"); 
- 417   6                    #endif  
- 418   6                    if(GET_DVR_EntrySleepMode()==TRUE)
- 419   6                    CLR_DVR_EntrySleepMode();
- 420   6                    }
- 421   5                    else if((PowerFlag==ON)&&(protocol_data[0]==3))
- 422   5                      {
- 423   6                      bytHoldOn3SPowerOff=ON;
- 424   6                      #if(_DEBUG_MESSAGE_UART_Protocol==ON) 
- 425   6                      GraphicsPrint(RED,"\r\n(CMD:bytHoldOn3SPowerOff)"); 
-C51 COMPILER V9.60.0.0   HS_DVRPROTOCOL                                                    04/13/2021 10:16:18 PAGE 8   
+ 365   6                    MCUTimerCancelTimerEvent( _SYSTEM_TIMER_EVENT_GRN_2S_BLINK_RED_ON);
+ 366   6      
+ 367   6                    MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_RED_BLINK);//Update LED Status
+ 368   6                    
+ 369   6                    }
+ 370   5                    else if(protocol_data[0]==1)
+ 371   5                    {
+ 372   6                    SET_DVR_Reboot();
+ 373   6                    MCUTimerActiveTimerEvent(SEC(1),_USER_TIMER_EVENT_OSD_DVR_REBOOT);
+ 374   6                    MCUTimerCancelTimerEvent( _SYSTEM_TIMER_EVENT_JUDGE_WDT_ECHO);
+ 375   6                    }
+ 376   5                    else if(protocol_data[0]==2)
+ 377   5                    {
+ 378   6                    SET_DVR_Reboot();
+ 379   6                    SET_DVR_RebootAndPower();
+ 380   6                    MCUTimerActiveTimerEvent(SEC(1),_USER_TIMER_EVENT_OSD_DVR_REBOOT);
+ 381   6                    MCUTimerCancelTimerEvent( _SYSTEM_TIMER_EVENT_JUDGE_WDT_ECHO);
+ 382   6                    }
+ 383   5      
+ 384   5                  break;
+ 385   5      
+ 386   5                case MCU_PROTOCOL_CMD_DVR_SHUTDOWN:
+ 387   5                  #if(_DEBUG_MESSAGE_UART_Protocol==ON) 
+                          GraphicsPrint(CYAN,"\r\n(CMD:DVR_SHUTDOWN)"); 
+                          #endif  
+ 390   5                  
+ 391   5                    if((protocol_data[0]==1))
+ 392   5                      {
+ 393   6                      CLR_DVR_Shutdown();
+ 394   6                      bytHoldOn3SPowerOff=OFF;
+ 395   6                      #if(_DEBUG_MESSAGE_UART_Protocol==ON) 
+                              GraphicsPrint(GREEN,"\r\n(CMD:bytHoldOn3SPowerOff=OFF)"); 
+                              #endif
+ 398   6                      }
+ 399   5                    else if((PowerFlag==ON)&&(protocol_data[0]==0))
+ 400   5                    {
+ 401   6                    CLR_DVR_Shutdown();
+ 402   6                    PowerFlag=OFF;
+ 403   6                    WriteEEP(EEP_Powerflag,PowerFlag);
+ 404   6      
+ 405   6                    if(GET_DVR_EntrySleepMode()==TRUE)
+ 406   6                    CLR_DVR_EntrySleepMode();
+ 407   6                    }
+ 408   5                    if((PowerFlag==ON)&&(protocol_data[0]==2))
+ 409   5                    {
+ 410   6                    SET_BATTERY_CAPACITY_LOW_FLAG();
+ 411   6                    CLR_DVR_Shutdown();
+ 412   6                    PowerFlag=OFF;
+ 413   6                    WriteEEP(EEP_Powerflag,PowerFlag);
+ 414   6                    if(ReadEEP(EEP_LowBattery_Flag)==OFF)
+ 415   6                    WriteEEP(EEP_LowBattery_Flag,ON);
+ 416   6                    #if(_DEBUG_MESSAGE_UART_Protocol==ON) 
+                            GraphicsPrint(RED,"\r\n(CMD:LOW Batt volt. shutdown)"); 
+                            #endif  
+ 419   6                    if(GET_DVR_EntrySleepMode()==TRUE)
+ 420   6                    CLR_DVR_EntrySleepMode();
+ 421   6                    }
+ 422   5                    else if((PowerFlag==ON)&&(protocol_data[0]==3))
+ 423   5                      {
+ 424   6                      bytHoldOn3SPowerOff=ON;
+ 425   6                      #if(_DEBUG_MESSAGE_UART_Protocol==ON) 
+                              GraphicsPrint(RED,"\r\n(CMD:bytHoldOn3SPowerOff)"); 
+C51 COMPILER V9.60.0.0   HS_DVRPROTOCOL                                                    04/22/2021 09:18:52 PAGE 8   
 
- 426   6                      #endif
- 427   6                      }
- 428   5      
- 429   5                  MCUTimerCancelTimerEvent(_USER_TIMER_EVENT_OSD_DVR_SHUTDOWN);             
- 430   5      
- 431   5                  if(bytHoldOn3SPowerOff==ON)           
- 432   5                  MCUTimerActiveTimerEvent(SEC(15), _USER_TIMER_EVENT_OSD_DVR_SHUTDOWN);
- 433   5      
- 434   5                  break;
- 435   5      
- 436   5                case  MCU_PROTOCOL_PROTOCOL_CMD_ENTER_ISP:  
- 437   5                  #if(_DEBUG_MESSAGE_UART_Protocol==ON) 
- 438   5                  GraphicsPrint(CYAN,"\r\n(CMD:MCU_ENTER_ISP_MODE)"); 
- 439   5                  #endif              
- 440   5                  MCUTimerActiveTimerEvent(SEC(1),_USER_TIMER_EVENT_OSD_DVR_ENTER_ISP_MODE);
- 441   5                  break;
- 442   5      
- 443   5                case  MCU_PROTOCOL_CMD_DC12V_PWR_START:
- 444   5      
- 445   5                  if(protocol_data[0]==ON)
- 446   5                    {
- 447   6                    WriteEEP(EEP_DC12_PWR_START,ON);
- 448   6                    PWR_START_flag=ON;
- 449   6                    }
- 450   5                  else
- 451   5                    {
- 452   6                    WriteEEP(EEP_DC12_PWR_START,OFF);
- 453   6                    PWR_START_flag=OFF;
- 454   6                    }
- 455   5      
- 456   5                  #if(_DEBUG_MESSAGE_UART_Protocol==ON) 
- 457   5                  GraphicsPrint(CYAN,"\r\n(CMD:MCU_DC12V_PWR_START=%d)",(WORD)ReadEEP(EEP_DC12_PWR_START)); 
- 458   5                  #endif  
- 459   5      
- 460   5                  
- 461   5                  break;
- 462   5                case  MCU_PROTOCOL_CMD_SET_CHARGE_CURRENT:
- 463   5                    if(protocol_data[0]==ON)                    
- 464   5                      DVRChangeCurrent=0x11;
- 465   5                    else
- 466   5                      DVRChangeCurrent=0x10;
- 467   5      
- 468   5                #if(_DEBUG_MESSAGE_UART_Protocol==ON) 
- 469   5                GraphicsPrint(GREEN,"\r\n(CMD:SET_CHARGE_CURRENT=%02x)",(WORD)DVRChangeCurrent);  
- 470   5                #endif  
- 471   5                SET_BATTERY_CHARGE_STATE(_BATT_STATUS_NONE);///reset charge current 
- 472   5      
+                              #endif
+ 428   6                      }
+ 429   5      
+ 430   5                  MCUTimerCancelTimerEvent(_USER_TIMER_EVENT_OSD_DVR_SHUTDOWN);             
+ 431   5      
+ 432   5                  if(bytHoldOn3SPowerOff==ON)           
+ 433   5                  MCUTimerActiveTimerEvent(SEC(15), _USER_TIMER_EVENT_OSD_DVR_SHUTDOWN);
+ 434   5      
+ 435   5                  break;
+ 436   5      
+ 437   5                case  MCU_PROTOCOL_PROTOCOL_CMD_ENTER_ISP:  
+ 438   5                  #if(_DEBUG_MESSAGE_UART_Protocol==ON) 
+                          GraphicsPrint(CYAN,"\r\n(CMD:MCU_ENTER_ISP_MODE)"); 
+                          #endif              
+ 441   5                  MCUTimerActiveTimerEvent(SEC(1),_USER_TIMER_EVENT_OSD_DVR_ENTER_ISP_MODE);
+ 442   5                  break;
+ 443   5      
+ 444   5                case  MCU_PROTOCOL_CMD_DC12V_PWR_START:
+ 445   5      
+ 446   5                  if(protocol_data[0]==ON)
+ 447   5                    {
+ 448   6                    WriteEEP(EEP_DC12_PWR_START,ON);
+ 449   6                    PWR_START_flag=ON;
+ 450   6                    }
+ 451   5                  else
+ 452   5                    {
+ 453   6                    WriteEEP(EEP_DC12_PWR_START,OFF);
+ 454   6                    PWR_START_flag=OFF;
+ 455   6                    }
+ 456   5      
+ 457   5                  #if(_DEBUG_MESSAGE_UART_Protocol==ON) 
+                          GraphicsPrint(CYAN,"\r\n(CMD:MCU_DC12V_PWR_START=%d)",(WORD)ReadEEP(EEP_DC12_PWR_START)); 
+                          #endif  
+ 460   5      
+ 461   5                  
+ 462   5                  break;
+ 463   5                case  MCU_PROTOCOL_CMD_SET_CHARGE_CURRENT:
+ 464   5                    if(protocol_data[0]==ON)                    
+ 465   5                      DVRChangeCurrent=0x11;
+ 466   5                    else
+ 467   5                      DVRChangeCurrent=0x10;
+ 468   5      
+ 469   5                #if(_DEBUG_MESSAGE_UART_Protocol==ON) 
+                        GraphicsPrint(GREEN,"\r\n(CMD:SET_CHARGE_CURRENT=%02x)",(WORD)DVRChangeCurrent);  
+                        #endif  
+ 472   5                SET_BATTERY_CHARGE_STATE(_BATT_STATUS_NONE);///reset charge current 
  473   5      
- 474   5                  break;
- 475   5                case MCU_PROTOCOL_CMD_GET_ENCODER_COUNT:
- 476   5                    #if(_DEBUG_MESSAGE_UART_Protocol==ON) 
- 477   5                    GraphicsPrint(GREEN,"\r\n(CMD:MCU_PROTOCOL_CMD_GET_ENCODER_COUNT)");  
- 478   5                    #endif
- 479   5                    MCUTimerActiveTimerEvent(SEC(1),_USER_TIMER_EVENT_REPLY_ENCODER_COUNT);
- 480   5                  break;
- 481   5                case MCU_PROTOCOL_CMD_RESET_ENCODER_COUNT:
- 482   5                    #if(_DEBUG_MESSAGE_UART_Protocol==ON) 
- 483   5                    GraphicsPrint(GREEN,"\r\n(CMD:MCU_PROTOCOL_CMD_RESET_ENCODER_COUNT)");  
- 484   5                    #endif
- 485   5                    MCUTimerActiveTimerEvent(SEC(1),_USER_TIMER_EVENT_RESET_ENCODER_COUNT);
- 486   5                  break;
- 487   5                case MCU_PROTOCOL_CMD_SET_MODELE_TYPE:
-C51 COMPILER V9.60.0.0   HS_DVRPROTOCOL                                                    04/13/2021 10:16:18 PAGE 9   
+ 474   5      
+ 475   5                  break;
+ 476   5                case MCU_PROTOCOL_CMD_GET_ENCODER_COUNT:
+ 477   5                    #if(_DEBUG_MESSAGE_UART_Protocol==ON) 
+                            GraphicsPrint(GREEN,"\r\n(CMD:MCU_PROTOCOL_CMD_GET_ENCODER_COUNT)");  
+                            #endif
+ 480   5                    MCUTimerActiveTimerEvent(SEC(1),_USER_TIMER_EVENT_REPLY_ENCODER_COUNT);
+ 481   5                  break;
+ 482   5                case MCU_PROTOCOL_CMD_RESET_ENCODER_COUNT:
+ 483   5                    #if(_DEBUG_MESSAGE_UART_Protocol==ON) 
+                            GraphicsPrint(GREEN,"\r\n(CMD:MCU_PROTOCOL_CMD_RESET_ENCODER_COUNT)");  
+                            #endif
+ 486   5                    MCUTimerActiveTimerEvent(SEC(1),_USER_TIMER_EVENT_RESET_ENCODER_COUNT);
+ 487   5                  break;
+ 488   5                case MCU_PROTOCOL_CMD_SET_MODELE_TYPE:
+C51 COMPILER V9.60.0.0   HS_DVRPROTOCOL                                                    04/22/2021 09:18:52 PAGE 9   
 
- 488   5      
- 489   5                    if(protocol_data[0]==ON)                    
- 490   5                      bytFastEncoderMode=ON;
- 491   5                    else
- 492   5                      bytFastEncoderMode=OFF;
- 493   5      
- 494   5                    #if(_DEBUG_MESSAGE_UART_Protocol==ON) 
- 495   5                    GraphicsPrint(CYAN,"\r\n(CMD:MCU_PROTOCOL_CMD_SET_MODELE_TYPE=%d)",(WORD)bytFastEncoderMode); 
- 496   5                    #endif  
- 497   5                  break;
- 498   5                default:
- 499   5                  break;
- 500   5                }
- 501   4                
- 502   4              }
- 503   3              else
- 504   3                  {
- 505   4                  #if(_DEBUG_MESSAGE_UART_Protocol==ON) 
- 506   4                  DEBUG_MESSAGE("(CS error)");
- 507   4                  #endif
- 508   4                  }
- 509   3              protocol_state = PROTOCOL_STATE_NONE;
- 510   3              break;
- 511   3            default:
- 512   3              break;
- 513   3          }
- 514   2        }
- 515   1      
- 516   1      
- 517   1      }
- 518          
- 519          
+ 489   5      
+ 490   5                    if(protocol_data[0]==ON)                    
+ 491   5                      bytFastEncoderMode=ON;
+ 492   5                    else
+ 493   5                      bytFastEncoderMode=OFF;
+ 494   5      
+ 495   5                    if(bytFastEncoderMode==ON)
+ 496   5                      {
+ 497   6                    ulongRotateNumber=ReadEEP(EEP_RotateNumberH);
+ 498   6                    ulongRotateNumber<<=8;
+ 499   6                    ulongRotateNumber|=ReadEEP(EEP_RotateNumberM);  
+ 500   6                    ulongRotateNumber<<=8;
+ 501   6                    ulongRotateNumber|=ReadEEP(EEP_RotateNumberL);  
+ 502   6                      }
+ 503   5                    else
+ 504   5                      {
+ 505   6                      ulongRotateNumber=ReadEEP(EEP_RotateNumberRH);
+ 506   6                      ulongRotateNumber<<=8;
+ 507   6                      ulongRotateNumber|=ReadEEP(EEP_RotateNumberRM); 
+ 508   6                      ulongRotateNumber<<=8;
+ 509   6                      ulongRotateNumber|=ReadEEP(EEP_RotateNumberRL);
+ 510   6                      }
+ 511   5                    
+ 512   5                    #if(_DEBUG_MESSAGE_UART_Protocol==ON) 
+                            GraphicsPrint(CYAN,"\r\n(CMD:MCU_PROTOCOL_CMD_SET_MODELE_TYPE=%d)",(WORD)bytFastEncoderMode); 
+                            #endif
+ 515   5                  break;
+ 516   5                default:
+ 517   5                  break;
+ 518   5                }
+ 519   4                
+ 520   4              }
+ 521   3              else
+ 522   3                  {
+ 523   4                  #if(_DEBUG_MESSAGE_UART_Protocol==ON) 
+                          DEBUG_MESSAGE("(CS error)");
+                          #endif
+ 526   4                  }
+ 527   3              protocol_state = PROTOCOL_STATE_NONE;
+ 528   3              break;
+ 529   3            default:
+ 530   3              break;
+ 531   3          }
+ 532   2        }
+ 533   1      
+ 534   1      
+ 535   1      }
+ 536          
+ 537          
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =   1900    ----
-   CONSTANT SIZE    =    756    ----
+   CODE SIZE        =   1717    ----
+   CONSTANT SIZE    =   ----    ----
    XDATA SIZE       =    262       1
    PDATA SIZE       =   ----    ----
    DATA SIZE        =   ----    ----
@@ -557,4 +574,4 @@ MODULE INFORMATION:   STATIC OVERLAYABLE
 END OF MODULE INFORMATION.
 
 
-C51 COMPILATION COMPLETE.  1 WARNING(S),  0 ERROR(S)
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

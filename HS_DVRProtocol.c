@@ -37,6 +37,7 @@ extern StructBatteryInfoType g_stBatteryInfo ;
 extern BYTE DVRChangeCurrent;
 extern BYTE bytHoldOn3SPowerOff;
 extern BYTE bytFastEncoderMode;
+extern DWORD ulongRotateNumber;
 
 void DvrReceivePaser(void)
 {
@@ -491,9 +492,26 @@ if ( RS2_ready())
 							else
 								bytFastEncoderMode=OFF;
 
+							if(bytFastEncoderMode==ON)
+								{
+							ulongRotateNumber=ReadEEP(EEP_RotateNumberH);
+							ulongRotateNumber<<=8;
+							ulongRotateNumber|=ReadEEP(EEP_RotateNumberM);	
+							ulongRotateNumber<<=8;
+							ulongRotateNumber|=ReadEEP(EEP_RotateNumberL);	
+								}
+							else
+								{
+								ulongRotateNumber=ReadEEP(EEP_RotateNumberRH);
+								ulongRotateNumber<<=8;
+								ulongRotateNumber|=ReadEEP(EEP_RotateNumberRM);	
+								ulongRotateNumber<<=8;
+								ulongRotateNumber|=ReadEEP(EEP_RotateNumberRL);
+								}
+							
 							#if(_DEBUG_MESSAGE_UART_Protocol==ON)	
 							GraphicsPrint(CYAN,"\r\n(CMD:MCU_PROTOCOL_CMD_SET_MODELE_TYPE=%d)",(WORD)bytFastEncoderMode);	
-							#endif	
+							#endif
 						break;
 					default:
 						break;
