@@ -74,6 +74,8 @@ typedef	unsigned long	DWORD;
 #define _CHARGE1000mA    0x00//0x18
 #define _CHARGE1100mA    0x00///maximum
 
+#define _CHARGESTOP    0xFF// 0xFF///maximum
+
 #else
 #define _CHARGE100mA    0xF4
 #define _CHARGE300mA    0xB0

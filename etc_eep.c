@@ -74,6 +74,8 @@ void ClearBasicEE(void)
 	WriteEEP(2, '0');
 	WriteEEP(3, 'I');
 
+	WriteEEP(EEP_HARDWARE_VER,Hardware_Version);
+
 	WriteEEP(EEP_Powerflag,ON);
 
 //	WriteEEP(EEP_CameraVolt, 14);  //7.6V
@@ -87,6 +89,8 @@ void ClearBasicEE(void)
 	
 	WriteEEP(EEP_PowerOffToOnflag,ON);
 
+	WriteEEP(EEP_BatteryStopCharge,OFF);
+	
 	WriteEEP(EEP_Encorder1,1);
 	WriteEEP(EEP_Decimal1,0);
 

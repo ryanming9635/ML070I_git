@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          04/22/2021 09:18:53 PAGE 1   
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/04/2021 17:40:40 PAGE 1   
 
 
 C51 COMPILER V9.60.0.0, COMPILATION OF MODULE SYSTIMER
@@ -29,6 +29,7 @@ line level    source
   19          #include "adc.h"
   20          #include "etc_eep.h"
   21          #include "Printf.h"
+*** WARNING C320 IN LINE 44 OF .\Include\Printf.h: DEBUG is defined 
   22          #include "KeyRemo.h"
   23          #include "Monitor.h"
   24          #include "CPU.h"
@@ -61,9 +62,9 @@ line level    source
   51          
   52          BYTE BattDetect1_COUNT=0, BattDetect2_COUNT=0, BattDetect3_COUNT=0, BattDetect4_COUNT=0,BattDetect5_COUNT=
              -0;
-  53          BYTE BattDetectMin_COUNT=0, BattDetectHigh_COUNT=0,BattDetectHighStop_COUNT=0,BattDetectNoStartUp_COUNT=0,
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          04/22/2021 09:18:53 PAGE 2   
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/04/2021 17:40:40 PAGE 2   
 
+  53          BYTE BattDetectMin_COUNT=0, BattDetectHigh_COUNT=0,BattDetectHighStop_COUNT=0,BattDetectNoStartUp_COUNT=0,
              -BattDetectStartUp_COUNT=0;
   54          BYTE  BATERY_STAT=0xFF,BATERY_STAT_TEMP=0xFE;
   55          BYTE TEMP_NORMAL_COUNT=0,TEMP_LOW_COUNT=0, TEMP_LOW_WARN_COUNT=0, TEMP_HIGH_COUNT=0,TEMP_HIGH_WARN_COUNT=0
@@ -72,1045 +73,1060 @@ line level    source
   57          BYTE PWM_TEMP=0;  
   58          BYTE CHARGE_TEMP_ABNORMAL=0;
   59          BYTE CHARGE_TEMP_NORMAL=0;
-  60          
-  61          #if (_DEBUG_MESSAGE_Monitor==ON)
-              bit Monitor_flag=OFF;
-              #endif
-  64          
-  65          extern BYTE PowerFlag;
-  66          extern BYTE CameraVolt;
-  67          extern BYTE PWR_START_flag;
-  68          extern StructBatteryInfoType g_stBatteryInfo;
-  69          extern BYTE EncorderCountPN;
-  70          extern BYTE EncorderLenint;
-  71          extern short EncorderCount;
-  72          extern WORD EncorderLenfloaat;
-  73          extern StructPowerInfoType idata g_stPowerInfo;
-  74          extern BYTE day,hour,minute,second;
-  75          extern StructDVRInfoType g_stDVRInfo;
-  76          extern BYTE Power_down_mode;
-  77          extern DWORD ulongRotateNumber;
-  78          extern BYTE bytFastEncoderMode;
-  79          
-  80          
-  81          //--------------------------------------------------
-  82          // Definitions of Timer2
-  83          //--------------------------------------------------
-  84          #define _EVENT_TIME_MAX                         61000 // Please do not modify this value.
-  85          
-  86          //****************************************************************************
-  87          // CODE TABLES
-  88          //****************************************************************************
-  89          
-  90          
+  60          BYTE _BATT_STATUS_CAPACITY_MAX_STOP_Count=0;
+  61          
+  62          #if (_DEBUG_MESSAGE_Monitor==ON)
+  63          bit Monitor_flag=OFF;
+  64          #endif
+  65          
+  66          extern BYTE PowerFlag;
+  67          extern BYTE CameraVolt;
+  68          extern BYTE PWR_START_flag;
+  69          extern StructBatteryInfoType g_stBatteryInfo;
+  70          extern BYTE EncorderCountPN;
+  71          extern BYTE EncorderLenint;
+  72          extern short EncorderCount;
+  73          extern WORD EncorderLenfloaat;
+  74          extern StructPowerInfoType idata g_stPowerInfo;
+  75          extern BYTE day,hour,minute,second;
+  76          extern StructDVRInfoType g_stDVRInfo;
+  77          extern BYTE Power_down_mode;
+  78          extern DWORD ulongRotateNumber;
+  79          extern BYTE bytFastEncoderMode;
+  80          extern BYTE bytBatteryStopCharge;
+  81          extern BYTE bytBatteryStopChargeCount;
+  82          
+  83          
+  84          //--------------------------------------------------
+  85          // Definitions of Timer2
+  86          //--------------------------------------------------
+  87          #define _EVENT_TIME_MAX                         61000 // Please do not modify this value.
+  88          
+  89          //****************************************************************************
+  90          // CODE TABLES
   91          //****************************************************************************
-  92          // FUNCTION DECLARATIONS
-  93          //****************************************************************************
-  94          void SysTimerHandler(void);
-  95          void SysTimerEventProc(EnumSystemTimerEventID enumEventID);
-  96          void MCUTimerInitialTimerEvent(void);
-  97          void MCUTimerActiveTimerEvent(WORD usTime, BYTE ucEventID);
-  98          void MCUTimerCancelTimerEvent(BYTE ucEventID);
-  99          void MCUTimerDelayXms(WORD usNum);
- 100          extern WORD GetBatteryBTH(void);
- 101          extern WORD GetBatteryVoltage(void);
- 102          extern void SetAD5110Step(BYTE newv) ;
- 103          extern void UserInterfacePowerSwitch(EnumPowerAction enumSwitch);
- 104          extern void SysPowerSwitch(EnumPowerAction enumSwitch);
- 105          extern void UserInterfaceBatteryChargeMode(EnumBatteryStatus enumSwitch);
- 106          extern void SET_MCU_POWER_DOWN_MODE(void);
- 107          
- 108          
- 109          //****************************************************************************
- 110          // FUNCTION DEFINITIONS
- 111          //****************************************************************************
- 112          //--------------------------------------------------
- 113          // Description  : Timer Delay
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          04/22/2021 09:18:53 PAGE 3   
+  92          
+  93          
+  94          //****************************************************************************
+  95          // FUNCTION DECLARATIONS
+  96          //****************************************************************************
+  97          void SysTimerHandler(void);
+  98          void SysTimerEventProc(EnumSystemTimerEventID enumEventID);
+  99          void MCUTimerInitialTimerEvent(void);
+ 100          void MCUTimerActiveTimerEvent(WORD usTime, BYTE ucEventID);
+ 101          void MCUTimerCancelTimerEvent(BYTE ucEventID);
+ 102          void MCUTimerDelayXms(WORD usNum);
+ 103          extern WORD GetBatteryBTH(void);
+ 104          extern WORD GetBatteryVoltage(void);
+ 105          extern void SetAD5110Step(BYTE newv) ;
+ 106          extern void UserInterfacePowerSwitch(EnumPowerAction enumSwitch);
+ 107          extern void SysPowerSwitch(EnumPowerAction enumSwitch);
+ 108          extern void UserInterfaceBatteryChargeMode(EnumBatteryStatus enumSwitch);
+ 109          extern void SET_MCU_POWER_DOWN_MODE(void);
+ 110          
+ 111          
+ 112          //****************************************************************************
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/04/2021 17:40:40 PAGE 3   
 
- 114          // Input Value  : usNum --> Delay in ms
- 115          // Output Value : None
- 116          //--------------------------------------------------
- 117          void MCUTimerDelayXms(WORD usNum)
- 118          {
- 119   1          if(usNum)
- 120   1          {
- 121   2              g_bNotifyTimer0Int = _FALSE;
- 122   2      
- 123   2              while(_TRUE)
- 124   2              {
- 125   3                  if(g_bNotifyTimer0Int)
- 126   3                  {
- 127   4                      g_bNotifyTimer0Int = _FALSE;
- 128   4      
- 129   4                      if(--usNum)
- 130   4                      {
- 131   5                      }
- 132   4                      else
+ 113          // FUNCTION DEFINITIONS
+ 114          //****************************************************************************
+ 115          //--------------------------------------------------
+ 116          // Description  : Timer Delay
+ 117          // Input Value  : usNum --> Delay in ms
+ 118          // Output Value : None
+ 119          //--------------------------------------------------
+ 120          void MCUTimerDelayXms(WORD usNum)
+ 121          {
+ 122   1          if(usNum)
+ 123   1          {
+ 124   2              g_bNotifyTimer0Int = _FALSE;
+ 125   2      
+ 126   2              while(_TRUE)
+ 127   2              {
+ 128   3                  if(g_bNotifyTimer0Int)
+ 129   3                  {
+ 130   4                      g_bNotifyTimer0Int = _FALSE;
+ 131   4      
+ 132   4                      if(--usNum)
  133   4                      {
- 134   5                          return;
- 135   5                      }
- 136   4                  }
- 137   3              }
- 138   2          }
- 139   1      }
- 140          
- 141          //--------------------------------------------------
- 142          // Description  : Get Event Time
- 143          // Input Value  : ucEventIndex --> Event which time is needed
- 144          // Output Value : Event Time
- 145          //--------------------------------------------------
- 146          WORD MCUTimerGetEventTime(BYTE ucEventIndex)
- 147          {
- 148   1          return GET_EVENT_TIME(ucEventIndex);
- 149   1      }
- 150          
- 151          //--------------------------------------------------
- 152          // Description  : Get Event ID
- 153          // Input Value  : Referenced Event Index
- 154          // Output Value : Stored Event ID
- 155          //--------------------------------------------------
- 156          BYTE MCUTimerGetEventID(BYTE ucEventIndex)
- 157          {
- 158   1          return GET_EVENT_ID(ucEventIndex);
- 159   1      }
- 160          
- 161          //--------------------------------------------------
- 162          // Description  : Clear Event Time
- 163          // Input Value  : ucEventIndex --> Event which time is needed to be cleared
- 164          // Output Value : None
- 165          //--------------------------------------------------
- 166          
- 167          
- 168          void MCUTimerClrEventValid(BYTE ucEventIndex)
- 169          {
- 170   1          CLR_EVENT_VALID(ucEventIndex);
- 171   1      }
- 172          
- 173          //--------------------------------------------------
- 174          // Description  : Check if Event is Valid
- 175          // Input Value  : ucEventIndex --> Event to be checked
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          04/22/2021 09:18:53 PAGE 4   
+ 134   5                      }
+ 135   4                      else
+ 136   4                      {
+ 137   5                          return;
+ 138   5                      }
+ 139   4                  }
+ 140   3              }
+ 141   2          }
+ 142   1      }
+ 143          
+ 144          //--------------------------------------------------
+ 145          // Description  : Get Event Time
+ 146          // Input Value  : ucEventIndex --> Event which time is needed
+ 147          // Output Value : Event Time
+ 148          //--------------------------------------------------
+ 149          WORD MCUTimerGetEventTime(BYTE ucEventIndex)
+ 150          {
+ 151   1          return GET_EVENT_TIME(ucEventIndex);
+ 152   1      }
+ 153          
+ 154          //--------------------------------------------------
+ 155          // Description  : Get Event ID
+ 156          // Input Value  : Referenced Event Index
+ 157          // Output Value : Stored Event ID
+ 158          //--------------------------------------------------
+ 159          BYTE MCUTimerGetEventID(BYTE ucEventIndex)
+ 160          {
+ 161   1          return GET_EVENT_ID(ucEventIndex);
+ 162   1      }
+ 163          
+ 164          //--------------------------------------------------
+ 165          // Description  : Clear Event Time
+ 166          // Input Value  : ucEventIndex --> Event which time is needed to be cleared
+ 167          // Output Value : None
+ 168          //--------------------------------------------------
+ 169          
+ 170          
+ 171          void MCUTimerClrEventValid(BYTE ucEventIndex)
+ 172          {
+ 173   1          CLR_EVENT_VALID(ucEventIndex);
+ 174   1      }
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/04/2021 17:40:40 PAGE 4   
 
- 176          // Output Value : Validity(_TRUE/_FALSE)
- 177          //--------------------------------------------------
- 178          bit MCUTimerCheckEventValid(BYTE ucEventIndex)
- 179          {
- 180   1          return GET_EVENT_VALID(ucEventIndex);;
- 181   1      }
- 182          
- 183          //--------------------------------------------------
- 184          // Description  : Get Timer Counter.
- 185          // Input Value  : None
- 186          // Output Value : Timer Counter
- 187          //--------------------------------------------------
- 188          WORD MCUTimerGetTimerCounter(void)
- 189          {
- 190   1          WORD usPresentTime = g_usTimerCounter;
- 191   1         
- 192   1          // When get counter,timer interrupt maybe change counter.
- 193   1          // Get twice to avoid it.
- 194   1          if(abs(g_usTimerCounter - usPresentTime) > 0x7F)
- 195   1          {
- 196   2              usPresentTime = g_usTimerCounter;
- 197   2          } 
- 198   1      
- 199   1          return usPresentTime;
- 200   1      }
- 201          //--------------------------------------------------
- 202          // Description  : Check timer and events. We have to run this function when setting up a timer for an even
+ 175          
+ 176          //--------------------------------------------------
+ 177          // Description  : Check if Event is Valid
+ 178          // Input Value  : ucEventIndex --> Event to be checked
+ 179          // Output Value : Validity(_TRUE/_FALSE)
+ 180          //--------------------------------------------------
+ 181          bit MCUTimerCheckEventValid(BYTE ucEventIndex)
+ 182          {
+ 183   1          return GET_EVENT_VALID(ucEventIndex);;
+ 184   1      }
+ 185          
+ 186          //--------------------------------------------------
+ 187          // Description  : Get Timer Counter.
+ 188          // Input Value  : None
+ 189          // Output Value : Timer Counter
+ 190          //--------------------------------------------------
+ 191          WORD MCUTimerGetTimerCounter(void)
+ 192          {
+ 193   1          WORD usPresentTime = g_usTimerCounter;
+ 194   1         
+ 195   1          // When get counter,timer interrupt maybe change counter.
+ 196   1          // Get twice to avoid it.
+ 197   1          if(abs(g_usTimerCounter - usPresentTime) > 0x7F)
+ 198   1          {
+ 199   2              usPresentTime = g_usTimerCounter;
+ 200   2          } 
+ 201   1      
+ 202   1          return usPresentTime;
+ 203   1      }
+ 204          //--------------------------------------------------
+ 205          // Description  : Check timer and events. We have to run this function when setting up a timer for an even
              -t.
- 203          // Input Value  : usTime    --> Unit in 1ms, range in 0.001 ~ 61sec
- 204          // Output Value : Return usPresentTime
- 205          //--------------------------------------------------
- 206          WORD MCUTimerCheckTimerEvent(WORD usTime)
- 207          {
- 208   1          BYTE ucTimerEventCnt = 0;
- 209   1          WORD usPresentTime = 0;
- 210   1      
- 211   1          usPresentTime = MCUTimerGetTimerCounter();
- 212   1          
- 213   1          if(usTime > _EVENT_TIME_MAX) 
- 214   1          {
- 215   2              usTime = _EVENT_TIME_MAX;
- 216   2          }
- 217   1         
- 218   1          if(((usPresentTime + usTime) > _EVENT_TIME_MAX) || // Size Limit of Timer Counter             
- 219   1             ((usPresentTime + usTime) < usPresentTime)) // Timer Counter Overflow
- 220   1          { 
- 221   2              g_usTimerCounter = 0;
- 222   2          
- 223   2              // Reset Timer Event Counter
- 224   2              for(ucTimerEventCnt = 0; ucTimerEventCnt < _TIMER_EVENT_COUNT; ucTimerEventCnt++)
- 225   2              {
- 226   3                  if(GET_EVENT_VALID(ucTimerEventCnt) == _TRUE)
- 227   3                  {
- 228   4                      if(GET_EVENT_TIME(ucTimerEventCnt) > usPresentTime)
- 229   4                      {
- 230   5                          SET_EVENT_TIME(ucTimerEventCnt, (GET_EVENT_TIME(ucTimerEventCnt) - usPresentTime));
- 231   5                      }
- 232   4                      else
- 233   4                      {
- 234   5                          SET_EVENT_TIME(ucTimerEventCnt, 0);
- 235   5                      }
- 236   4                  }
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          04/22/2021 09:18:53 PAGE 5   
+ 206          // Input Value  : usTime    --> Unit in 1ms, range in 0.001 ~ 61sec
+ 207          // Output Value : Return usPresentTime
+ 208          //--------------------------------------------------
+ 209          WORD MCUTimerCheckTimerEvent(WORD usTime)
+ 210          {
+ 211   1          BYTE ucTimerEventCnt = 0;
+ 212   1          WORD usPresentTime = 0;
+ 213   1      
+ 214   1          usPresentTime = MCUTimerGetTimerCounter();
+ 215   1          
+ 216   1          if(usTime > _EVENT_TIME_MAX) 
+ 217   1          {
+ 218   2              usTime = _EVENT_TIME_MAX;
+ 219   2          }
+ 220   1         
+ 221   1          if(((usPresentTime + usTime) > _EVENT_TIME_MAX) || // Size Limit of Timer Counter             
+ 222   1             ((usPresentTime + usTime) < usPresentTime)) // Timer Counter Overflow
+ 223   1          { 
+ 224   2              g_usTimerCounter = 0;
+ 225   2          
+ 226   2              // Reset Timer Event Counter
+ 227   2              for(ucTimerEventCnt = 0; ucTimerEventCnt < _TIMER_EVENT_COUNT; ucTimerEventCnt++)
+ 228   2              {
+ 229   3                  if(GET_EVENT_VALID(ucTimerEventCnt) == _TRUE)
+ 230   3                  {
+ 231   4                      if(GET_EVENT_TIME(ucTimerEventCnt) > usPresentTime)
+ 232   4                      {
+ 233   5                          SET_EVENT_TIME(ucTimerEventCnt, (GET_EVENT_TIME(ucTimerEventCnt) - usPresentTime));
+ 234   5                      }
+ 235   4                      else
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/04/2021 17:40:40 PAGE 5   
 
- 237   3              }
- 238   2              
- 239   2              usPresentTime = 0;
- 240   2          }    
- 241   1      
- 242   1          return usPresentTime;
- 243   1      }
- 244          
- 245          //--------------------------------------------------
- 246          // Description  : Initial timer and events. We have to run this function at firmware startup
- 247          // Input Value  : None
- 248          // Output Value : None
- 249          //--------------------------------------------------
- 250          void MCUTimerInitialTimerEvent(void)
- 251          {
- 252   1          BYTE ucTimerEventCnt = 0;
- 253   1      
- 254   1          for(ucTimerEventCnt = 0; ucTimerEventCnt < _TIMER_EVENT_COUNT; ucTimerEventCnt++)
- 255   1          {
- 256   2              CLR_EVENT_VALID(ucTimerEventCnt);
- 257   2          }
- 258   1      
- 259   1         // TR2 = 1;
- 260   1      }
- 261          
- 262          //--------------------------------------------------
- 263          // Description  : Active Timer Event
- 264          // Input Value  : usTime --> Time to active Timer Event
- 265          //          ucEventID --> Event to be actived
- 266          // Output Value : None
- 267          //--------------------------------------------------
- 268          void MCUTimerActiveTimerEvent(WORD usTime, BYTE ucEventID)
- 269          {
- 270   1          BYTE ucEventIndex = 0;
- 271   1      
- 272   1          // Search for Existing Event with the same Event ID
- 273   1          for(ucEventIndex = 0; ucEventIndex < _TIMER_EVENT_COUNT; ucEventIndex++)
- 274   1          {
- 275   2              if(GET_EVENT_VALID(ucEventIndex) == _TRUE)
- 276   2              {
- 277   3                  if(GET_EVENT_ID(ucEventIndex) == ucEventID)
- 278   3                  {
- 279   4                      return;
- 280   4                  }
- 281   3              }
- 282   2          }
- 283   1      
- 284   1          // Choose any Vacant Storage for Event
- 285   1          for(ucEventIndex = 0; ucEventIndex < _TIMER_EVENT_COUNT; ucEventIndex++)
- 286   1          {
- 287   2              if(GET_EVENT_VALID(ucEventIndex) == _FALSE)
- 288   2              {
- 289   3                  SET_EVENT_VALID(ucEventIndex);
- 290   3                  SET_EVENT_ID(ucEventIndex, ucEventID);
- 291   3                  SET_EVENT_TIME(ucEventIndex, (WORD)((DWORD)(MCUTimerCheckTimerEvent(usTime)) + usTime));
- 292   3                  return;
- 293   3              }
- 294   2          }
- 295   1      
- 296   1          //Printf("No More Available Storage for Simultaneous Event!!!!!!");
- 297   1      }
- 298          
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          04/22/2021 09:18:53 PAGE 6   
+ 236   4                      {
+ 237   5                          SET_EVENT_TIME(ucTimerEventCnt, 0);
+ 238   5                      }
+ 239   4                  }
+ 240   3              }
+ 241   2              
+ 242   2              usPresentTime = 0;
+ 243   2          }    
+ 244   1      
+ 245   1          return usPresentTime;
+ 246   1      }
+ 247          
+ 248          //--------------------------------------------------
+ 249          // Description  : Initial timer and events. We have to run this function at firmware startup
+ 250          // Input Value  : None
+ 251          // Output Value : None
+ 252          //--------------------------------------------------
+ 253          void MCUTimerInitialTimerEvent(void)
+ 254          {
+ 255   1          BYTE ucTimerEventCnt = 0;
+ 256   1      
+ 257   1          for(ucTimerEventCnt = 0; ucTimerEventCnt < _TIMER_EVENT_COUNT; ucTimerEventCnt++)
+ 258   1          {
+ 259   2              CLR_EVENT_VALID(ucTimerEventCnt);
+ 260   2          }
+ 261   1      
+ 262   1         // TR2 = 1;
+ 263   1      }
+ 264          
+ 265          //--------------------------------------------------
+ 266          // Description  : Active Timer Event
+ 267          // Input Value  : usTime --> Time to active Timer Event
+ 268          //          ucEventID --> Event to be actived
+ 269          // Output Value : None
+ 270          //--------------------------------------------------
+ 271          void MCUTimerActiveTimerEvent(WORD usTime, BYTE ucEventID)
+ 272          {
+ 273   1          BYTE ucEventIndex = 0;
+ 274   1      
+ 275   1          // Search for Existing Event with the same Event ID
+ 276   1          for(ucEventIndex = 0; ucEventIndex < _TIMER_EVENT_COUNT; ucEventIndex++)
+ 277   1          {
+ 278   2              if(GET_EVENT_VALID(ucEventIndex) == _TRUE)
+ 279   2              {
+ 280   3                  if(GET_EVENT_ID(ucEventIndex) == ucEventID)
+ 281   3                  {
+ 282   4                      return;
+ 283   4                  }
+ 284   3              }
+ 285   2          }
+ 286   1      
+ 287   1          // Choose any Vacant Storage for Event
+ 288   1          for(ucEventIndex = 0; ucEventIndex < _TIMER_EVENT_COUNT; ucEventIndex++)
+ 289   1          {
+ 290   2              if(GET_EVENT_VALID(ucEventIndex) == _FALSE)
+ 291   2              {
+ 292   3                  SET_EVENT_VALID(ucEventIndex);
+ 293   3                  SET_EVENT_ID(ucEventIndex, ucEventID);
+ 294   3                  SET_EVENT_TIME(ucEventIndex, (WORD)((DWORD)(MCUTimerCheckTimerEvent(usTime)) + usTime));
+ 295   3                  return;
+ 296   3              }
+ 297   2          }
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/04/2021 17:40:40 PAGE 6   
 
- 299          //--------------------------------------------------
- 300          // Description  : Cancel an event
- 301          // Input Value  : Event     --> Event which we want to cancel
- 302          // Output Value : None
- 303          //--------------------------------------------------
- 304          void MCUTimerCancelTimerEvent(BYTE ucEventID)
- 305          {
- 306   1          BYTE ucEventIndex = 0;
- 307   1          
- 308   1          // Search for Existing Event with the same Event ID
- 309   1          for(ucEventIndex = 0; ucEventIndex < _TIMER_EVENT_COUNT; ucEventIndex++)
- 310   1          {
- 311   2              if(GET_EVENT_VALID(ucEventIndex) == _TRUE)
- 312   2              {
- 313   3                  if(GET_EVENT_ID(ucEventIndex) == ucEventID)
- 314   3                  {
- 315   4                      CLR_EVENT_VALID(ucEventIndex);
- 316   4                      return;
- 317   4                  }
- 318   3              }
- 319   2          }      
- 320   1      }
- 321          
- 322          //--------------------------------------------------
- 323          // Description  : Reactive a timer for an event. If the event is exist,
- 324          //                this function will reset the executing time and restart.
- 325          // Input Value  : usTime    --> Unit in 1ms, range in 0.01 ~ 61 sec
- 326          //                Event     --> Execute Event while timeup
- 327          // Output Value : None
- 328          //--------------------------------------------------
- 329          void MCUTimerReactiveTimerEvent(WORD usTime, BYTE ucEventID)
- 330          {
- 331   1          BYTE ucEventIndex = 0;
- 332   1      
- 333   1          // Search for Existing Event with the same Event ID
- 334   1          for(ucEventIndex = 0; ucEventIndex < _TIMER_EVENT_COUNT; ucEventIndex++)
- 335   1          {
- 336   2              if(GET_EVENT_VALID(ucEventIndex) == _TRUE)
- 337   2              {
- 338   3                  if(GET_EVENT_ID(ucEventIndex) == ucEventID)
- 339   3                  {
- 340   4                      SET_EVENT_TIME(ucEventIndex, (WORD)((DWORD)(MCUTimerCheckTimerEvent(usTime)) + usTime));
- 341   4                      return;
- 342   4                  }
- 343   3              }
- 344   2          }    
- 345   1      
- 346   1          // Choose any Vacant Storage for Event
- 347   1          for(ucEventIndex = 0; ucEventIndex < _TIMER_EVENT_COUNT; ucEventIndex++)
- 348   1          {
- 349   2              if(GET_EVENT_VALID(ucEventIndex) == _FALSE)
- 350   2              {
- 351   3                  SET_EVENT_VALID(ucEventIndex);
- 352   3                  SET_EVENT_ID(ucEventIndex, ucEventID);
- 353   3                  SET_EVENT_TIME(ucEventIndex, (WORD)((DWORD)(MCUTimerCheckTimerEvent(usTime)) + usTime));
- 354   3                  return;
- 355   3              }
- 356   2          }   
- 357   1      }
- 358          
- 359          
- 360          void UserInterfaceTimerEventProc(BYTE ucEventID)
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          04/22/2021 09:18:53 PAGE 7   
+ 298   1      
+ 299   1          //Printf("No More Available Storage for Simultaneous Event!!!!!!");
+ 300   1      }
+ 301          
+ 302          //--------------------------------------------------
+ 303          // Description  : Cancel an event
+ 304          // Input Value  : Event     --> Event which we want to cancel
+ 305          // Output Value : None
+ 306          //--------------------------------------------------
+ 307          void MCUTimerCancelTimerEvent(BYTE ucEventID)
+ 308          {
+ 309   1          BYTE ucEventIndex = 0;
+ 310   1          
+ 311   1          // Search for Existing Event with the same Event ID
+ 312   1          for(ucEventIndex = 0; ucEventIndex < _TIMER_EVENT_COUNT; ucEventIndex++)
+ 313   1          {
+ 314   2              if(GET_EVENT_VALID(ucEventIndex) == _TRUE)
+ 315   2              {
+ 316   3                  if(GET_EVENT_ID(ucEventIndex) == ucEventID)
+ 317   3                  {
+ 318   4                      CLR_EVENT_VALID(ucEventIndex);
+ 319   4                      return;
+ 320   4                  }
+ 321   3              }
+ 322   2          }      
+ 323   1      }
+ 324          
+ 325          //--------------------------------------------------
+ 326          // Description  : Reactive a timer for an event. If the event is exist,
+ 327          //                this function will reset the executing time and restart.
+ 328          // Input Value  : usTime    --> Unit in 1ms, range in 0.01 ~ 61 sec
+ 329          //                Event     --> Execute Event while timeup
+ 330          // Output Value : None
+ 331          //--------------------------------------------------
+ 332          void MCUTimerReactiveTimerEvent(WORD usTime, BYTE ucEventID)
+ 333          {
+ 334   1          BYTE ucEventIndex = 0;
+ 335   1      
+ 336   1          // Search for Existing Event with the same Event ID
+ 337   1          for(ucEventIndex = 0; ucEventIndex < _TIMER_EVENT_COUNT; ucEventIndex++)
+ 338   1          {
+ 339   2              if(GET_EVENT_VALID(ucEventIndex) == _TRUE)
+ 340   2              {
+ 341   3                  if(GET_EVENT_ID(ucEventIndex) == ucEventID)
+ 342   3                  {
+ 343   4                      SET_EVENT_TIME(ucEventIndex, (WORD)((DWORD)(MCUTimerCheckTimerEvent(usTime)) + usTime));
+ 344   4                      return;
+ 345   4                  }
+ 346   3              }
+ 347   2          }    
+ 348   1      
+ 349   1          // Choose any Vacant Storage for Event
+ 350   1          for(ucEventIndex = 0; ucEventIndex < _TIMER_EVENT_COUNT; ucEventIndex++)
+ 351   1          {
+ 352   2              if(GET_EVENT_VALID(ucEventIndex) == _FALSE)
+ 353   2              {
+ 354   3                  SET_EVENT_VALID(ucEventIndex);
+ 355   3                  SET_EVENT_ID(ucEventIndex, ucEventID);
+ 356   3                  SET_EVENT_TIME(ucEventIndex, (WORD)((DWORD)(MCUTimerCheckTimerEvent(usTime)) + usTime));
+ 357   3                  return;
+ 358   3              }
+ 359   2          }   
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/04/2021 17:40:40 PAGE 7   
 
- 361          {
- 362   1      
- 363   1      switch(ucEventID)
- 364   1      {
- 365   2      
- 366   2        case _USER_TIMER_EVENT_OSD_CAMERA_VOLTAGE_INC:
- 367   2            SetAD5110Step(CameraVolt);
- 368   2            WriteEEP(EEP_CameraVolt, CameraVolt);  
- 369   2            #if(_DEBUG_MESSAGE_UserInterfaceTimerEvent==ON)
-                    GraphicsPrint(YELLOW,"(CAM_INC %d)",(WORD)(CameraVolt));  
-                    #endif
- 372   2              break;
- 373   2      
- 374   2        case _USER_TIMER_EVENT_OSD_CAMERA_VOLTAGE_DEC:
- 375   2            SetAD5110Step(CameraVolt);  
- 376   2            WriteEEP(EEP_CameraVolt, CameraVolt);  
- 377   2            #if(_DEBUG_MESSAGE_UserInterfaceTimerEvent==ON)
-                    GraphicsPrint(YELLOW,"(CAM_DEC %d)",(WORD)(CameraVolt));  
-                    #endif
- 380   2            break;
- 381   2              case _USER_TIMER_EVENT_OSD_SET_CAMERA_VOLTAGE:
- 382   2            SetAD5110Step(CameraVolt);  
- 383   2            WriteEEP(EEP_CameraVolt, CameraVolt);     
- 384   2            #if(_DEBUG_MESSAGE_UserInterfaceTimerEvent==ON)
-                    GraphicsPrint(MAGENTA,"(CAM_VOLT_LEVEL=%d)",(WORD)(CameraVolt));  
-                    #endif
- 387   2            break;
- 388   2              case _USER_TIMER_EVENT_OSD_GET_MCU_VERSION:
- 389   2            MCU_SendCmdToDVR(MCU_PROTOCOL_CMD_REPLY_MCU_FW);  
- 390   2            #if(_DEBUG_MESSAGE_UserInterfaceTimerEvent==ON)
-                    GraphicsPrint(YELLOW,"(GET_MCU_VERSION)");  
-                    #endif
- 393   2            break;
- 394   2        case _USER_TIMER_EVENT_REPLY_ENCODER_COUNT:
- 395   2            MCU_SendCmdToDVR(MCU_PROTOCOL_CMD_REPLY_ENCODER_COUNT); 
- 396   2            #if(_DEBUG_MESSAGE_UserInterfaceTimerEvent==ON)
-                    GraphicsPrint(YELLOW,"(REPLY_ENCODER_COUNT)");  
-                    #endif
- 399   2            break;
- 400   2        case _USER_TIMER_EVENT_RESET_ENCODER_COUNT:
- 401   2            #if(_DEBUG_MESSAGE_UserInterfaceTimerEvent==ON)
-                    GraphicsPrint(YELLOW,"(RESET_ENCODER_COUNT)");  
-                    #endif
- 404   2            if(bytFastEncoderMode==ON)
- 405   2              {
- 406   3            WriteEEP(EEP_RotateNumberL,0);
- 407   3            WriteEEP(EEP_RotateNumberM,0);
- 408   3            WriteEEP(EEP_RotateNumberH,0);
- 409   3            ulongRotateNumber=0;
- 410   3              }
- 411   2            else
- 412   2              {
- 413   3              WriteEEP(EEP_RotateNumberRL,0);
- 414   3              WriteEEP(EEP_RotateNumberRM,0);
- 415   3              WriteEEP(EEP_RotateNumberRH,0);
- 416   3              ulongRotateNumber=0;
- 417   3              }
- 418   2            break;
- 419   2        case _USER_TIMER_EVENT_OSD_DVR_FACTORY_MODE:
- 420   2      
- 421   2              if(GET_AC_PLUG()==_TRUE)
- 422   2              {
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          04/22/2021 09:18:53 PAGE 8   
+ 360   1      }
+ 361          
+ 362          
+ 363          void UserInterfaceTimerEventProc(BYTE ucEventID)
+ 364          {
+ 365   1      
+ 366   1      switch(ucEventID)
+ 367   1      {
+ 368   2      
+ 369   2        case _USER_TIMER_EVENT_OSD_CAMERA_VOLTAGE_INC:
+ 370   2            SetAD5110Step(CameraVolt);
+ 371   2            WriteEEP(EEP_CameraVolt, CameraVolt);  
+ 372   2            #if(_DEBUG_MESSAGE_UserInterfaceTimerEvent==ON)
+ 373   2            GraphicsPrint(YELLOW,"(CAM_INC %d)",(WORD)(CameraVolt));  
+ 374   2            #endif
+ 375   2              break;
+ 376   2      
+ 377   2        case _USER_TIMER_EVENT_OSD_CAMERA_VOLTAGE_DEC:
+ 378   2            SetAD5110Step(CameraVolt);  
+ 379   2            WriteEEP(EEP_CameraVolt, CameraVolt);  
+ 380   2            #if(_DEBUG_MESSAGE_UserInterfaceTimerEvent==ON)
+ 381   2            GraphicsPrint(YELLOW,"(CAM_DEC %d)",(WORD)(CameraVolt));  
+ 382   2            #endif
+ 383   2            break;
+ 384   2              case _USER_TIMER_EVENT_OSD_SET_CAMERA_VOLTAGE:
+ 385   2            SetAD5110Step(CameraVolt);  
+ 386   2            WriteEEP(EEP_CameraVolt, CameraVolt);     
+ 387   2            #if(_DEBUG_MESSAGE_UserInterfaceTimerEvent==ON)
+ 388   2            GraphicsPrint(MAGENTA,"(CAM_VOLT_LEVEL=%d)",(WORD)(CameraVolt));  
+ 389   2            #endif
+ 390   2            break;
+ 391   2              case _USER_TIMER_EVENT_OSD_GET_MCU_VERSION:
+ 392   2            MCU_SendCmdToDVR(MCU_PROTOCOL_CMD_REPLY_MCU_FW);  
+ 393   2            #if(_DEBUG_MESSAGE_UserInterfaceTimerEvent==ON)
+ 394   2            GraphicsPrint(YELLOW,"(GET_MCU_VERSION)");  
+ 395   2            #endif
+ 396   2            break;
+ 397   2        case _USER_TIMER_EVENT_REPLY_ENCODER_COUNT:
+ 398   2            MCU_SendCmdToDVR(MCU_PROTOCOL_CMD_REPLY_ENCODER_COUNT); 
+ 399   2            #if(_DEBUG_MESSAGE_UserInterfaceTimerEvent==ON)
+ 400   2            GraphicsPrint(YELLOW,"(REPLY_ENCODER_COUNT)");  
+ 401   2            #endif
+ 402   2            break;
+ 403   2        case _USER_TIMER_EVENT_RESET_ENCODER_COUNT:
+ 404   2            #if(_DEBUG_MESSAGE_UserInterfaceTimerEvent==ON)
+ 405   2            GraphicsPrint(YELLOW,"(RESET_ENCODER_COUNT)");  
+ 406   2            #endif
+ 407   2            if(bytFastEncoderMode==ON)
+ 408   2              {
+ 409   3            WriteEEP(EEP_RotateNumberL,0);
+ 410   3            WriteEEP(EEP_RotateNumberM,0);
+ 411   3            WriteEEP(EEP_RotateNumberH,0);
+ 412   3            ulongRotateNumber=0;
+ 413   3              }
+ 414   2            else
+ 415   2              {
+ 416   3              WriteEEP(EEP_RotateNumberRL,0);
+ 417   3              WriteEEP(EEP_RotateNumberRM,0);
+ 418   3              WriteEEP(EEP_RotateNumberRH,0);
+ 419   3              ulongRotateNumber=0;
+ 420   3              }
+ 421   2            break;
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/04/2021 17:40:40 PAGE 8   
 
- 423   3              MCU_SendCmdToDVR(MCU_PROTOCOL_CMD_ENTRY_FACTORY);     
- 424   3              #if(_DEBUG_MESSAGE_UserInterfaceTimerEvent==ON)
-                      GraphicsPrint(RED,"(DVR_FACTORY_MODE)");  
-                      #endif
- 427   3              }
- 428   2            #if(_DEBUG_MESSAGE_UserInterfaceTimerEvent==ON)
-                    else
-                      {
-                      GraphicsPrint(RED,"(DVR_FACTORY_FAIL)");      
-                      }
-                    #endif
- 434   2            
- 435   2            break;
- 436   2      
- 437   2             case _USER_TIMER_EVENT_OSD_MCU_ENTRY_SLEEP_MODE:
- 438   2          
- 439   2              if(GET_DVR_EntrySleepMode()==_FALSE)
- 440   2              {
- 441   3              SET_TARGET_POWER_STATUS(_POWER_STATUS_SAVING);
- 442   3              SET_DVR_EntrySleepMode();
- 443   3              #if(_DEBUG_MESSAGE_UserInterfaceTimerEvent==ON)
-                        GraphicsPrint(YELLOW,"(MCU_NORMAL_TO_SLEEP_MODE)");    
-                      #endif        
- 446   3              }
- 447   2              break;
- 448   2      
- 449   2        case _USER_TIMER_EVENT_OSD_DISTANCE_RESET:
- 450   2          EncorderCount=0;
- 451   2          EncorderLenint=0;
- 452   2          EncorderLenfloaat=0;
- 453   2          EncorderCountPN=0;
- 454   2          #if(_DEBUG_MESSAGE_UserInterfaceTimerEvent==ON)
-                  GraphicsPrint(YELLOW,"\r\n ClearEncorder ",0);
-                  #endif
- 457   2             //Printf("(DISTANCE_RESET)");   
- 458   2             break;
- 459   2      
- 460   2         case _USER_TIMER_EVENT_OSD_DVR_REBOOT:
- 461   2            #if(_DEBUG_MESSAGE_UserInterfaceTimerEvent==ON)
-                     GraphicsPrint(YELLOW,"(DVR_REBOOT)");  
-                     #endif
- 464   2              if(GET_DVR_Reboot()==_TRUE) 
- 465   2                {
- 466   3                CLR_DVR_Reboot();
- 467   3                CLR_DVR_SystemReadyNotic();
- 468   3                 UserInterfaceBatteryChargeMode(_BATT_STATUS_DVR_OFF);
- 469   3                MCUTimerActiveTimerEvent(SEC(3), _USER_TIMER_EVENT_OSD_DVR_REBOOT);
- 470   3      
- 471   3                P3M1=0x00;//p3.4 and P3.5 set output ryan@20210226
- 472   3                }
- 473   2              else
- 474   2              {
- 475   3                 UserInterfaceBatteryChargeMode(_BATT_STATUS_DVR_ON);
- 476   3              }
- 477   2              break;
- 478   2      
- 479   2         case _USER_TIMER_EVENT_OSD_DVR_SHUTDOWN:
- 480   2            #if(_DEBUG_MESSAGE_UserInterfaceTimerEvent==ON)
-                     GraphicsPrint(YELLOW,"(DVR_SHUTDOWN)");  
-                    #endif
- 483   2            SET_DVR_Shutdown();
- 484   2            MCU_SendCmdToDVR(MCU_PROTOCOL_CMD_SYSTEM_SHUTDOWN);
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          04/22/2021 09:18:53 PAGE 9   
+ 422   2        case _USER_TIMER_EVENT_OSD_DVR_FACTORY_MODE:
+ 423   2      
+ 424   2              if(GET_AC_PLUG()==_TRUE)
+ 425   2              {
+ 426   3              MCU_SendCmdToDVR(MCU_PROTOCOL_CMD_ENTRY_FACTORY);     
+ 427   3              #if(_DEBUG_MESSAGE_UserInterfaceTimerEvent==ON)
+ 428   3              GraphicsPrint(RED,"(DVR_FACTORY_MODE)");  
+ 429   3              #endif
+ 430   3              }
+ 431   2            #if(_DEBUG_MESSAGE_UserInterfaceTimerEvent==ON)
+ 432   2            else
+ 433   2              {
+ 434   3              GraphicsPrint(RED,"(DVR_FACTORY_FAIL)");      
+ 435   3              }
+ 436   2            #endif
+ 437   2            
+ 438   2            break;
+ 439   2      
+ 440   2             case _USER_TIMER_EVENT_OSD_MCU_ENTRY_SLEEP_MODE:
+ 441   2          
+ 442   2              if(GET_DVR_EntrySleepMode()==_FALSE)
+ 443   2              {
+ 444   3              SET_TARGET_POWER_STATUS(_POWER_STATUS_SAVING);
+ 445   3              SET_DVR_EntrySleepMode();
+ 446   3              #if(_DEBUG_MESSAGE_UserInterfaceTimerEvent==ON)
+ 447   3                GraphicsPrint(YELLOW,"(MCU_NORMAL_TO_SLEEP_MODE)");    
+ 448   3              #endif        
+ 449   3              }
+ 450   2              break;
+ 451   2      
+ 452   2        case _USER_TIMER_EVENT_OSD_DISTANCE_RESET:
+ 453   2          EncorderCount=0;
+ 454   2          EncorderLenint=0;
+ 455   2          EncorderLenfloaat=0;
+ 456   2          EncorderCountPN=0;
+ 457   2          #if(_DEBUG_MESSAGE_UserInterfaceTimerEvent==ON)
+ 458   2          GraphicsPrint(YELLOW,"\r\n ClearEncorder ",0);
+ 459   2          #endif
+ 460   2             //Printf("(DISTANCE_RESET)");   
+ 461   2             break;
+ 462   2      
+ 463   2         case _USER_TIMER_EVENT_OSD_DVR_REBOOT:
+ 464   2            #if(_DEBUG_MESSAGE_UserInterfaceTimerEvent==ON)
+ 465   2             GraphicsPrint(YELLOW,"(DVR_REBOOT)");  
+ 466   2             #endif
+ 467   2              if(GET_DVR_Reboot()==_TRUE) 
+ 468   2                {
+ 469   3                CLR_DVR_Reboot();
+ 470   3                CLR_DVR_SystemReadyNotic();
+ 471   3                 UserInterfaceBatteryChargeMode(_BATT_STATUS_DVR_OFF);
+ 472   3                MCUTimerActiveTimerEvent(SEC(3), _USER_TIMER_EVENT_OSD_DVR_REBOOT);
+ 473   3      
+ 474   3                P3M1=0x00;//p3.4 and P3.5 set output ryan@20210226
+ 475   3                }
+ 476   2              else
+ 477   2              {
+ 478   3                 UserInterfaceBatteryChargeMode(_BATT_STATUS_DVR_ON);
+ 479   3              }
+ 480   2              break;
+ 481   2      
+ 482   2         case _USER_TIMER_EVENT_OSD_DVR_SHUTDOWN:
+ 483   2            #if(_DEBUG_MESSAGE_UserInterfaceTimerEvent==ON)
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/04/2021 17:40:40 PAGE 9   
 
- 485   2             MCUTimerActiveTimerEvent(SEC(15), _USER_TIMER_EVENT_OSD_DVR_SHUTDOWN);
- 486   2             break;
- 487   2      
- 488   2            case  _USER_TIMER_EVENT_OSD_DVR_ENTER_ISP_MODE:
- 489   2          #if(_DEBUG_MESSAGE_UserInterfaceTimerEvent==ON)
-                     GraphicsPrint(YELLOW,"(MCU_ENTER_ISP_MODE)");      
-                  #endif
- 492   2              enter_isp();
- 493   2             break;
- 494   2      
- 495   2        case _USER_TIMER_EVENT_OSD_ENCODER_DEVIATION_SETTING:     
- 496   2            #if(_DEBUG_MESSAGE_UserInterfaceTimerEvent==ON)
-                    GraphicsPrint(YELLOW,"(ENCODER_SET)");  
-                    #endif
- 499   2            break;
- 500   2      
- 501   2        case _USER_TIMER_EVENT_PANEL_BACKLIGHT_ON:
- 502   2          SET_PWCTRL();
- 503   2          #if(_DEBUG_MESSAGE_UserInterfaceTimerEvent==ON)
-                  GraphicsPrint(YELLOW,"(Panel_ON)"); 
-                  #endif
- 506   2             UserInterfacePowerSwitch(_POWER_ACTION_PANEL_POWER_ON);    
- 507   2          break;
- 508   2      
- 509   2        case _USER_TIMER_EVENT_OSD_DVR_STOP_REBOOT:
- 510   2          #if(_DEBUG_MESSAGE_UserInterfaceTimerEvent==ON)
-                  GraphicsPrint(YELLOW,"(DVR STOP REBOOT)");  
-                  #endif
- 513   2          break;
- 514   2      
- 515   2        #if (_DEBUG_MESSAGE_Monitor==ON)
-                case _USER_TIMER_EVENT_Monitor_ON:
-                 Monitor_flag=_FALSE;
-                  break;
-                #endif
- 520   2      
- 521   2         default:   break;
- 522   2         
+ 484   2             GraphicsPrint(YELLOW,"(DVR_SHUTDOWN)");  
+ 485   2            #endif
+ 486   2            SET_DVR_Shutdown();
+ 487   2            MCU_SendCmdToDVR(MCU_PROTOCOL_CMD_SYSTEM_SHUTDOWN);
+ 488   2             MCUTimerActiveTimerEvent(SEC(15), _USER_TIMER_EVENT_OSD_DVR_SHUTDOWN);
+ 489   2             break;
+ 490   2      
+ 491   2            case  _USER_TIMER_EVENT_OSD_DVR_ENTER_ISP_MODE:
+ 492   2          #if(_DEBUG_MESSAGE_UserInterfaceTimerEvent==ON)
+ 493   2             GraphicsPrint(YELLOW,"(MCU_ENTER_ISP_MODE)");      
+ 494   2          #endif
+ 495   2              enter_isp();
+ 496   2             break;
+ 497   2      
+ 498   2        case _USER_TIMER_EVENT_OSD_ENCODER_DEVIATION_SETTING:     
+ 499   2            #if(_DEBUG_MESSAGE_UserInterfaceTimerEvent==ON)
+ 500   2            GraphicsPrint(YELLOW,"(ENCODER_SET)");  
+ 501   2            #endif
+ 502   2            break;
+ 503   2      
+ 504   2        case _USER_TIMER_EVENT_PANEL_BACKLIGHT_ON:
+ 505   2          SET_PWCTRL();
+ 506   2          #if(_DEBUG_MESSAGE_UserInterfaceTimerEvent==ON)
+ 507   2          GraphicsPrint(YELLOW,"(Panel_ON)"); 
+ 508   2          #endif
+ 509   2             UserInterfacePowerSwitch(_POWER_ACTION_PANEL_POWER_ON);    
+ 510   2          break;
+ 511   2      
+ 512   2        case _USER_TIMER_EVENT_OSD_DVR_STOP_REBOOT:
+ 513   2          #if(_DEBUG_MESSAGE_UserInterfaceTimerEvent==ON)
+ 514   2          GraphicsPrint(YELLOW,"(DVR STOP REBOOT)");  
+ 515   2          #endif
+ 516   2          break;
+ 517   2      
+ 518   2        #if (_DEBUG_MESSAGE_Monitor==ON)
+ 519   2        case _USER_TIMER_EVENT_Monitor_ON:
+ 520   2         Monitor_flag=_FALSE;
+ 521   2          break;
+ 522   2        #endif
  523   2      
- 524   2      }
- 525   1        
- 526   1      }
- 527          
- 528          //--------------------------------------------------
- 529          // Description  : Timer Handler
- 530          // Input Value  : None
- 531          // Output Value : None
- 532          //--------------------------------------------------
- 533          void SysTimerHandler(void)
- 534          {
- 535   1          BYTE ucTimerEventIndex = 0;
- 536   1          BYTE ucTimerEventID = 0;    
- 537   1          WORD usPresentTime = 0;
- 538   1      
- 539   1          for(ucTimerEventIndex = 0; ucTimerEventIndex < _TIMER_EVENT_COUNT; ucTimerEventIndex++)
- 540   1          {
- 541   2              usPresentTime = MCUTimerGetTimerCounter();
- 542   2      
- 543   2              if(MCUTimerCheckEventValid(ucTimerEventIndex) == _FALSE)
- 544   2              {
- 545   3                  continue;
- 546   3              }         
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          04/22/2021 09:18:53 PAGE 10  
+ 524   2         default:   break;
+ 525   2         
+ 526   2      
+ 527   2      }
+ 528   1        
+ 529   1      }
+ 530          
+ 531          //--------------------------------------------------
+ 532          // Description  : Timer Handler
+ 533          // Input Value  : None
+ 534          // Output Value : None
+ 535          //--------------------------------------------------
+ 536          void SysTimerHandler(void)
+ 537          {
+ 538   1          BYTE ucTimerEventIndex = 0;
+ 539   1          BYTE ucTimerEventID = 0;    
+ 540   1          WORD usPresentTime = 0;
+ 541   1      
+ 542   1          for(ucTimerEventIndex = 0; ucTimerEventIndex < _TIMER_EVENT_COUNT; ucTimerEventIndex++)
+ 543   1          {
+ 544   2              usPresentTime = MCUTimerGetTimerCounter();
+ 545   2      
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/04/2021 17:40:40 PAGE 10  
 
- 547   2              
- 548   2              if(usPresentTime > MCUTimerGetEventTime(ucTimerEventIndex))
- 549   2              {
- 550   3                  MCUTimerClrEventValid(ucTimerEventIndex);
- 551   3      
- 552   3                  // Get Event ID From Event Index
- 553   3                  ucTimerEventID = MCUTimerGetEventID(ucTimerEventIndex);
- 554   3                  
- 555   3                  if(ucTimerEventID < _USER_TIMER_EVENT_END)
- 556   3                  {
- 557   4                      UserInterfaceTimerEventProc(ucTimerEventID);
- 558   4                      
- 559   4                      continue;
- 560   4                  }
- 561   3      
- 562   3                  if(ucTimerEventID < _SYSTEM_TIMER_EVENT_END)
- 563   3                  {
- 564   4                      SysTimerEventProc(ucTimerEventID);
- 565   4                      
- 566   4                      continue;
- 567   4                  }
- 568   3                  
- 569   3               //   MCUTimerEventProc(ucTimerEventID);
- 570   3              }
- 571   2          }
- 572   1      
- 573   1      }
- 574          
- 575          //--------------------------------------------------
- 576          // Description  : Timer Event Process
- 577          // Input Value  : enumEventID --> Event to be processed
- 578          // Output Value : None
- 579          //--------------------------------------------------
- 580          void SysTimerEventProc(EnumSystemTimerEventID enumEventID)
- 581          {
- 582   1      
- 583   1      switch(enumEventID)
- 584   1         { 
- 585   2         case _SYSTEM_TIMER_EVENT_GRN_RED_OFF:
- 586   2           PowerLED(_SYSTEM_TIMER_EVENT_GRN_RED_OFF);
- 587   2        break;
- 588   2      
- 589   2         case _SYSTEM_TIMER_EVENT_GRN_ON_RED_OFF:
- 590   2         PowerLED(_SYSTEM_TIMER_EVENT_GRN_ON_RED_OFF);
- 591   2        break;
- 592   2      
- 593   2         case _SYSTEM_TIMER_EVENT_GRN_OFF_RED_ON: 
- 594   2          PowerLED(_SYSTEM_TIMER_EVENT_GRN_OFF_RED_ON);
- 595   2        break;
- 596   2      
- 597   2         case _SYSTEM_TIMER_EVENT_GRN_RED_ON:
- 598   2            PowerLED(_SYSTEM_TIMER_EVENT_GRN_RED_ON);
- 599   2          break;
- 600   2      
- 601   2         case _SYSTEM_TIMER_EVENT_GRN_BLINK:
- 602   2           PowerLED(_SYSTEM_TIMER_EVENT_GRN_BLINK);
- 603   2           MCUTimerActiveTimerEvent(SEC(0.25), _SYSTEM_TIMER_EVENT_GRN_BLINK);
- 604   2          break;
- 605   2      
- 606   2         case _SYSTEM_TIMER_EVENT_GRN_2S_BLINK:
- 607   2           PowerLED(_SYSTEM_TIMER_EVENT_GRN_BLINK);
- 608   2           MCUTimerActiveTimerEvent(SEC(1), _SYSTEM_TIMER_EVENT_GRN_2S_BLINK);
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          04/22/2021 09:18:53 PAGE 11  
+ 546   2              if(MCUTimerCheckEventValid(ucTimerEventIndex) == _FALSE)
+ 547   2              {
+ 548   3                  continue;
+ 549   3              }         
+ 550   2              
+ 551   2              if(usPresentTime > MCUTimerGetEventTime(ucTimerEventIndex))
+ 552   2              {
+ 553   3                  MCUTimerClrEventValid(ucTimerEventIndex);
+ 554   3      
+ 555   3                  // Get Event ID From Event Index
+ 556   3                  ucTimerEventID = MCUTimerGetEventID(ucTimerEventIndex);
+ 557   3                  
+ 558   3                  if(ucTimerEventID < _USER_TIMER_EVENT_END)
+ 559   3                  {
+ 560   4                      UserInterfaceTimerEventProc(ucTimerEventID);
+ 561   4                      
+ 562   4                      continue;
+ 563   4                  }
+ 564   3      
+ 565   3                  if(ucTimerEventID < _SYSTEM_TIMER_EVENT_END)
+ 566   3                  {
+ 567   4                      SysTimerEventProc(ucTimerEventID);
+ 568   4                      
+ 569   4                      continue;
+ 570   4                  }
+ 571   3                  
+ 572   3               //   MCUTimerEventProc(ucTimerEventID);
+ 573   3              }
+ 574   2          }
+ 575   1      
+ 576   1      }
+ 577          
+ 578          //--------------------------------------------------
+ 579          // Description  : Timer Event Process
+ 580          // Input Value  : enumEventID --> Event to be processed
+ 581          // Output Value : None
+ 582          //--------------------------------------------------
+ 583          void SysTimerEventProc(EnumSystemTimerEventID enumEventID)
+ 584          {
+ 585   1      
+ 586   1      switch(enumEventID)
+ 587   1         { 
+ 588   2         case _SYSTEM_TIMER_EVENT_GRN_RED_OFF:
+ 589   2           PowerLED(_SYSTEM_TIMER_EVENT_GRN_RED_OFF);
+ 590   2        break;
+ 591   2      
+ 592   2         case _SYSTEM_TIMER_EVENT_GRN_ON_RED_OFF:
+ 593   2         PowerLED(_SYSTEM_TIMER_EVENT_GRN_ON_RED_OFF);
+ 594   2        break;
+ 595   2      
+ 596   2         case _SYSTEM_TIMER_EVENT_GRN_OFF_RED_ON: 
+ 597   2          PowerLED(_SYSTEM_TIMER_EVENT_GRN_OFF_RED_ON);
+ 598   2        break;
+ 599   2      
+ 600   2         case _SYSTEM_TIMER_EVENT_GRN_RED_ON:
+ 601   2            PowerLED(_SYSTEM_TIMER_EVENT_GRN_RED_ON);
+ 602   2          break;
+ 603   2      
+ 604   2         case _SYSTEM_TIMER_EVENT_GRN_BLINK:
+ 605   2           PowerLED(_SYSTEM_TIMER_EVENT_GRN_BLINK);
+ 606   2           MCUTimerActiveTimerEvent(SEC(0.25), _SYSTEM_TIMER_EVENT_GRN_BLINK);
+ 607   2          break;
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/04/2021 17:40:40 PAGE 11  
 
- 609   2          break;
- 610   2      
- 611   2         case _SYSTEM_TIMER_EVENT_RED_BLINK:
- 612   2           PowerLED(_SYSTEM_TIMER_EVENT_RED_BLINK);
- 613   2           MCUTimerActiveTimerEvent(SEC(1), _SYSTEM_TIMER_EVENT_RED_BLINK);
- 614   2      
- 615   2          break;  
- 616   2      
- 617   2        case _SYSTEM_TIMER_EVENT_GRN_RED_BLINK:
- 618   2           PowerLED(_SYSTEM_TIMER_EVENT_GRN_RED_BLINK);
- 619   2           MCUTimerActiveTimerEvent(SEC(1), _SYSTEM_TIMER_EVENT_GRN_RED_BLINK);
- 620   2      
- 621   2         break; 
- 622   2      
- 623   2         case _SYSTEM_TIMER_EVENT_GRN_ON_RED_BLINK:
- 624   2          PowerLED(_SYSTEM_TIMER_EVENT_GRN_ON_RED_BLINK);
- 625   2          MCUTimerActiveTimerEvent(SEC(1), _SYSTEM_TIMER_EVENT_GRN_ON_RED_BLINK);
- 626   2          break; 
- 627   2          break;
- 628   2      
- 629   2         case _SYSTEM_TIMER_EVENT_GRN_2S_BLINK_RED_ON:
- 630   2           PowerLED(_SYSTEM_TIMER_EVENT_GRN_2S_BLINK_RED_ON);
- 631   2           MCUTimerActiveTimerEvent(SEC(1), _SYSTEM_TIMER_EVENT_GRN_2S_BLINK_RED_ON);
- 632   2              break;
- 633   2       case _SYSTEM_TIMER_EVENT_BATT_LOW_RED_BLINK:
- 634   2        PowerLED(_SYSTEM_TIMER_EVENT_GRN_RED_OFF);
- 635   2        PowerLED(_SYSTEM_TIMER_EVENT_GRN_OFF_RED_ON);
- 636   2        MCUTimerDelayXms(500);
+ 608   2      
+ 609   2         case _SYSTEM_TIMER_EVENT_GRN_2S_BLINK:
+ 610   2           PowerLED(_SYSTEM_TIMER_EVENT_GRN_BLINK);
+ 611   2           MCUTimerActiveTimerEvent(SEC(1), _SYSTEM_TIMER_EVENT_GRN_2S_BLINK);
+ 612   2          break;
+ 613   2      
+ 614   2         case _SYSTEM_TIMER_EVENT_RED_BLINK:
+ 615   2           PowerLED(_SYSTEM_TIMER_EVENT_RED_BLINK);
+ 616   2           MCUTimerActiveTimerEvent(SEC(1), _SYSTEM_TIMER_EVENT_RED_BLINK);
+ 617   2      
+ 618   2          break;  
+ 619   2      
+ 620   2        case _SYSTEM_TIMER_EVENT_GRN_RED_BLINK:
+ 621   2           PowerLED(_SYSTEM_TIMER_EVENT_GRN_RED_BLINK);
+ 622   2           MCUTimerActiveTimerEvent(SEC(1), _SYSTEM_TIMER_EVENT_GRN_RED_BLINK);
+ 623   2      
+ 624   2         break; 
+ 625   2      
+ 626   2         case _SYSTEM_TIMER_EVENT_GRN_ON_RED_BLINK:
+ 627   2          PowerLED(_SYSTEM_TIMER_EVENT_GRN_ON_RED_BLINK);
+ 628   2          MCUTimerActiveTimerEvent(SEC(1), _SYSTEM_TIMER_EVENT_GRN_ON_RED_BLINK);
+ 629   2          break; 
+ 630   2          break;
+ 631   2      
+ 632   2         case _SYSTEM_TIMER_EVENT_GRN_2S_BLINK_RED_ON:
+ 633   2           PowerLED(_SYSTEM_TIMER_EVENT_GRN_2S_BLINK_RED_ON);
+ 634   2           MCUTimerActiveTimerEvent(SEC(1), _SYSTEM_TIMER_EVENT_GRN_2S_BLINK_RED_ON);
+ 635   2              break;
+ 636   2       case _SYSTEM_TIMER_EVENT_BATT_LOW_RED_BLINK:
  637   2        PowerLED(_SYSTEM_TIMER_EVENT_GRN_RED_OFF);
- 638   2        MCUTimerDelayXms(500);
- 639   2      
- 640   2        PowerLED(_SYSTEM_TIMER_EVENT_GRN_OFF_RED_ON);
+ 638   2        PowerLED(_SYSTEM_TIMER_EVENT_GRN_OFF_RED_ON);
+ 639   2        MCUTimerDelayXms(500);
+ 640   2        PowerLED(_SYSTEM_TIMER_EVENT_GRN_RED_OFF);
  641   2        MCUTimerDelayXms(500);
- 642   2        PowerLED(_SYSTEM_TIMER_EVENT_GRN_RED_OFF);
- 643   2        MCUTimerDelayXms(500);
- 644   2      
- 645   2        PowerLED(_SYSTEM_TIMER_EVENT_GRN_OFF_RED_ON);
+ 642   2      
+ 643   2        PowerLED(_SYSTEM_TIMER_EVENT_GRN_OFF_RED_ON);
+ 644   2        MCUTimerDelayXms(500);
+ 645   2        PowerLED(_SYSTEM_TIMER_EVENT_GRN_RED_OFF);
  646   2        MCUTimerDelayXms(500);
- 647   2        PowerLED(_SYSTEM_TIMER_EVENT_GRN_RED_OFF);
- 648   2        MCUTimerDelayXms(500);
- 649   2      
- 650   2        SET_BATTERY_CHARGE_STATE(_BATT_STATUS_NONE);//reset battery state.
- 651   2        break;
- 652   2        
- 653   2         case _SYSTEM_TIMER_EVENT_JUDGE_CHECK_AC_CABLE:
- 654   2        
- 655   2          if(Check_ADAP_IN()==_TRUE)    
- 656   2          {
- 657   3            
- 658   3                  if(GET_AC_PLUG()==_FALSE)
- 659   3                  { 
- 660   4          
- 661   4                  if(MCUTimerCheckEventValid(_SYSTEM_TIMER_EVENT_JUDGE_BATT_MODE)==_TRUE)
- 662   4                    {
- 663   5                      #if(_DEBUG_MESSAGE_SysTimerEvent==ON)
-                              GraphicsPrint(BLUE,"(AC1)");
-                              #endif  
- 666   5      
- 667   5                    MCUTimerCancelTimerEvent( _SYSTEM_TIMER_EVENT_JUDGE_BATT_MODE);  
- 668   5                    MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_JUDGE_BATT_MODE); 
- 669   5                    }
- 670   4          
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          04/22/2021 09:18:53 PAGE 12  
+ 647   2      
+ 648   2        PowerLED(_SYSTEM_TIMER_EVENT_GRN_OFF_RED_ON);
+ 649   2        MCUTimerDelayXms(500);
+ 650   2        PowerLED(_SYSTEM_TIMER_EVENT_GRN_RED_OFF);
+ 651   2        MCUTimerDelayXms(500);
+ 652   2      
+ 653   2        SET_BATTERY_CHARGE_STATE(_BATT_STATUS_NONE);//reset battery state.
+ 654   2        break;
+ 655   2        
+ 656   2         case _SYSTEM_TIMER_EVENT_JUDGE_CHECK_AC_CABLE:
+ 657   2        
+ 658   2          if(Check_ADAP_IN()==_TRUE)    
+ 659   2          {
+ 660   3            
+ 661   3                  if(GET_AC_PLUG()==_FALSE)
+ 662   3                  { 
+ 663   4          
+ 664   4                  if(MCUTimerCheckEventValid(_SYSTEM_TIMER_EVENT_JUDGE_BATT_MODE)==_TRUE)
+ 665   4                    {
+ 666   5                      #if(_DEBUG_MESSAGE_SysTimerEvent==ON)
+ 667   5                      GraphicsPrint(BLUE,"(AC1)");
+ 668   5                      #endif  
+ 669   5      
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/04/2021 17:40:40 PAGE 12  
 
- 671   4                  if(MCUTimerCheckEventValid(_SYSTEM_TIMER_EVENT_JUDGE_AC_MODE)==_TRUE)
- 672   4                    {
- 673   5                    MCUTimerCancelTimerEvent( _SYSTEM_TIMER_EVENT_JUDGE_AC_MODE);  
- 674   5                    MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_JUDGE_AC_MODE); 
- 675   5                    #if(_DEBUG_MESSAGE_SysTimerEvent==ON)
-                            GraphicsPrint(BLUE,"(AC2)");
-                            #endif  
- 678   5                    }
- 679   4          
- 680   4                  }
- 681   3            
- 682   3          }
- 683   2          else
- 684   2            {
- 685   3              if(GET_AC_PLUG()==_TRUE)
- 686   3              {
- 687   4                    if(MCUTimerCheckEventValid(_SYSTEM_TIMER_EVENT_JUDGE_BATT_MODE)==_TRUE)
- 688   4                    {
- 689   5                    MCUTimerCancelTimerEvent( _SYSTEM_TIMER_EVENT_JUDGE_BATT_MODE);  
- 690   5                    MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_JUDGE_BATT_MODE); 
- 691   5                    #if(_DEBUG_MESSAGE_SysTimerEvent==ON)
-                            GraphicsPrint(BLUE,"(AC3)");
-                            #endif
- 694   5                    }
- 695   4          
- 696   4                  if(MCUTimerCheckEventValid(_SYSTEM_TIMER_EVENT_JUDGE_AC_MODE)==_TRUE)
- 697   4                    {
- 698   5                    #if(_DEBUG_MESSAGE_SysTimerEvent==ON)
-                            GraphicsPrint(BLUE,"(AC4)");
-                            #endif  
- 701   5                    MCUTimerCancelTimerEvent( _SYSTEM_TIMER_EVENT_JUDGE_AC_MODE);  
- 702   5                    MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_JUDGE_AC_MODE); 
- 703   5                    }
- 704   4              }
- 705   3            }
- 706   2                
- 707   2            MCUTimerActiveTimerEvent(SEC(1), _SYSTEM_TIMER_EVENT_JUDGE_CHECK_AC_CABLE);   
- 708   2            break;
- 709   2       case _SYSTEM_TIMER_EVENT_REPLAY_REGULAR_DATA:
- 710   2      
- 711   2          if(GET_DVR_SystemReadyNotic()==_TRUE)          
- 712   2           MCU_SendCmdToDVR(MCU_PROTOCOL_CMD_REGULAR_DATA);
- 713   2          
- 714   2           MCUTimerActiveTimerEvent(SEC(1), _SYSTEM_TIMER_EVENT_REPLAY_REGULAR_DATA);
- 715   2           
- 716   2        break;
- 717   2        case _SYSTEM_TIMER_EVENT_POWER_OFF_ON_DELAY:
- 718   2              #if(_DEBUG_MESSAGE_SysTimerEvent==ON)
-                      GraphicsPrint(RED,"(CLR_DVR_PowerOFFDelay)");
-                      #endif
- 721   2            CLR_DVR_PowerOFFDelay();
- 722   2          break;
- 723   2          case _SYSTEM_TIMER_EVENT_JUDGE_FIRST_GET_BATT_BTH_STATE:
- 724   2            #if (_DEBUG_MESSAGE_BATTERY_TEST)
+ 670   5                    MCUTimerCancelTimerEvent( _SYSTEM_TIMER_EVENT_JUDGE_BATT_MODE);  
+ 671   5                    MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_JUDGE_BATT_MODE); 
+ 672   5                    }
+ 673   4          
+ 674   4                  if(MCUTimerCheckEventValid(_SYSTEM_TIMER_EVENT_JUDGE_AC_MODE)==_TRUE)
+ 675   4                    {
+ 676   5                    MCUTimerCancelTimerEvent( _SYSTEM_TIMER_EVENT_JUDGE_AC_MODE);  
+ 677   5                    MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_JUDGE_AC_MODE); 
+ 678   5                    #if(_DEBUG_MESSAGE_SysTimerEvent==ON)
+ 679   5                    GraphicsPrint(BLUE,"(AC2)");
+ 680   5                    #endif  
+ 681   5                    }
+ 682   4          
+ 683   4                  }
+ 684   3            
+ 685   3          }
+ 686   2          else
+ 687   2            {
+ 688   3              if(GET_AC_PLUG()==_TRUE)
+ 689   3              {
+ 690   4                    if(MCUTimerCheckEventValid(_SYSTEM_TIMER_EVENT_JUDGE_BATT_MODE)==_TRUE)
+ 691   4                    {
+ 692   5                    MCUTimerCancelTimerEvent( _SYSTEM_TIMER_EVENT_JUDGE_BATT_MODE);  
+ 693   5                    MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_JUDGE_BATT_MODE); 
+ 694   5                    #if(_DEBUG_MESSAGE_SysTimerEvent==ON)
+ 695   5                    GraphicsPrint(BLUE,"(AC3)");
+ 696   5                    #endif
+ 697   5                    }
+ 698   4          
+ 699   4                  if(MCUTimerCheckEventValid(_SYSTEM_TIMER_EVENT_JUDGE_AC_MODE)==_TRUE)
+ 700   4                    {
+ 701   5                    #if(_DEBUG_MESSAGE_SysTimerEvent==ON)
+ 702   5                    GraphicsPrint(BLUE,"(AC4)");
+ 703   5                    #endif  
+ 704   5                    MCUTimerCancelTimerEvent( _SYSTEM_TIMER_EVENT_JUDGE_AC_MODE);  
+ 705   5                    MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_JUDGE_AC_MODE); 
+ 706   5                    }
+ 707   4              }
+ 708   3            }
+ 709   2                
+ 710   2            MCUTimerActiveTimerEvent(SEC(1), _SYSTEM_TIMER_EVENT_JUDGE_CHECK_AC_CABLE);   
+ 711   2            break;
+ 712   2       case _SYSTEM_TIMER_EVENT_REPLAY_REGULAR_DATA:
+ 713   2      
+ 714   2          if(GET_DVR_SystemReadyNotic()==_TRUE)          
+ 715   2           MCU_SendCmdToDVR(MCU_PROTOCOL_CMD_REGULAR_DATA);
+ 716   2          
+ 717   2           MCUTimerActiveTimerEvent(SEC(1), _SYSTEM_TIMER_EVENT_REPLAY_REGULAR_DATA);
+ 718   2           
+ 719   2        break;
+ 720   2        case _SYSTEM_TIMER_EVENT_POWER_OFF_ON_DELAY:
+ 721   2              #if(_DEBUG_MESSAGE_SysTimerEvent==ON)
+ 722   2              GraphicsPrint(RED,"(CLR_DVR_PowerOFFDelay)");
+ 723   2              #endif
+ 724   2            CLR_DVR_PowerOFFDelay();
+ 725   2          break;
+ 726   2          case _SYSTEM_TIMER_EVENT_JUDGE_FIRST_GET_BATT_BTH_STATE:
+ 727   2            #if (_DEBUG_MESSAGE_BATTERY_TEST)
                     #else
- 726   2            BatteryVoltage=GetBatteryVoltage();
- 727   2      //      BatteryBTH=GetBatteryBTH()+7;
- 728   2            BatteryBTH=GetBatteryBTH();
- 729   2            #endif
- 730   2      
- 731   2            if(BatteryVoltage<=BATTERY_CAPACITY_MIN) //<11.6V
- 732   2              BATERY_STAT=_BATT_STATUS_CAPACITY_MIN;
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          04/22/2021 09:18:53 PAGE 13  
+ 729   2            BatteryVoltage=GetBatteryVoltage();
+ 730   2      //      BatteryBTH=GetBatteryBTH()+7;
+ 731   2            BatteryBTH=GetBatteryBTH();
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/04/2021 17:40:40 PAGE 13  
 
- 733   2              else if((BatteryVoltage>BATTERY_CAPACITY_MIN)&&(BatteryVoltage<=BATTERY_CAPACITY_NO_STARTUP))
- 734   2                BATERY_STAT=_BATT_STATUS_CAPACITY_NO_STARTUP;       
- 735   2              else if((BatteryVoltage>BATTERY_CAPACITY_NO_STARTUP)&&(BatteryVoltage<=BATTERY_CAPACITY_LEVEL0))
- 736   2                BATERY_STAT=_BATT_STATUS_CAPACITY_LEVEL0;
- 737   2              else if((BatteryVoltage>BATTERY_CAPACITY_LEVEL0)&&(BatteryVoltage<=BATTERY_CAPACITY_LEVEL1))
- 738   2                BATERY_STAT=_BATT_STATUS_CAPACITY_LEVEL1;
- 739   2              else if((BatteryVoltage>BATTERY_CAPACITY_LEVEL1)&&(BatteryVoltage<=BATTERY_CAPACITY_LEVEL2))
- 740   2                BATERY_STAT=_BATT_STATUS_CAPACITY_LEVEL2;
- 741   2              else if((BatteryVoltage>BATTERY_CAPACITY_LEVEL2)&&(BatteryVoltage<=BATTERY_CAPACITY_LEVEL3))
- 742   2                BATERY_STAT=_BATT_STATUS_CAPACITY_LEVEL3;
- 743   2              else if((BatteryVoltage>BATTERY_CAPACITY_LEVEL3)&&(BatteryVoltage<=BATTERY_CAPACITY_HIGH))
- 744   2                BATERY_STAT=_BATT_STATUS_CAPACITY_LEVEL4;
- 745   2              else if((BatteryVoltage>BATTERY_CAPACITY_HIGH)&&(BatteryVoltage<=BATTERY_CAPACITY_HIGH_STOP)&&(PowerFl
+ 732   2            #endif
+ 733   2      
+ 734   2            if(BatteryVoltage<=BATTERY_CAPACITY_MIN) //<11.6V
+ 735   2              BATERY_STAT=_BATT_STATUS_CAPACITY_MIN;
+ 736   2              else if((BatteryVoltage>BATTERY_CAPACITY_MIN)&&(BatteryVoltage<=BATTERY_CAPACITY_NO_STARTUP))
+ 737   2                BATERY_STAT=_BATT_STATUS_CAPACITY_NO_STARTUP;       
+ 738   2              else if((BatteryVoltage>BATTERY_CAPACITY_NO_STARTUP)&&(BatteryVoltage<=BATTERY_CAPACITY_LEVEL0))
+ 739   2                BATERY_STAT=_BATT_STATUS_CAPACITY_LEVEL0;
+ 740   2              else if((BatteryVoltage>BATTERY_CAPACITY_LEVEL0)&&(BatteryVoltage<=BATTERY_CAPACITY_LEVEL1))
+ 741   2                BATERY_STAT=_BATT_STATUS_CAPACITY_LEVEL1;
+ 742   2              else if((BatteryVoltage>BATTERY_CAPACITY_LEVEL1)&&(BatteryVoltage<=BATTERY_CAPACITY_LEVEL2))
+ 743   2                BATERY_STAT=_BATT_STATUS_CAPACITY_LEVEL2;
+ 744   2              else if((BatteryVoltage>BATTERY_CAPACITY_LEVEL2)&&(BatteryVoltage<=BATTERY_CAPACITY_LEVEL3))
+ 745   2                BATERY_STAT=_BATT_STATUS_CAPACITY_LEVEL3;
+ 746   2              else if((BatteryVoltage>BATTERY_CAPACITY_LEVEL3)&&(BatteryVoltage<=BATTERY_CAPACITY_HIGH))
+ 747   2                BATERY_STAT=_BATT_STATUS_CAPACITY_LEVEL4;
+ 748   2              else if((BatteryVoltage>BATTERY_CAPACITY_HIGH)&&(BatteryVoltage<=BATTERY_CAPACITY_HIGH_STOP)&&(PowerFl
              -ag==ON))
- 746   2                BATERY_STAT=_BATT_STATUS_CAPACITY_MAX;
- 747   2              else if((BatteryVoltage>BATTERY_CAPACITY_HIGH)&&(BatteryVoltage<=(BATTERY_CAPACITY_HIGH_STOP+9))&&(Pow
+ 749   2                BATERY_STAT=_BATT_STATUS_CAPACITY_MAX;
+ 750   2              else if((BatteryVoltage>BATTERY_CAPACITY_HIGH)&&(BatteryVoltage<=(BATTERY_CAPACITY_HIGH_STOP+9))&&(Pow
              -erFlag==OFF))
- 748   2                BATERY_STAT=_BATT_STATUS_CAPACITY_MAX;
- 749   2              else          
- 750   2                BATERY_STAT=_BATT_STATUS_CAPACITY_MAX_STOP;
- 751   2      
- 752   2            SET_BATTERY_STATE(BATERY_STAT);
- 753   2          
- 754   2            SET_BATTERY_CAPACITY(BatteryVoltage);
- 755   2      
- 756   2      
- 757   2            if((BatteryBTH<=BTH_TEMP_HIGH)&&(BatteryBTH>BTH_TEMP_MIN)) //High temperature.
- 758   2              TEMP_STAT=_BATT_STATUS_TEMP_HIGH;
- 759   2              else if((BatteryBTH>BTH_TEMP_HIGH)&&(BatteryBTH<=BTH_TEMP_HIGH_WARN))//50~55 warnning
- 760   2                TEMP_STAT=_BATT_STATUS_TEMP_HIGH_WARN;
- 761   2              else if((BatteryBTH>BTH_TEMP_HIGH_WARN)&&(BatteryBTH<=BTH_TEMP_LOW_WARN))
- 762   2                TEMP_STAT=_BATT_STATUS_TEMP_NORMAL;
- 763   2              else if((BatteryBTH>BTH_TEMP_LOW_WARN)&&(BatteryBTH<=BTH_TEMP_LOW))  //0~-5 warnning
- 764   2                TEMP_STAT=_BATT_STATUS_TEMP_LOW_WARN;
- 765   2              else if((BatteryBTH>BTH_TEMP_LOW)&&(BatteryBTH<=BATTERY_ACD_no_battery)) /// if(BatteryBTH>BTH_TEMP_LO
+ 751   2                BATERY_STAT=_BATT_STATUS_CAPACITY_MAX;
+ 752   2              else          
+ 753   2                BATERY_STAT=_BATT_STATUS_CAPACITY_MAX_STOP;
+ 754   2      
+ 755   2            SET_BATTERY_STATE(BATERY_STAT);
+ 756   2          
+ 757   2            SET_BATTERY_CAPACITY(BatteryVoltage);
+ 758   2      
+ 759   2      
+ 760   2            if((BatteryBTH<=BTH_TEMP_HIGH)&&(BatteryBTH>BTH_TEMP_MIN)) //High temperature.
+ 761   2              TEMP_STAT=_BATT_STATUS_TEMP_HIGH;
+ 762   2              else if((BatteryBTH>BTH_TEMP_HIGH)&&(BatteryBTH<=BTH_TEMP_HIGH_WARN))//50~55 warnning
+ 763   2                TEMP_STAT=_BATT_STATUS_TEMP_HIGH_WARN;
+ 764   2              else if((BatteryBTH>BTH_TEMP_HIGH_WARN)&&(BatteryBTH<=BTH_TEMP_LOW_WARN))
+ 765   2                TEMP_STAT=_BATT_STATUS_TEMP_NORMAL;
+ 766   2              else if((BatteryBTH>BTH_TEMP_LOW_WARN)&&(BatteryBTH<=BTH_TEMP_LOW))  //0~-5 warnning
+ 767   2                TEMP_STAT=_BATT_STATUS_TEMP_LOW_WARN;
+ 768   2              else if((BatteryBTH>BTH_TEMP_LOW)&&(BatteryBTH<=BATTERY_ACD_no_battery)) /// if(BatteryBTH>BTH_TEMP_LO
              -W)  //-5~-10 warnning
- 766   2                TEMP_STAT=_BATT_STATUS_TEMP_LOW;
- 767   2              else{
- 768   3                SET_NO_BATTERY();
- 769   3                SET_BATTERY_STATE(_BATT_STATUS_NO_BATT);
- 770   3                TEMP_STAT=_BATT_STATUS_TEMP_NORMAL; ///no DC12V input
- 771   3                }
- 772   2      
- 773   2              if(GET_BATTERY_CHARGE_STATE()==_BATT_STATUS_NO_BATT)  
- 774   2              TEMP_STAT=_BATT_STATUS_TEMP_NORMAL;
+ 769   2                TEMP_STAT=_BATT_STATUS_TEMP_LOW;
+ 770   2              else{
+ 771   3                SET_NO_BATTERY();
+ 772   3                SET_BATTERY_STATE(_BATT_STATUS_NO_BATT);
+ 773   3                TEMP_STAT=_BATT_STATUS_TEMP_NORMAL; ///no DC12V input
+ 774   3                }
  775   2      
- 776   2              SET_BTH_STATE(TEMP_STAT); 
- 777   2      
- 778   2              STAT1_temp=GET_STAT1(); 
- 779   2              if(STAT1_Flag!=STAT1_temp)
- 780   2              STAT1_Flag=STAT1_temp;
- 781   2                    
- 782   2              STAT2_temp=GET_STAT2(); 
- 783   2              if(STAT2_Flag!=STAT2_temp)
- 784   2              STAT2_Flag=STAT2_temp;        
- 785   2      
- 786   2            /*
- 787   2            if((BatteryBTH<=CHARGE_TEMP_HIGH)&&(BatteryBTH>CHARGE_TEMP_LOW))  
- 788   2              {
- 789   2              if(GET_AC_PLUG()==_TRUE)  
- 790   2                SET_CHARGE_TMEP_ABNORMAL();
- 791   2      
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          04/22/2021 09:18:53 PAGE 14  
+ 776   2              if(GET_BATTERY_CHARGE_STATE()==_BATT_STATUS_NO_BATT)  
+ 777   2              TEMP_STAT=_BATT_STATUS_TEMP_NORMAL;
+ 778   2      
+ 779   2              SET_BTH_STATE(TEMP_STAT); 
+ 780   2      
+ 781   2              STAT1_temp=GET_STAT1(); 
+ 782   2              if(STAT1_Flag!=STAT1_temp)
+ 783   2              STAT1_Flag=STAT1_temp;
+ 784   2                    
+ 785   2              STAT2_temp=GET_STAT2(); 
+ 786   2              if(STAT2_Flag!=STAT2_temp)
+ 787   2              STAT2_Flag=STAT2_temp;        
+ 788   2      
+ 789   2            /*
+ 790   2            if((BatteryBTH<=CHARGE_TEMP_HIGH)&&(BatteryBTH>CHARGE_TEMP_LOW))  
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/04/2021 17:40:40 PAGE 14  
 
- 792   2              if(GET_BATTERY_CHARGE_STATE()==_BATT_STATUS_NO_BATT)  
- 793   2                    CLR_CHARGE_TMEP_ABNORMAL();
- 794   2              }
- 795   2            */
- 796   2            break;
- 797   2          case _SYSTEM_TIMER_EVENT_JUDGE_BATT_STATE:  
- 798   2      
- 799   2          #if (_DEBUG_MESSAGE_BATTERY_TEST)
+ 791   2              {
+ 792   2              if(GET_AC_PLUG()==_TRUE)  
+ 793   2                SET_CHARGE_TMEP_ABNORMAL();
+ 794   2      
+ 795   2              if(GET_BATTERY_CHARGE_STATE()==_BATT_STATUS_NO_BATT)  
+ 796   2                    CLR_CHARGE_TMEP_ABNORMAL();
+ 797   2              }
+ 798   2            */
+ 799   2            break;
+ 800   2          case _SYSTEM_TIMER_EVENT_JUDGE_BATT_STATE:  
+ 801   2      
+ 802   2          #if (_DEBUG_MESSAGE_BATTERY_TEST)
                   #else
- 801   2            BatteryVoltage=GetBatteryVoltage();
- 802   2          #endif
- 803   2          
- 804   2            #if 1
- 805   2          SET_BATTERY_CAPACITY(BatteryVoltage);
- 806   2            
- 807   2      //   if((GET_BATTERY_CAPACITY()<200)||(BatteryBTH>=935)) //no battery  <3.3V
- 808   2      //     if(((GET_BATTERY_CAPACITY()<BATTERY_ACD_MIN)||(STAT1_Flag==1))&&(GET_AC_PLUG()==_TRUE)) //no battery
+ 804   2            BatteryVoltage=GetBatteryVoltage();
+ 805   2          #endif
+ 806   2          
+ 807   2            #if 1
+ 808   2          SET_BATTERY_CAPACITY(BatteryVoltage);
+ 809   2            
+ 810   2      //   if((GET_BATTERY_CAPACITY()<200)||(BatteryBTH>=935)) //no battery  <3.3V
+ 811   2      //     if(((GET_BATTERY_CAPACITY()<BATTERY_ACD_MIN)||(STAT1_Flag==1))&&(GET_AC_PLUG()==_TRUE)) //no battery
              -  <3.3V
- 809   2      /*     if((GET_BATTERY_CAPACITY()<BATTERY_ACD_MIN)&&(GET_AC_PLUG()==_TRUE)) //no battery  <3.3V
- 810   2              {
- 811   2            SET_NO_BATTERY();
- 812   2            SET_BATTERY_STATE(_BATT_STATUS_NO_BATT); 
- 813   2              }
- 814   2          else 
- 815   2          */  
- 816   2          {
- 817   3            if(GET_NO_BATTERY()==_TRUE)
- 818   3              {
- 819   4              BattDetect1_COUNT=0;
- 820   4              BattDetect2_COUNT=0;
- 821   4              BattDetect3_COUNT=0;
- 822   4              BattDetect4_COUNT=0;
- 823   4              BattDetect5_COUNT=0;
- 824   4              BattDetectMin_COUNT=0;
- 825   4              BattDetectHigh_COUNT=0;
- 826   4              BattDetectHighStop_COUNT=0;
- 827   4              BattDetectNoStartUp_COUNT=0;
- 828   4              BATERY_STAT=_BATT_STATUS_CAPACITY_LEVEL4;
- 829   4              }
- 830   3              #if (_DEBUG_MESSAGE_Power_Supply_TEST==ON)
+ 812   2      /*     if((GET_BATTERY_CAPACITY()<BATTERY_ACD_MIN)&&(GET_AC_PLUG()==_TRUE)) //no battery  <3.3V
+ 813   2              {
+ 814   2            SET_NO_BATTERY();
+ 815   2            SET_BATTERY_STATE(_BATT_STATUS_NO_BATT); 
+ 816   2              }
+ 817   2          else 
+ 818   2          */  
+ 819   2          {
+ 820   3            if(GET_NO_BATTERY()==_TRUE)
+ 821   3              {
+ 822   4              BattDetect1_COUNT=0;
+ 823   4              BattDetect2_COUNT=0;
+ 824   4              BattDetect3_COUNT=0;
+ 825   4              BattDetect4_COUNT=0;
+ 826   4              BattDetect5_COUNT=0;
+ 827   4              BattDetectMin_COUNT=0;
+ 828   4              BattDetectHigh_COUNT=0;
+ 829   4              BattDetectHighStop_COUNT=0;
+ 830   4              BattDetectNoStartUp_COUNT=0;
+ 831   4              BATERY_STAT=_BATT_STATUS_CAPACITY_LEVEL4;
+ 832   4              }
+ 833   3              #if (_DEBUG_MESSAGE_Power_Supply_TEST==ON)
                       CLR_NO_BATTERY(); 
                       #endif
- 833   3            if(BatteryVoltage<=BATTERY_CAPACITY_MIN) //<11.6V
- 834   3            {
- 835   4                  BattDetect1_COUNT=0;
- 836   4                  BattDetect2_COUNT=0;
- 837   4              BattDetect3_COUNT=0;
- 838   4              BattDetect4_COUNT=0;
- 839   4              BattDetect5_COUNT=0;              
- 840   4              BattDetectMin_COUNT++;
- 841   4              BattDetectHigh_COUNT=0;
- 842   4              BattDetectHighStop_COUNT=0;
- 843   4              BattDetectNoStartUp_COUNT=0;
- 844   4            }
- 845   3            else if((BatteryVoltage>BATTERY_CAPACITY_MIN)&&(BatteryVoltage<=BATTERY_CAPACITY_NO_STARTUP))
- 846   3            {
- 847   4            //_BATT_STATUS_CAPACITY_NO_STARTUP
- 848   4                  BattDetect1_COUNT=0;
- 849   4                  BattDetect2_COUNT=0;
- 850   4              BattDetect3_COUNT=0;
- 851   4              BattDetect4_COUNT=0;
- 852   4              BattDetect5_COUNT=0;              
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          04/22/2021 09:18:53 PAGE 15  
+ 836   3            if(BatteryVoltage<=BATTERY_CAPACITY_MIN) //<11.6V
+ 837   3            {
+ 838   4                  BattDetect1_COUNT=0;
+ 839   4                  BattDetect2_COUNT=0;
+ 840   4              BattDetect3_COUNT=0;
+ 841   4              BattDetect4_COUNT=0;
+ 842   4              BattDetect5_COUNT=0;              
+ 843   4              BattDetectMin_COUNT++;
+ 844   4              BattDetectHigh_COUNT=0;
+ 845   4              BattDetectHighStop_COUNT=0;
+ 846   4              BattDetectNoStartUp_COUNT=0;
+ 847   4            }
+ 848   3            else if((BatteryVoltage>BATTERY_CAPACITY_MIN)&&(BatteryVoltage<=BATTERY_CAPACITY_NO_STARTUP))
+ 849   3            {
+ 850   4            //_BATT_STATUS_CAPACITY_NO_STARTUP
+ 851   4                  BattDetect1_COUNT=0;
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/04/2021 17:40:40 PAGE 15  
 
- 853   4              BattDetectMin_COUNT=0;
- 854   4              BattDetectHigh_COUNT=0;
- 855   4              BattDetectHighStop_COUNT=0;               
- 856   4              BattDetectNoStartUp_COUNT++;
- 857   4            } 
- 858   3            else if((BatteryVoltage>BATTERY_CAPACITY_NO_STARTUP)&&(BatteryVoltage<=BATTERY_CAPACITY_LEVEL0))
- 859   3            {
- 860   4            //_BATT_STATUS_CAPACITY_LEVEL0
- 861   4                  BattDetect1_COUNT++;
- 862   4                  BattDetect2_COUNT=0;
- 863   4              BattDetect3_COUNT=0;
- 864   4              BattDetect4_COUNT=0;
- 865   4              BattDetect5_COUNT=0;              
- 866   4              BattDetectMin_COUNT=0;
- 867   4              BattDetectHigh_COUNT=0;
- 868   4              BattDetectHighStop_COUNT=0;               
- 869   4              BattDetectNoStartUp_COUNT=0;
- 870   4            }     
- 871   3            else if((BatteryVoltage>BATTERY_CAPACITY_LEVEL0)&&(BatteryVoltage<=BATTERY_CAPACITY_LEVEL1))
- 872   3            {
- 873   4              // _BATT_STATUS_CAPACITY_LEVEL1
- 874   4                BattDetect1_COUNT=0;
- 875   4                    BattDetect2_COUNT++;
- 876   4              BattDetect3_COUNT=0;
- 877   4              BattDetect4_COUNT=0;
- 878   4              BattDetect5_COUNT=0;
- 879   4              BattDetectMin_COUNT=0;
- 880   4              BattDetectHigh_COUNT=0;
- 881   4              BattDetectNoStartUp_COUNT=0;
- 882   4              
- 883   4            }
- 884   3            else if((BatteryVoltage>BATTERY_CAPACITY_LEVEL1)&&(BatteryVoltage<=BATTERY_CAPACITY_LEVEL2))
- 885   3            {
- 886   4            //_BATT_STATUS_CAPACITY_LEVEL2
- 887   4                BattDetect1_COUNT=0;
- 888   4                    BattDetect2_COUNT=0;
- 889   4              BattDetect3_COUNT++;
- 890   4              BattDetect4_COUNT=0;
- 891   4              BattDetect5_COUNT=0;
- 892   4              BattDetectMin_COUNT=0;
- 893   4              BattDetectHigh_COUNT=0;
- 894   4              BattDetectHighStop_COUNT=0;
- 895   4              BattDetectNoStartUp_COUNT=0;
- 896   4              
- 897   4            }
- 898   3            else if((BatteryVoltage>BATTERY_CAPACITY_LEVEL2)&&(BatteryVoltage<=BATTERY_CAPACITY_LEVEL3))
- 899   3            {
- 900   4              //_BATT_STATUS_CAPACITY_LEVEL3
- 901   4                BattDetect1_COUNT=0;
- 902   4                  BattDetect2_COUNT=0;
- 903   4              BattDetect3_COUNT=0;
- 904   4              BattDetect4_COUNT++;
- 905   4              BattDetect5_COUNT=0;
- 906   4              BattDetectMin_COUNT=0;
- 907   4              BattDetectHigh_COUNT=0;
- 908   4              BattDetectHighStop_COUNT=0;
- 909   4              BattDetectNoStartUp_COUNT=0;
- 910   4              
- 911   4            }
- 912   3            else if((BatteryVoltage>BATTERY_CAPACITY_LEVEL4)&&(BatteryVoltage<=BATTERY_CAPACITY_HIGH))
- 913   3            {
- 914   4              //_BATT_STATUS_CAPACITY_LEVEL4
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          04/22/2021 09:18:53 PAGE 16  
+ 852   4                  BattDetect2_COUNT=0;
+ 853   4              BattDetect3_COUNT=0;
+ 854   4              BattDetect4_COUNT=0;
+ 855   4              BattDetect5_COUNT=0;              
+ 856   4              BattDetectMin_COUNT=0;
+ 857   4              BattDetectHigh_COUNT=0;
+ 858   4              BattDetectHighStop_COUNT=0;               
+ 859   4              BattDetectNoStartUp_COUNT++;
+ 860   4            } 
+ 861   3            else if((BatteryVoltage>BATTERY_CAPACITY_NO_STARTUP)&&(BatteryVoltage<=BATTERY_CAPACITY_LEVEL0))
+ 862   3            {
+ 863   4            //_BATT_STATUS_CAPACITY_LEVEL0
+ 864   4                  BattDetect1_COUNT++;
+ 865   4                  BattDetect2_COUNT=0;
+ 866   4              BattDetect3_COUNT=0;
+ 867   4              BattDetect4_COUNT=0;
+ 868   4              BattDetect5_COUNT=0;              
+ 869   4              BattDetectMin_COUNT=0;
+ 870   4              BattDetectHigh_COUNT=0;
+ 871   4              BattDetectHighStop_COUNT=0;               
+ 872   4              BattDetectNoStartUp_COUNT=0;
+ 873   4            }     
+ 874   3            else if((BatteryVoltage>BATTERY_CAPACITY_LEVEL0)&&(BatteryVoltage<=BATTERY_CAPACITY_LEVEL1))
+ 875   3            {
+ 876   4              // _BATT_STATUS_CAPACITY_LEVEL1
+ 877   4                BattDetect1_COUNT=0;
+ 878   4                    BattDetect2_COUNT++;
+ 879   4              BattDetect3_COUNT=0;
+ 880   4              BattDetect4_COUNT=0;
+ 881   4              BattDetect5_COUNT=0;
+ 882   4              BattDetectMin_COUNT=0;
+ 883   4              BattDetectHigh_COUNT=0;
+ 884   4              BattDetectNoStartUp_COUNT=0;
+ 885   4              
+ 886   4            }
+ 887   3            else if((BatteryVoltage>BATTERY_CAPACITY_LEVEL1)&&(BatteryVoltage<=BATTERY_CAPACITY_LEVEL2))
+ 888   3            {
+ 889   4            //_BATT_STATUS_CAPACITY_LEVEL2
+ 890   4                BattDetect1_COUNT=0;
+ 891   4                    BattDetect2_COUNT=0;
+ 892   4              BattDetect3_COUNT++;
+ 893   4              BattDetect4_COUNT=0;
+ 894   4              BattDetect5_COUNT=0;
+ 895   4              BattDetectMin_COUNT=0;
+ 896   4              BattDetectHigh_COUNT=0;
+ 897   4              BattDetectHighStop_COUNT=0;
+ 898   4              BattDetectNoStartUp_COUNT=0;
+ 899   4              
+ 900   4            }
+ 901   3            else if((BatteryVoltage>BATTERY_CAPACITY_LEVEL2)&&(BatteryVoltage<=BATTERY_CAPACITY_LEVEL3))
+ 902   3            {
+ 903   4              //_BATT_STATUS_CAPACITY_LEVEL3
+ 904   4                BattDetect1_COUNT=0;
+ 905   4                  BattDetect2_COUNT=0;
+ 906   4              BattDetect3_COUNT=0;
+ 907   4              BattDetect4_COUNT++;
+ 908   4              BattDetect5_COUNT=0;
+ 909   4              BattDetectMin_COUNT=0;
+ 910   4              BattDetectHigh_COUNT=0;
+ 911   4              BattDetectHighStop_COUNT=0;
+ 912   4              BattDetectNoStartUp_COUNT=0;
+ 913   4              
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/04/2021 17:40:40 PAGE 16  
 
- 915   4                BattDetect1_COUNT=0;
- 916   4              BattDetect2_COUNT=0;
- 917   4              BattDetect3_COUNT=0;
- 918   4              BattDetect4_COUNT=0;
- 919   4              BattDetect5_COUNT++;
- 920   4              BattDetectMin_COUNT=0;
- 921   4              BattDetectHigh_COUNT=0;
- 922   4              BattDetectHighStop_COUNT=0;
- 923   4              BattDetectNoStartUp_COUNT=0;
- 924   4              
- 925   4          
- 926   4            }
- 927   3            else if((BatteryVoltage>BATTERY_CAPACITY_HIGH)&&(BatteryVoltage<=BATTERY_CAPACITY_HIGH_STOP)&&(PowerFla
+ 914   4            }
+ 915   3            else if((BatteryVoltage>BATTERY_CAPACITY_LEVEL4)&&(BatteryVoltage<=BATTERY_CAPACITY_HIGH))
+ 916   3            {
+ 917   4              //_BATT_STATUS_CAPACITY_LEVEL4
+ 918   4                BattDetect1_COUNT=0;
+ 919   4              BattDetect2_COUNT=0;
+ 920   4              BattDetect3_COUNT=0;
+ 921   4              BattDetect4_COUNT=0;
+ 922   4              BattDetect5_COUNT++;
+ 923   4              BattDetectMin_COUNT=0;
+ 924   4              BattDetectHigh_COUNT=0;
+ 925   4              BattDetectHighStop_COUNT=0;
+ 926   4              BattDetectNoStartUp_COUNT=0;
+ 927   4              
+ 928   4          
+ 929   4            }
+ 930   3            else if((BatteryVoltage>BATTERY_CAPACITY_HIGH)&&(BatteryVoltage<=BATTERY_CAPACITY_HIGH_STOP)&&(PowerFla
              -g==ON))      
- 928   3            {
- 929   4              BattDetect1_COUNT=0;
- 930   4              BattDetect2_COUNT=0;
- 931   4              BattDetect3_COUNT=0;
- 932   4              BattDetect4_COUNT=0;
- 933   4              BattDetect5_COUNT=0;
- 934   4              BattDetectMin_COUNT=0;
- 935   4              BattDetectHigh_COUNT++; 
- 936   4              BattDetectHighStop_COUNT=0;
- 937   4              BattDetectNoStartUp_COUNT=0;
- 938   4              
- 939   4            }
- 940   3            else if((BatteryVoltage>BATTERY_CAPACITY_HIGH)&&(BatteryVoltage<=(BATTERY_CAPACITY_HIGH_STOP+9))&&(Powe
+ 931   3            {
+ 932   4              BattDetect1_COUNT=0;
+ 933   4              BattDetect2_COUNT=0;
+ 934   4              BattDetect3_COUNT=0;
+ 935   4              BattDetect4_COUNT=0;
+ 936   4              BattDetect5_COUNT=0;
+ 937   4              BattDetectMin_COUNT=0;
+ 938   4              BattDetectHigh_COUNT++; 
+ 939   4              BattDetectHighStop_COUNT=0;
+ 940   4              BattDetectNoStartUp_COUNT=0;
+ 941   4              
+ 942   4            }
+ 943   3            else if((BatteryVoltage>BATTERY_CAPACITY_HIGH)&&(BatteryVoltage<=(BATTERY_CAPACITY_HIGH_STOP+9))&&(Powe
              -rFlag==OFF))      
- 941   3            {
- 942   4              BattDetect1_COUNT=0;
- 943   4              BattDetect2_COUNT=0;
- 944   4              BattDetect3_COUNT=0;
- 945   4              BattDetect4_COUNT=0;
- 946   4              BattDetect5_COUNT=0;
- 947   4              BattDetectMin_COUNT=0;
- 948   4              BattDetectHigh_COUNT++; 
- 949   4              BattDetectHighStop_COUNT=0;
- 950   4              BattDetectNoStartUp_COUNT=0;
- 951   4              
- 952   4            }
- 953   3            else///>BATTERY_CAPACITY_HIGH_STOP
- 954   3            {
- 955   4              BattDetect1_COUNT=0;
- 956   4              BattDetect2_COUNT=0;
- 957   4              BattDetect3_COUNT=0;
- 958   4              BattDetect4_COUNT=0;
- 959   4              BattDetect5_COUNT=0;
- 960   4              BattDetectMin_COUNT=0;
- 961   4              BattDetectHigh_COUNT=0; 
- 962   4              BattDetectHighStop_COUNT++;
- 963   4              BattDetectNoStartUp_COUNT=0;
- 964   4            }
- 965   3      
- 966   3            if(BatteryVoltage>=BATTERY_CAPACITY_STARTUP)
- 967   3            BattDetectStartUp_COUNT++;
- 968   3            else    
- 969   3            BattDetectStartUp_COUNT=0;
- 970   3            
- 971   3            if(BattDetect1_COUNT==20)
- 972   3            {
- 973   4              BATERY_STAT=_BATT_STATUS_CAPACITY_LEVEL0;
- 974   4              BattDetect1_COUNT=0;
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          04/22/2021 09:18:53 PAGE 17  
+ 944   3            {
+ 945   4              BattDetect1_COUNT=0;
+ 946   4              BattDetect2_COUNT=0;
+ 947   4              BattDetect3_COUNT=0;
+ 948   4              BattDetect4_COUNT=0;
+ 949   4              BattDetect5_COUNT=0;
+ 950   4              BattDetectMin_COUNT=0;
+ 951   4              BattDetectHigh_COUNT++; 
+ 952   4              BattDetectHighStop_COUNT=0;
+ 953   4              BattDetectNoStartUp_COUNT=0;
+ 954   4              
+ 955   4            }
+ 956   3            else///>BATTERY_CAPACITY_HIGH_STOP
+ 957   3            {
+ 958   4              BattDetect1_COUNT=0;
+ 959   4              BattDetect2_COUNT=0;
+ 960   4              BattDetect3_COUNT=0;
+ 961   4              BattDetect4_COUNT=0;
+ 962   4              BattDetect5_COUNT=0;
+ 963   4              BattDetectMin_COUNT=0;
+ 964   4              BattDetectHigh_COUNT=0; 
+ 965   4              BattDetectHighStop_COUNT++;
+ 966   4              BattDetectNoStartUp_COUNT=0;
+ 967   4            }
+ 968   3      
+ 969   3            if(BatteryVoltage>=BATTERY_CAPACITY_STARTUP)
+ 970   3            BattDetectStartUp_COUNT++;
+ 971   3            else    
+ 972   3            BattDetectStartUp_COUNT=0;
+ 973   3            
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/04/2021 17:40:40 PAGE 17  
 
- 975   4            }
- 976   3            if(BattDetect2_COUNT==20)
- 977   3            {
- 978   4              BATERY_STAT=_BATT_STATUS_CAPACITY_LEVEL1;
- 979   4              BattDetect2_COUNT=0;
- 980   4            }
- 981   3            if(BattDetect3_COUNT==20)
- 982   3            {
- 983   4              BATERY_STAT=_BATT_STATUS_CAPACITY_LEVEL2;
- 984   4              BattDetect3_COUNT=0;
- 985   4            }
- 986   3            if(BattDetect4_COUNT==20)
- 987   3            {
- 988   4              BATERY_STAT=_BATT_STATUS_CAPACITY_LEVEL3;
- 989   4              BattDetect4_COUNT=0;
- 990   4            }
- 991   3            if(BattDetect5_COUNT==20)
- 992   3            {
- 993   4              BATERY_STAT=_BATT_STATUS_CAPACITY_LEVEL4;
- 994   4              BattDetect5_COUNT=0;
- 995   4            }
- 996   3      
- 997   3            if(BattDetectMin_COUNT==20)
- 998   3            {
- 999   4            BATERY_STAT=_BATT_STATUS_CAPACITY_MIN;
-1000   4            BattDetectMin_COUNT=0;
-1001   4            }
-1002   3            
-1003   3            if(BattDetectHigh_COUNT==20)
-1004   3            {
-1005   4            BATERY_STAT=_BATT_STATUS_CAPACITY_MAX;
-1006   4            BattDetectHigh_COUNT=0;
-1007   4            }
-1008   3      
-1009   3            if(BattDetectNoStartUp_COUNT==20)
-1010   3            {
-1011   4            BATERY_STAT=_BATT_STATUS_CAPACITY_NO_STARTUP;
-1012   4            BattDetectNoStartUp_COUNT=0;
-1013   4            }
-1014   3      
-1015   3                if(BattDetectHigh_COUNT==20)
-1016   3                {
-1017   4                BATERY_STAT=_BATT_STATUS_CAPACITY_MAX;
-1018   4                BattDetectHigh_COUNT=0;
-1019   4                }
-1020   3      
-1021   3              if(BattDetectHighStop_COUNT==20)
-1022   3              {
-1023   4              BATERY_STAT=_BATT_STATUS_CAPACITY_MAX_STOP;
-1024   4              BattDetectHighStop_COUNT=0;
-1025   4              }
-1026   3      
-1027   3              if(BATERY_STAT_TEMP!=BATERY_STAT)
-1028   3              {
-1029   4              BATERY_STAT_TEMP=BATERY_STAT;
-1030   4              SET_BATTERY_CHARGE_STATE(_BATT_STATUS_NONE);//reset battery state. 
-1031   4              }
-1032   3      
-1033   3            if(BattDetectStartUp_COUNT==20)
-1034   3            { 
-1035   4              if(GET_BATTERY_CAPACITY_LOW_FLAG()==_TRUE)
-1036   4                {
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          04/22/2021 09:18:53 PAGE 18  
+ 974   3            if(BattDetect1_COUNT==20)
+ 975   3            {
+ 976   4              BATERY_STAT=_BATT_STATUS_CAPACITY_LEVEL0;
+ 977   4              BattDetect1_COUNT=0;
+ 978   4            }
+ 979   3            if(BattDetect2_COUNT==20)
+ 980   3            {
+ 981   4              BATERY_STAT=_BATT_STATUS_CAPACITY_LEVEL1;
+ 982   4              BattDetect2_COUNT=0;
+ 983   4            }
+ 984   3            if(BattDetect3_COUNT==20)
+ 985   3            {
+ 986   4              BATERY_STAT=_BATT_STATUS_CAPACITY_LEVEL2;
+ 987   4              BattDetect3_COUNT=0;
+ 988   4            }
+ 989   3            if(BattDetect4_COUNT==20)
+ 990   3            {
+ 991   4              BATERY_STAT=_BATT_STATUS_CAPACITY_LEVEL3;
+ 992   4              BattDetect4_COUNT=0;
+ 993   4            }
+ 994   3            if(BattDetect5_COUNT==20)
+ 995   3            {
+ 996   4              BATERY_STAT=_BATT_STATUS_CAPACITY_LEVEL4;
+ 997   4              BattDetect5_COUNT=0;
+ 998   4              /*
+ 999   4                if(bytBatteryStopCharge==_TRUE)
+1000   4                {
+1001   4                    bytBatteryStopCharge=_FALSE;
+1002   4                  if(ReadEEP(EEP_BatteryStopCharge)==ON)
+1003   4                    WriteEEP(EEP_BatteryStopCharge,OFF);
+1004   4                  
+1005   4                #if(_DEBUG_MESSAGE_Battery_Charge_Debug==ON)
+1006   4                 GraphicsPrint(RED,"(bytBatteryStopCharge=0)");
+1007   4                #endif
+1008   4                }
+1009   4              */
+1010   4            }
+1011   3      
+1012   3            if(BattDetectMin_COUNT==20)
+1013   3            {
+1014   4            BATERY_STAT=_BATT_STATUS_CAPACITY_MIN;
+1015   4            BattDetectMin_COUNT=0;
+1016   4            }
+1017   3            
+1018   3            if(BattDetectHigh_COUNT==20)
+1019   3            {
+1020   4            BATERY_STAT=_BATT_STATUS_CAPACITY_MAX;
+1021   4            BattDetectHigh_COUNT=0;
+1022   4            }
+1023   3      
+1024   3            if(BattDetectNoStartUp_COUNT==20)
+1025   3            {
+1026   4            BATERY_STAT=_BATT_STATUS_CAPACITY_NO_STARTUP;
+1027   4            BattDetectNoStartUp_COUNT=0;
+1028   4            }
+1029   3      
+1030   3                if(BattDetectHigh_COUNT==20)
+1031   3                {
+1032   4                BATERY_STAT=_BATT_STATUS_CAPACITY_MAX;
+1033   4                BattDetectHigh_COUNT=0;
+1034   4                }
+1035   3      
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/04/2021 17:40:40 PAGE 18  
 
-1037   5                #if(_DEBUG_MESSAGE_SysTimerEvent==ON)
-                         GraphicsPrint(RED,"(Normal Voltage Charge >12.5V)");
-                        #endif
-1040   5                CLR_BATTERY_CAPACITY_LOW_FLAG();
-1041   5                SET_BATTERY_CHARGE_STATE(_BATT_STATUS_NONE);//reset battery state.  
-1042   5      
-1043   5                  if(ReadEEP(EEP_LowBattery_Flag))
-1044   5                    WriteEEP(EEP_LowBattery_Flag,OFF);
-1045   5                }
-1046   4              
-1047   4            BattDetectStartUp_COUNT=0;
-1048   4            }
-1049   3      
-1050   3            SET_BATTERY_STATE(BATERY_STAT);
-1051   3        }
-1052   2          //#if (_DEBUG_MESSAGE_SysTimerEvent==ON)
-1053   2          //GraphicsPrint(CYAN,">");
-1054   2          //#endif
-1055   2              if(PowerFlag==OFF)
-1056   2              MCUTimerActiveTimerEvent(SEC(0.1/*1*/), _SYSTEM_TIMER_EVENT_JUDGE_BATT_STATE);
-1057   2              else
-1058   2          MCUTimerActiveTimerEvent(SEC(0.3/*1*/), _SYSTEM_TIMER_EVENT_JUDGE_BATT_STATE);
-1059   2            #else
+1036   3              if(BattDetectHighStop_COUNT==20)
+1037   3              {
+1038   4              BATERY_STAT=_BATT_STATUS_CAPACITY_MAX_STOP;
+1039   4              BattDetectHighStop_COUNT=0;
+1040   4              }
+1041   3      
+1042   3              if(BATERY_STAT_TEMP!=BATERY_STAT)
+1043   3              {
+1044   4              BATERY_STAT_TEMP=BATERY_STAT;
+1045   4              SET_BATTERY_CHARGE_STATE(_BATT_STATUS_NONE);//reset battery state. 
+1046   4              }
+1047   3      
+1048   3            if(BattDetectStartUp_COUNT==20)
+1049   3            { 
+1050   4              if(GET_BATTERY_CAPACITY_LOW_FLAG()==_TRUE)
+1051   4                {
+1052   5                #if(_DEBUG_MESSAGE_SysTimerEvent==ON)
+1053   5                 GraphicsPrint(RED,"(Normal Voltage Charge >12.5V)");
+1054   5                #endif
+1055   5                CLR_BATTERY_CAPACITY_LOW_FLAG();
+1056   5                SET_BATTERY_CHARGE_STATE(_BATT_STATUS_NONE);//reset battery state.  
+1057   5      
+1058   5                  if(ReadEEP(EEP_LowBattery_Flag))
+1059   5                    WriteEEP(EEP_LowBattery_Flag,OFF);
+1060   5                }
+1061   4              
+1062   4            BattDetectStartUp_COUNT=0;
+1063   4            }
+1064   3      
+1065   3            SET_BATTERY_STATE(BATERY_STAT);
+1066   3        }
+1067   2          //#if (_DEBUG_MESSAGE_SysTimerEvent==ON)
+1068   2          //GraphicsPrint(CYAN,">");
+1069   2          //#endif
+1070   2              if(PowerFlag==OFF)
+1071   2              MCUTimerActiveTimerEvent(SEC(0.1/*1*/), _SYSTEM_TIMER_EVENT_JUDGE_BATT_STATE);
+1072   2              else
+1073   2          MCUTimerActiveTimerEvent(SEC(0.3/*1*/), _SYSTEM_TIMER_EVENT_JUDGE_BATT_STATE);
+1074   2            #else
                     SET_BATTERY_CAPACITY(BatteryVoltage);
                 
                       
@@ -1134,6 +1150,8 @@ line level    source
                   else if((GET_BATTERY_CAPACITY()>BATTERY_CAPACITY_LEVEL2)&&(GET_BATTERY_CAPACITY()<=BATTERY_CAPACITY_LEVE
              -L3))//15V-14.2V
                     SET_BATTERY_STATE(_BATT_STATUS_CAPACITY_LEVEL3);  
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/04/2021 17:40:40 PAGE 19  
+
                   else    
                     SET_BATTERY_STATE(_BATT_STATUS_CAPACITY_LEVEL4);//>15V
                     }   
@@ -1141,27 +1159,25 @@ line level    source
                   MCUTimerActiveTimerEvent(SEC(5), _SYSTEM_TIMER_EVENT_JUDGE_BATT_STATE);
               
                   #endif
-1087   2      
-1088   2          break;
-1089   2      
-1090   2          case _SYSTEM_TIMER_EVENT_JUDGE_PSW_STATE:
-1091   2          #if (_DEBUG_MESSAGE_Scankey_CHECK==ON)
-                  GraphicsPrint(CYAN,"\r\nPOWER key pressed");
-                  #endif
-1094   2      
-1095   2            if(GET_DVR_EntrySleepMode()==_TRUE)
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          04/22/2021 09:18:53 PAGE 19  
-
-1096   2            {
-1097   3              SET_TARGET_POWER_STATUS(_POWER_STATUS_NORMAL);
-1098   3              //CLR_DVR_EntrySleepMode();
-1099   3              //MCU_SendCmdToDVR(MCU_PROTOCOL_CMD_SLEEP_WAKE_UP);
-1100   3              #if (_DEBUG_MESSAGE_Scankey_CHECK==ON)
-                        GraphicsPrint(YELLOW,"(MCU_SLEEP_TO_NORMAL_MODE)");    
-                      #endif        
-1103   3      
-1104   3            }
-1105   2            #if 0 //for test
+1102   2      
+1103   2          break;
+1104   2      
+1105   2          case _SYSTEM_TIMER_EVENT_JUDGE_PSW_STATE:
+1106   2          #if (_DEBUG_MESSAGE_Scankey_CHECK==ON)
+1107   2          GraphicsPrint(CYAN,"\r\nPOWER key pressed");
+1108   2          #endif
+1109   2      
+1110   2            if(GET_DVR_EntrySleepMode()==_TRUE)
+1111   2            {
+1112   3              SET_TARGET_POWER_STATUS(_POWER_STATUS_NORMAL);
+1113   3              //CLR_DVR_EntrySleepMode();
+1114   3              //MCU_SendCmdToDVR(MCU_PROTOCOL_CMD_SLEEP_WAKE_UP);
+1115   3              #if (_DEBUG_MESSAGE_Scankey_CHECK==ON)
+1116   3                GraphicsPrint(YELLOW,"(MCU_SLEEP_TO_NORMAL_MODE)");    
+1117   3              #endif        
+1118   3      
+1119   3            }
+1120   2            #if 0 //for test
                     else if(PowerFlag==ON)    
                       {
                     MCUTimerActiveTimerEvent(SEC(0.1), _USER_TIMER_EVENT_OSD_DVR_SHUTDOWN);
@@ -1169,209 +1185,209 @@ line level    source
                     WriteEEP(EEP_Powerflag,PowerFlag);
                       }
                     #else
-1113   2            else if(PowerFlag==ON)    
-1114   2            MCUTimerActiveTimerEvent(SEC(0.1), _USER_TIMER_EVENT_OSD_DVR_SHUTDOWN);
-1115   2            #endif
-1116   2            else
-1117   2            {
-1118   3                if(GET_DVR_PowerOFFDelay()==_FALSE)
-1119   3                {
-1120   4                  if((GET_BATTERY_CAPACITY_LOW_FLAG()==_FALSE)||(Check_ADAP_IN()/*GET_AC_PLUG()*/==_TRUE))
-1121   4                  {
-1122   5                  PowerFlag=ON;
-1123   5                  WriteEEP(EEP_Powerflag,PowerFlag);
-1124   5                  }
-1125   4                  else
-1126   4                    {
-1127   5                    #if(_DEBUG_MESSAGE_SysTimerEvent==ON)
-                            GraphicsPrint(RED,"\r\n(Battery voltage low <12.5V...)");
-                            #endif
-1130   5                    MCUTimerActiveTimerEvent(SEC(0.01), _SYSTEM_TIMER_EVENT_BATT_LOW_RED_BLINK);
-1131   5                    }
-1132   4                  
-1133   4                #if (_DEBUG_MESSAGE_Scankey_CHECK==ON)
-                        if(PWR_START_flag==ON)
-                            GraphicsPrint(YELLOW,"(DC12V to Power on)");    
-                        #endif
-1137   4                }
-1138   3                else
-1139   3                MCUTimerActiveTimerEvent(SEC(3), _SYSTEM_TIMER_EVENT_JUDGE_PSW_STATE);
-1140   3                
-1141   3            }
-1142   2          
-1143   2            break;
-1144   2      case _SYSTEM_TIMER_EVENT_BATTERY_LOW_PWR_OFF:
-1145   2           if(PowerFlag==ON)  
-1146   2          MCUTimerActiveTimerEvent(SEC(0.1), _USER_TIMER_EVENT_OSD_DVR_SHUTDOWN);
-1147   2        break;
-1148   2          case _SYSTEM_TIMER_EVENT_JUDGE_BTH_STATE:
-1149   2        
-1150   2          #if (_DEBUG_MESSAGE_BATTERY_TEST)
-                  #else
-1152   2          BatteryBTH=GetBatteryBTH();
-1153   2      
-1154   2      //    if(GET_BATTERY_CHARGE_STATE()==_BATT_STATUS_NO_BATT)
-1155   2      //      BatteryBTH=549;
-1156   2          #endif
+1128   2            else if(PowerFlag==ON)    
+1129   2            MCUTimerActiveTimerEvent(SEC(0.1), _USER_TIMER_EVENT_OSD_DVR_SHUTDOWN);
+1130   2            #endif
+1131   2            else
+1132   2            {
+1133   3                if(GET_DVR_PowerOFFDelay()==_FALSE)
+1134   3                {
+1135   4                  if((GET_BATTERY_CAPACITY_LOW_FLAG()==_FALSE)||(Check_ADAP_IN()/*GET_AC_PLUG()*/==_TRUE))
+1136   4                  {
+1137   5                  PowerFlag=ON;
+1138   5                  WriteEEP(EEP_Powerflag,PowerFlag);
+1139   5                  }
+1140   4                  else
+1141   4                    {
+1142   5                    #if(_DEBUG_MESSAGE_SysTimerEvent==ON)
+1143   5                    GraphicsPrint(RED,"\r\n(Battery voltage low <12.5V...)");
+1144   5                    #endif
+1145   5                    MCUTimerActiveTimerEvent(SEC(0.01), _SYSTEM_TIMER_EVENT_BATT_LOW_RED_BLINK);
+1146   5                    }
+1147   4                  
+1148   4                #if (_DEBUG_MESSAGE_Scankey_CHECK==ON)
+1149   4                if(PWR_START_flag==ON)
+1150   4                    GraphicsPrint(YELLOW,"(DC12V to Power on)");    
+1151   4                #endif
+1152   4                }
+1153   3                else
+1154   3                MCUTimerActiveTimerEvent(SEC(3), _SYSTEM_TIMER_EVENT_JUDGE_PSW_STATE);
+1155   3                
+1156   3            }
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/04/2021 17:40:40 PAGE 20  
+
 1157   2          
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          04/22/2021 09:18:53 PAGE 20  
-
-1158   2          //if((GET_BATTERY_CHARGE_STATE()==_BATT_STATUS_STOP_CHARGE)&&(GET_BTH_STATE()==_BATT_STATUS_TEMP_NORMAL)
+1158   2            break;
+1159   2      case _SYSTEM_TIMER_EVENT_BATTERY_LOW_PWR_OFF:
+1160   2           if(PowerFlag==ON)  
+1161   2          MCUTimerActiveTimerEvent(SEC(0.1), _USER_TIMER_EVENT_OSD_DVR_SHUTDOWN);
+1162   2        break;
+1163   2          case _SYSTEM_TIMER_EVENT_JUDGE_BTH_STATE:
+1164   2        
+1165   2          #if (_DEBUG_MESSAGE_BATTERY_TEST)
+                  #else
+1167   2          BatteryBTH=GetBatteryBTH();
+1168   2      
+1169   2      //    if(GET_BATTERY_CHARGE_STATE()==_BATT_STATUS_NO_BATT)
+1170   2      //      BatteryBTH=549;
+1171   2          #endif
+1172   2          
+1173   2          //if((GET_BATTERY_CHARGE_STATE()==_BATT_STATUS_STOP_CHARGE)&&(GET_BTH_STATE()==_BATT_STATUS_TEMP_NORMAL)
              -)
-1159   2          //SET_BTH_STATE(_BATT_STATUS_TEMP_NORMAL);
-1160   2          //else
-1161   2          //{
-1162   2      
-1163   2          #if 1
-1164   2          if((BatteryBTH<=BTH_TEMP_HIGH)&&(BatteryBTH>BTH_TEMP_MIN)) //<11.6V
-1165   2            {     
-1166   3            TEMP_NORMAL_COUNT=0;
-1167   3              TEMP_LOW_COUNT=0;
-1168   3            TEMP_LOW_WARN_COUNT=0;
-1169   3            TEMP_HIGH_COUNT++;
-1170   3            TEMP_HIGH_WARN_COUNT=0;
-1171   3            }
-1172   2            else if((BatteryBTH>BTH_TEMP_HIGH)&&(BatteryBTH<=BTH_TEMP_HIGH_WARN))//50~55 warnning
-1173   2            {
-1174   3            TEMP_NORMAL_COUNT=0;
-1175   3              TEMP_LOW_COUNT=0;
-1176   3            TEMP_LOW_WARN_COUNT=0;
-1177   3            TEMP_HIGH_COUNT=0;
-1178   3            TEMP_HIGH_WARN_COUNT++;
-1179   3            }   
-1180   2            else if((BatteryBTH>BTH_TEMP_HIGH_WARN)&&(BatteryBTH<=BTH_TEMP_LOW_WARN))
-1181   2            {
-1182   3            TEMP_NORMAL_COUNT++;
-1183   3            TEMP_LOW_COUNT=0;
-1184   3            TEMP_LOW_WARN_COUNT=0;
-1185   3            TEMP_HIGH_COUNT=0;
-1186   3            TEMP_HIGH_WARN_COUNT=0;
-1187   3            }
-1188   2            else if((BatteryBTH>BTH_TEMP_LOW_WARN)&&(BatteryBTH<=BTH_TEMP_LOW))  //0~-5 warnning
-1189   2              {
-1190   3              TEMP_NORMAL_COUNT=0;
-1191   3              TEMP_LOW_COUNT=0;
-1192   3              TEMP_LOW_WARN_COUNT++;
-1193   3              TEMP_HIGH_COUNT=0;
-1194   3              TEMP_HIGH_WARN_COUNT=0;
-1195   3      
-1196   3              }
-1197   2            else if((BatteryBTH>BTH_TEMP_LOW)&&(BatteryBTH<=BATTERY_ACD_no_battery))  //-5~-10 warnning
-1198   2              {
-1199   3              TEMP_NORMAL_COUNT=0;
-1200   3              TEMP_LOW_COUNT++;
-1201   3              TEMP_LOW_WARN_COUNT=0;
-1202   3              TEMP_HIGH_COUNT=0;
-1203   3              TEMP_HIGH_WARN_COUNT=0;
-1204   3              }
-1205   2            else
-1206   2              {
-1207   3              #if (_DEBUG_MESSAGE_Power_Supply_TEST==ON)
+1174   2          //SET_BTH_STATE(_BATT_STATUS_TEMP_NORMAL);
+1175   2          //else
+1176   2          //{
+1177   2      
+1178   2          #if 1
+1179   2          if((BatteryBTH<=BTH_TEMP_HIGH)&&(BatteryBTH>BTH_TEMP_MIN)) //<11.6V
+1180   2            {     
+1181   3            TEMP_NORMAL_COUNT=0;
+1182   3              TEMP_LOW_COUNT=0;
+1183   3            TEMP_LOW_WARN_COUNT=0;
+1184   3            TEMP_HIGH_COUNT++;
+1185   3            TEMP_HIGH_WARN_COUNT=0;
+1186   3            }
+1187   2            else if((BatteryBTH>BTH_TEMP_HIGH)&&(BatteryBTH<=BTH_TEMP_HIGH_WARN))//50~55 warnning
+1188   2            {
+1189   3            TEMP_NORMAL_COUNT=0;
+1190   3              TEMP_LOW_COUNT=0;
+1191   3            TEMP_LOW_WARN_COUNT=0;
+1192   3            TEMP_HIGH_COUNT=0;
+1193   3            TEMP_HIGH_WARN_COUNT++;
+1194   3            }   
+1195   2            else if((BatteryBTH>BTH_TEMP_HIGH_WARN)&&(BatteryBTH<=BTH_TEMP_LOW_WARN))
+1196   2            {
+1197   3            TEMP_NORMAL_COUNT++;
+1198   3            TEMP_LOW_COUNT=0;
+1199   3            TEMP_LOW_WARN_COUNT=0;
+1200   3            TEMP_HIGH_COUNT=0;
+1201   3            TEMP_HIGH_WARN_COUNT=0;
+1202   3            }
+1203   2            else if((BatteryBTH>BTH_TEMP_LOW_WARN)&&(BatteryBTH<=BTH_TEMP_LOW))  //0~-5 warnning
+1204   2              {
+1205   3              TEMP_NORMAL_COUNT=0;
+1206   3              TEMP_LOW_COUNT=0;
+1207   3              TEMP_LOW_WARN_COUNT++;
+1208   3              TEMP_HIGH_COUNT=0;
+1209   3              TEMP_HIGH_WARN_COUNT=0;
+1210   3      
+1211   3              }
+1212   2            else if((BatteryBTH>BTH_TEMP_LOW)&&(BatteryBTH<=BATTERY_ACD_no_battery))  //-5~-10 warnning
+1213   2              {
+1214   3              TEMP_NORMAL_COUNT=0;
+1215   3              TEMP_LOW_COUNT++;
+1216   3              TEMP_LOW_WARN_COUNT=0;
+1217   3              TEMP_HIGH_COUNT=0;
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/04/2021 17:40:40 PAGE 21  
+
+1218   3              TEMP_HIGH_WARN_COUNT=0;
+1219   3              }
+1220   2            else
+1221   2              {
+1222   3              #if (_DEBUG_MESSAGE_Power_Supply_TEST==ON)
                       #else
-1209   3              SET_NO_BATTERY();
-1210   3              SET_BATTERY_STATE(_BATT_STATUS_NO_BATT);
-1211   3              #endif
-1212   3              TEMP_STAT=_BATT_STATUS_TEMP_NORMAL; ///no DC12V input
-1213   3            TEMP_NORMAL_COUNT=0;
-1214   3              TEMP_LOW_COUNT=0;
-1215   3            TEMP_LOW_WARN_COUNT=0;
-1216   3            TEMP_HIGH_COUNT=0;
-1217   3            TEMP_HIGH_WARN_COUNT=0;         
-1218   3              }
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          04/22/2021 09:18:53 PAGE 21  
-
-1219   2      
-1220   2          if(((TEMP_NORMAL_COUNT>3)||(TEMP_LOW_COUNT>3)||(TEMP_LOW_WARN_COUNT>3)||(TEMP_HIGH_COUNT>3)||(TEMP_HIGH_
+1224   3              SET_NO_BATTERY();
+1225   3              SET_BATTERY_STATE(_BATT_STATUS_NO_BATT);
+1226   3              #endif
+1227   3              TEMP_STAT=_BATT_STATUS_TEMP_NORMAL; ///no DC12V input
+1228   3            TEMP_NORMAL_COUNT=0;
+1229   3              TEMP_LOW_COUNT=0;
+1230   3            TEMP_LOW_WARN_COUNT=0;
+1231   3            TEMP_HIGH_COUNT=0;
+1232   3            TEMP_HIGH_WARN_COUNT=0;         
+1233   3              }
+1234   2      
+1235   2          if(((TEMP_NORMAL_COUNT>3)||(TEMP_LOW_COUNT>3)||(TEMP_LOW_WARN_COUNT>3)||(TEMP_HIGH_COUNT>3)||(TEMP_HIGH_
              -WARN_COUNT>3)\
-1221   2            )&&(PWR_START_flag==ON)&&(PowerFlag==OFF)&&(GET_NO_BATTERY()==_TRUE))
-1222   2          PowerFlag=ON;
-1223   2      
-1224   2            
-1225   2          if(TEMP_HIGH_COUNT==TempADC_Counts)
-1226   2          {
-1227   3            TEMP_STAT=_BATT_STATUS_TEMP_HIGH;
-1228   3            TEMP_HIGH_COUNT=0;
-1229   3            CLR_BATTERY_HIGH_TMEP_WARN();
-1230   3            CLR_BATTERY_LOW_TMEP_WARN();  
-1231   3            CLR_NO_BATTERY();
-1232   3          }
-1233   2      
-1234   2          if(TEMP_HIGH_WARN_COUNT==TempADC_Counts)
-1235   2          {
-1236   3            TEMP_STAT=_BATT_STATUS_TEMP_HIGH_WARN;
-1237   3            TEMP_HIGH_WARN_COUNT=0;
-1238   3            SET_BATTERY_HIGH_TMEP_WARN();
-1239   3            CLR_BATTERY_LOW_TMEP_WARN();
-1240   3            CLR_NO_BATTERY();   
-1241   3          }
-1242   2      
-1243   2          if(TEMP_NORMAL_COUNT==TempADC_Counts)
-1244   2          {
-1245   3            TEMP_STAT=_BATT_STATUS_TEMP_NORMAL;
-1246   3            TEMP_NORMAL_COUNT=0;
-1247   3            CLR_BATTERY_LOW_TMEP_WARN();
-1248   3            CLR_BATTERY_HIGH_TMEP_WARN();
-1249   3            CLR_NO_BATTERY();   
-1250   3          }
-1251   2      
-1252   2          if(TEMP_LOW_WARN_COUNT==TempADC_Counts)
-1253   2          {
-1254   3            TEMP_STAT=_BATT_STATUS_TEMP_LOW_WARN;
-1255   3            TEMP_LOW_WARN_COUNT=0;
-1256   3            SET_BATTERY_LOW_TMEP_WARN();
-1257   3            CLR_BATTERY_HIGH_TMEP_WARN();
-1258   3            CLR_NO_BATTERY();     
-1259   3          }
-1260   2      
-1261   2          if(TEMP_LOW_COUNT==TempADC_Counts)
-1262   2          {
-1263   3            TEMP_STAT=_BATT_STATUS_TEMP_LOW;
-1264   3            TEMP_LOW_COUNT=0;
-1265   3            CLR_BATTERY_LOW_TMEP_WARN();
-1266   3            CLR_BATTERY_HIGH_TMEP_WARN(); 
-1267   3            CLR_NO_BATTERY();   
-1268   3          }
-1269   2      /*
-1270   2          if(GET_BATTERY_CHARGE_STATE()==_BATT_STATUS_NO_BATT)
-1271   2            {
-1272   2              TEMP_STAT=_BATT_STATUS_TEMP_NORMAL;
-1273   2              CLR_BATTERY_LOW_TMEP_WARN();
-1274   2              CLR_BATTERY_HIGH_TMEP_WARN();
+1236   2            )&&(PWR_START_flag==ON)&&(PowerFlag==OFF)&&(GET_NO_BATTERY()==_TRUE))
+1237   2          PowerFlag=ON;
+1238   2      
+1239   2            
+1240   2          if(TEMP_HIGH_COUNT==TempADC_Counts)
+1241   2          {
+1242   3            TEMP_STAT=_BATT_STATUS_TEMP_HIGH;
+1243   3            TEMP_HIGH_COUNT=0;
+1244   3            CLR_BATTERY_HIGH_TMEP_WARN();
+1245   3            CLR_BATTERY_LOW_TMEP_WARN();  
+1246   3            CLR_NO_BATTERY();
+1247   3          }
+1248   2      
+1249   2          if(TEMP_HIGH_WARN_COUNT==TempADC_Counts)
+1250   2          {
+1251   3            TEMP_STAT=_BATT_STATUS_TEMP_HIGH_WARN;
+1252   3            TEMP_HIGH_WARN_COUNT=0;
+1253   3            SET_BATTERY_HIGH_TMEP_WARN();
+1254   3            CLR_BATTERY_LOW_TMEP_WARN();
+1255   3            CLR_NO_BATTERY();   
+1256   3          }
+1257   2      
+1258   2          if(TEMP_NORMAL_COUNT==TempADC_Counts)
+1259   2          {
+1260   3            TEMP_STAT=_BATT_STATUS_TEMP_NORMAL;
+1261   3            TEMP_NORMAL_COUNT=0;
+1262   3            CLR_BATTERY_LOW_TMEP_WARN();
+1263   3            CLR_BATTERY_HIGH_TMEP_WARN();
+1264   3            CLR_NO_BATTERY();   
+1265   3          }
+1266   2      
+1267   2          if(TEMP_LOW_WARN_COUNT==TempADC_Counts)
+1268   2          {
+1269   3            TEMP_STAT=_BATT_STATUS_TEMP_LOW_WARN;
+1270   3            TEMP_LOW_WARN_COUNT=0;
+1271   3            SET_BATTERY_LOW_TMEP_WARN();
+1272   3            CLR_BATTERY_HIGH_TMEP_WARN();
+1273   3            CLR_NO_BATTERY();     
+1274   3          }
 1275   2      
-1276   2            }
-1277   2          */
-1278   2          SET_BTH_STATE(TEMP_STAT);
-1279   2      
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          04/22/2021 09:18:53 PAGE 22  
+1276   2          if(TEMP_LOW_COUNT==TempADC_Counts)
+1277   2          {
+1278   3            TEMP_STAT=_BATT_STATUS_TEMP_LOW;
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/04/2021 17:40:40 PAGE 22  
 
-1280   2      
-1281   2            if((BatteryBTH<=CHARGE_TEMP_HIGH)||(BatteryBTH>CHARGE_TEMP_LOW))  
-1282   2              {
-1283   3              CHARGE_TEMP_ABNORMAL++;
-1284   3              CHARGE_TEMP_NORMAL=0;
-1285   3              }
-1286   2              else
-1287   2              {
-1288   3              CHARGE_TEMP_ABNORMAL=0;
-1289   3              CHARGE_TEMP_NORMAL++;
-1290   3              //CLR_CHARGE_TMEP_ABNORMAL();
-1291   3              }
-1292   2              
-1293   2              if(CHARGE_TEMP_ABNORMAL==TempADC_Counts)
-1294   2                {
-1295   3                CHARGE_TEMP_ABNORMAL=0;
-1296   3                  if((GET_AC_PLUG()==_TRUE)&&(GET_NO_BATTERY()==_FALSE))      
-1297   3                  SET_CHARGE_TMEP_ABNORMAL();
-1298   3                
-1299   3                //  if(GET_BATTERY_CHARGE_STATE()==_BATT_STATUS_NO_BATT)  
-1300   3                //    CLR_CHARGE_TMEP_ABNORMAL();                     
-1301   3                }
-1302   2              else  if(CHARGE_TEMP_NORMAL==TempADC_Counts)
-1303   2                {
-1304   3                CHARGE_TEMP_NORMAL=0;
-1305   3                CLR_CHARGE_TMEP_ABNORMAL();
-1306   3                }
-1307   2          #else
+1279   3            TEMP_LOW_COUNT=0;
+1280   3            CLR_BATTERY_LOW_TMEP_WARN();
+1281   3            CLR_BATTERY_HIGH_TMEP_WARN(); 
+1282   3            CLR_NO_BATTERY();   
+1283   3          }
+1284   2      /*
+1285   2          if(GET_BATTERY_CHARGE_STATE()==_BATT_STATUS_NO_BATT)
+1286   2            {
+1287   2              TEMP_STAT=_BATT_STATUS_TEMP_NORMAL;
+1288   2              CLR_BATTERY_LOW_TMEP_WARN();
+1289   2              CLR_BATTERY_HIGH_TMEP_WARN();
+1290   2      
+1291   2            }
+1292   2          */
+1293   2          SET_BTH_STATE(TEMP_STAT);
+1294   2      
+1295   2      
+1296   2            if((BatteryBTH<=CHARGE_TEMP_HIGH)||(BatteryBTH>CHARGE_TEMP_LOW))  
+1297   2              {
+1298   3              CHARGE_TEMP_ABNORMAL++;
+1299   3              CHARGE_TEMP_NORMAL=0;
+1300   3              }
+1301   2              else
+1302   2              {
+1303   3              CHARGE_TEMP_ABNORMAL=0;
+1304   3              CHARGE_TEMP_NORMAL++;
+1305   3              //CLR_CHARGE_TMEP_ABNORMAL();
+1306   3              }
+1307   2              
+1308   2              if(CHARGE_TEMP_ABNORMAL==TempADC_Counts)
+1309   2                {
+1310   3                CHARGE_TEMP_ABNORMAL=0;
+1311   3                  if((GET_AC_PLUG()==_TRUE)&&(GET_NO_BATTERY()==_FALSE))      
+1312   3                  SET_CHARGE_TMEP_ABNORMAL();
+1313   3                
+1314   3                //  if(GET_BATTERY_CHARGE_STATE()==_BATT_STATUS_NO_BATT)  
+1315   3                //    CLR_CHARGE_TMEP_ABNORMAL();                     
+1316   3                }
+1317   2              else  if(CHARGE_TEMP_NORMAL==TempADC_Counts)
+1318   2                {
+1319   3                CHARGE_TEMP_NORMAL=0;
+1320   3                CLR_CHARGE_TMEP_ABNORMAL();
+1321   3                }
+1322   2          #else
                       if((BatteryBTH<=BTH_TEMP_HIGH)&&(BatteryBTH>BTH_TEMP_MIN)) //>55
                       SET_BTH_STATE(_BATT_STATUS_TEMP_HIGH);          
                     else if((BatteryBTH>BTH_TEMP_HIGH)&&(BatteryBTH<=BTH_TEMP_HIGH_WARN))//50~55 warnning
@@ -1390,6 +1406,8 @@ line level    source
                       //SET_BATTERY_LOW_TMEP_WARN();
                       //CLR_BATTERY_HIGH_TMEP_WARN(); 
                       }
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/04/2021 17:40:40 PAGE 23  
+
                     else if(BatteryBTH>BTH_TEMP_LOW)  //-5~-10 warnning
                       {
                       SET_BTH_STATE(_BATT_STATUS_TEMP_LOW);       
@@ -1401,288 +1419,322 @@ line level    source
                     
               
                     #endif  
-1337   2          //}
-1338   2            if(PowerFlag==OFF)
-1339   2              MCUTimerActiveTimerEvent(SEC(0.1/*1*/), _SYSTEM_TIMER_EVENT_JUDGE_BTH_STATE);
-1340   2              else
-1341   2          MCUTimerActiveTimerEvent(SEC(0.2/*0.3*//*1*/), _SYSTEM_TIMER_EVENT_JUDGE_BTH_STATE);
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          04/22/2021 09:18:53 PAGE 23  
+1352   2          //}
+1353   2            if(PowerFlag==OFF)
+1354   2              MCUTimerActiveTimerEvent(SEC(0.1/*1*/), _SYSTEM_TIMER_EVENT_JUDGE_BTH_STATE);
+1355   2              else
+1356   2          MCUTimerActiveTimerEvent(SEC(0.2/*0.3*//*1*/), _SYSTEM_TIMER_EVENT_JUDGE_BTH_STATE);
+1357   2          break;
+1358   2      
+1359   2          case _SYSTEM_TIMER_EVENT_JUDGE_WDT_ECHO:
+1360   2      
+1361   2      
+1362   2            if(GET_DVR_WDTkickDisable()==_FALSE)
+1363   2            {
+1364   3            #if(_DEBUG_MESSAGE_WDT_KICK_CHECK == ON)    
+1365   3            GraphicsPrint(RED,"\r\n(WDT kick over 10 seconds, Try to reboot the DVR)"); 
+1366   3            #endif
+1367   3            SET_DVR_Reboot();
+1368   3            SET_DVR_RebootAndPower();
+1369   3            MCUTimerActiveTimerEvent(SEC(1), _USER_TIMER_EVENT_OSD_DVR_REBOOT);
+1370   3            }
+1371   2          break;
+1372   2      
+1373   2          case _SYSTEM_TIMER_EVENT_JUDGE_AC_MODE:
+1374   2          
+1375   2              #if(_DEBUG_MESSAGE_SysTimerEvent==ON)
+1376   2              GraphicsPrint(CYAN,"(AC)");
+1377   2              if(GET_STAT1()==ON)
+1378   2                GraphicsPrint(GREEN,"(S1=1)");
+1379   2              else
+1380   2                GraphicsPrint(GREEN,"(S1=0)");
+1381   2              
+1382   2              if(GET_STAT2()==ON)
+1383   2                GraphicsPrint(MAGENTA,"(S2=1)");
+1384   2              else
+1385   2                GraphicsPrint(MAGENTA,"(S2=0)");
+1386   2                
+1387   2              #endif
+1388   2              
+1389   2                  if(Check_ADAP_IN()==_TRUE)
+1390   2                  {
+1391   3                    if(GET_AC_PLUG()!=_TRUE)
+1392   3                    {
+1393   4                      SET_AC_PLUG();
+1394   4                      //SET_AC_MODE();  // turn on AC mode
+1395   4                      CLR_AC_MODE();  // turn on AC mode
+1396   4                      //MCUTimerDelayXms(100);//delay 50ms    
+1397   4                      //CLR_BAT_SYS();// turn off battery output              
+1398   4                      //SET_PWM(_CHG_CURR,Low_Current);
+1399   4      
+1400   4                      STAT1_temp=GET_STAT1(); 
+1401   4                      if(STAT1_Flag!=STAT1_temp)
+1402   4                      STAT1_Flag=STAT1_temp;
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/04/2021 17:40:40 PAGE 24  
 
-1342   2          break;
-1343   2      
-1344   2          case _SYSTEM_TIMER_EVENT_JUDGE_WDT_ECHO:
-1345   2      
-1346   2      
-1347   2            if(GET_DVR_WDTkickDisable()==_FALSE)
-1348   2            {
-1349   3            #if(_DEBUG_MESSAGE_WDT_KICK_CHECK == ON)    
-                    GraphicsPrint(RED,"\r\n(WDT kick over 10 seconds, Try to reboot the DVR)"); 
-                    #endif
-1352   3            SET_DVR_Reboot();
-1353   3            SET_DVR_RebootAndPower();
-1354   3            MCUTimerActiveTimerEvent(SEC(1), _USER_TIMER_EVENT_OSD_DVR_REBOOT);
-1355   3            }
-1356   2          break;
-1357   2      
-1358   2          case _SYSTEM_TIMER_EVENT_JUDGE_AC_MODE:
-1359   2          
-1360   2              #if(_DEBUG_MESSAGE_SysTimerEvent==ON)
-                      GraphicsPrint(CYAN,"(AC)");
-                      if(GET_STAT1()==ON)
-                        GraphicsPrint(GREEN,"(S1=1)");
-                      else
-                        GraphicsPrint(GREEN,"(S1=0)");
-                      
-                      if(GET_STAT2()==ON)
-                        GraphicsPrint(MAGENTA,"(S2=1)");
-                      else
-                        GraphicsPrint(MAGENTA,"(S2=0)");
-                        
-                      #endif
-1373   2              
-1374   2                  if(Check_ADAP_IN()==_TRUE)
-1375   2                  {
-1376   3                    if(GET_AC_PLUG()!=_TRUE)
-1377   3                    {
-1378   4                      SET_AC_PLUG();
-1379   4                      //SET_AC_MODE();  // turn on AC mode
-1380   4                      CLR_AC_MODE();  // turn on AC mode
-1381   4                      //MCUTimerDelayXms(100);//delay 50ms    
-1382   4                      //CLR_BAT_SYS();// turn off battery output              
-1383   4                      //SET_PWM(_CHG_CURR,Low_Current);
-1384   4      
-1385   4                      STAT1_temp=GET_STAT1(); 
-1386   4                      if(STAT1_Flag!=STAT1_temp)
-1387   4                      STAT1_Flag=STAT1_temp;
-1388   4                      
-1389   4                      STAT2_temp=GET_STAT2(); 
-1390   4                      if(STAT2_Flag!=STAT2_temp)
-1391   4                      STAT2_Flag=STAT2_temp;
-1392   4      
-1393   4                    }         
-1394   3                  
-1395   3                  if(GET_NO_BATTERY()==_TRUE)
-1396   3                    {
-1397   4                  MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_NO_BATT);                
-1398   4                    }
-1399   3                  else
-1400   3                    {
-1401   4                    
-1402   4                  if(GET_POWER_STATUS()==_POWER_STATUS_NORMAL)
-1403   4                  {
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          04/22/2021 09:18:53 PAGE 24  
-
-1404   5                    
-1405   5                    if((GET_BTH_STATE()==_BATT_STATUS_TEMP_NORMAL)&&(GET_BATTERY_CAPACITY_HIGH_FLAG()==_FALSE)&&(GET_BA
-             -TTERY_ABNORMAL()==_FALSE)&&(GET_CHARGE_TMEP_ABNORMAL()==_FALSE)/*&&(GET_CHARGE_START_FLAG()==_TRUE)*/)
-1406   5                      {
-1407   6                        if(GET_BATTERY_CAPACITY_LOW_FLAG()==_FALSE)
-1408   6                        MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_BATT_NORMAL_CHARGE);                   
-1409   6                        else
-1410   6                        MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_BATT_LOW_CHARGE);  
-1411   6                      }
-1412   5                    else if(GET_BATTERY_CHARGE_STATE()==_BATT_STATUS_NO_BATT)
-1413   5                    MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_NO_BATT); 
-1414   5                    else
-1415   5                    MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_BATT_NO_CHARGE);   
-1416   5                  }
-1417   4                  else if(GET_POWER_STATUS()==_POWER_STATUS_SAVING)
-1418   4                    {
+1403   4                      
+1404   4                      STAT2_temp=GET_STAT2(); 
+1405   4                      if(STAT2_Flag!=STAT2_temp)
+1406   4                      STAT2_Flag=STAT2_temp;
+1407   4      
+1408   4                    }         
+1409   3                  
+1410   3                  if(GET_NO_BATTERY()==_TRUE)
+1411   3                    {
+1412   4                  MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_NO_BATT);                
+1413   4                    }
+1414   3                  else
+1415   3                    {
+1416   4                    
+1417   4                  if(GET_POWER_STATUS()==_POWER_STATUS_NORMAL)
+1418   4                  {
 1419   5                    
 1420   5                    if((GET_BTH_STATE()==_BATT_STATUS_TEMP_NORMAL)&&(GET_BATTERY_CAPACITY_HIGH_FLAG()==_FALSE)&&(GET_BA
              -TTERY_ABNORMAL()==_FALSE)&&(GET_CHARGE_TMEP_ABNORMAL()==_FALSE)/*&&(GET_CHARGE_START_FLAG()==_TRUE)*/)
 1421   5                      {
-1422   6                      if(GET_BATTERY_CAPACITY_LOW_FLAG()==_FALSE)
-1423   6                      MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_BATT_NORMAL_CHARGE);                   
-1424   6                      else
-1425   6                      MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_BATT_LOW_CHARGE);
+1422   6                        if(GET_BATTERY_CAPACITY_LOW_FLAG()==_FALSE)
+1423   6                        MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_BATT_NORMAL_CHARGE);                   
+1424   6                        else
+1425   6                        MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_BATT_LOW_CHARGE);  
 1426   6                      }
-1427   5                      else if(GET_BATTERY_CHARGE_STATE()==_BATT_STATUS_NO_BATT)
-1428   5                      MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_NO_BATT); 
-1429   5                      else
-1430   5                      MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_BATT_NO_CHARGE); 
-1431   5                    }
-1432   4                  else if(GET_POWER_STATUS()==_POWER_STATUS_OFF)
+1427   5                    else if(GET_BATTERY_CHARGE_STATE()==_BATT_STATUS_NO_BATT)
+1428   5                    MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_NO_BATT); 
+1429   5                    else
+1430   5                    MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_BATT_NO_CHARGE);   
+1431   5                  }
+1432   4                  else if(GET_POWER_STATUS()==_POWER_STATUS_SAVING)
 1433   4                    {
-1434   5                      
-1435   5                      if((GET_BTH_STATE()==_BATT_STATUS_TEMP_NORMAL)&&(GET_BATTERY_CAPACITY_HIGH_FLAG()==_FALSE)&&(GET_B
-             -ATTERY_ABNORMAL()==_FALSE)&&(GET_CHARGE_TMEP_ABNORMAL()==_FALSE)/*&&(GET_CHARGE_START_FLAG()==_TRUE)*/)
-1436   5                        {
-1437   6                        if(GET_BATTERY_CAPACITY_LOW_FLAG()==_FALSE)
-1438   6                          MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_BATT_HIGH_CHARGE); 
-1439   6                        else
-1440   6                          MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_BATT_LOW_CHARGE);  
-1441   6                        }
+1434   5                    
+1435   5                    if((GET_BTH_STATE()==_BATT_STATUS_TEMP_NORMAL)&&(GET_BATTERY_CAPACITY_HIGH_FLAG()==_FALSE)&&(GET_BA
+             -TTERY_ABNORMAL()==_FALSE)&&(GET_CHARGE_TMEP_ABNORMAL()==_FALSE)/*&&(GET_CHARGE_START_FLAG()==_TRUE)*/)
+1436   5                      {
+1437   6                      if(GET_BATTERY_CAPACITY_LOW_FLAG()==_FALSE)
+1438   6                      MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_BATT_NORMAL_CHARGE);                   
+1439   6                      else
+1440   6                      MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_BATT_LOW_CHARGE);
+1441   6                      }
 1442   5                      else if(GET_BATTERY_CHARGE_STATE()==_BATT_STATUS_NO_BATT)
 1443   5                      MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_NO_BATT); 
 1444   5                      else
 1445   5                      MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_BATT_NO_CHARGE); 
 1446   5                    }
-1447   4                          
-1448   4                  
-1449   4                    }
-1450   3                
-1451   3                  MCUTimerActiveTimerEvent(SEC(5), _SYSTEM_TIMER_EVENT_JUDGE_AC_MODE);   //repeat on AC mode
-1452   3      
-1453   3      
-1454   3                  }
-1455   2                else
-1456   2                  {
-1457   3                  CLR_AC_PLUG();
-1458   3                  CLR_AC_MODE();  // turn off AC mode
-1459   3                  SET_AC_PLUG_OUT();
-1460   3                  CLR_BATTERY_CAPACITY_HIGH_FLAG(); 
-1461   3                  if((PWR_START_flag==ON)&&(PowerFlag==ON))
-1462   3                  MCU_SendCmdToDVR(MCU_PROTOCOL_CMD_SYSTEM_SHUTDOWN);///SET_AC_PLUG_OUT             
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          04/22/2021 09:18:53 PAGE 25  
+1447   4                  else if(GET_POWER_STATUS()==_POWER_STATUS_OFF)
+1448   4                    {
+1449   5                      
+1450   5                      if((GET_BTH_STATE()==_BATT_STATUS_TEMP_NORMAL)&&(GET_BATTERY_CAPACITY_HIGH_FLAG()==_FALSE)&&(GET_B
+             -ATTERY_ABNORMAL()==_FALSE)&&(GET_CHARGE_TMEP_ABNORMAL()==_FALSE)/*&&(GET_CHARGE_START_FLAG()==_TRUE)*/)
+1451   5                        {
+1452   6                        if(GET_BATTERY_CAPACITY_LOW_FLAG()==_FALSE)
+1453   6                          MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_BATT_HIGH_CHARGE); 
+1454   6                        else
+1455   6                          MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_BATT_LOW_CHARGE);  
+1456   6                        }
+1457   5                      else if(GET_BATTERY_CHARGE_STATE()==_BATT_STATUS_NO_BATT)
+1458   5                      MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_NO_BATT); 
+1459   5                      else
+1460   5                      MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_BATT_NO_CHARGE); 
+1461   5                    }
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/04/2021 17:40:40 PAGE 25  
 
-1463   3                  MCUTimerActiveTimerEvent(SEC(0.5), _SYSTEM_TIMER_EVENT_BATT_NO_CHARGE);  //change battery mode          
-1464   3                  MCUTimerActiveTimerEvent(SEC(0.5), _SYSTEM_TIMER_EVENT_JUDGE_BATT_MODE);  //going to battery mode
-1465   3                  }
-1466   2      
-1467   2                CLR_AC_MODE();  
-1468   2                    //CLR_BAT_SYS();
-1469   2          break;
-1470   2                      case _SYSTEM_TIMER_EVENT_CHECK_CHARGE_STATE:
-1471   2      
-1472   2                    STAT1_temp=GET_STAT1();
-1473   2                    STAT2_temp=GET_STAT2();
-1474   2                  
-1475   2                    #if(_DEBUG_MESSAGE_SysTimerEvent==ON)
-                            GraphicsPrint(YELLOW,"(STAT1_temp=%02x)",(WORD)STAT1_temp);
-                            #endif  
-1478   2                    #if(_DEBUG_MESSAGE_SysTimerEvent==ON)
-                            GraphicsPrint(GREEN,"(STAT2_temp=%02x)",(WORD)STAT2_temp);
-                            #endif  
-1481   2                    
-1482   2                    if((STAT1_Flag!=STAT1_temp)&&(GET_NO_BATTERY()==_FALSE))
-1483   2                      {
-1484   3                      STAT1_Flag=STAT1_temp;
-1485   3                      SET_BATTERY_CHARGE_STATE(_BATT_STATUS_NONE);//reset battery state.              
-1486   3                      }
-1487   2                    
-1488   2                      if((STAT2_Flag!=STAT2_temp)&&(GET_NO_BATTERY()==_FALSE))
-1489   2                      {
-1490   3                      STAT2_Flag=STAT2_temp;
-1491   3                      SET_BATTERY_CHARGE_STATE(_BATT_STATUS_NONE);//reset battery state.              
-1492   3                      }
-1493   2            
-1494   2                #if 1
-1495   2                    if(GET_BATTERY_ABNORMAL()==_FALSE)
-1496   2                    { 
-1497   3                        if(GET_BATTERY_CAPACITY()>=BATTERY_ACD_MAX)//>17    
-1498   3                        {
-1499   4                        #if(_DEBUG_MESSAGE_SysTimerEvent==ON)
-                                GraphicsPrint(RED,"( HigH Voltage >17V shut down)");
-                                #endif
-1502   4                        SET_BATTERY_ABNORMAL();
-1503   4                        MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_JUDGE_PSW_STATE);            
-1504   4                        }
-1505   3                  
-1506   3                    }
-1507   2      
-1508   2                        switch(GET_BATTERY_STATE())
-1509   2                        {
-1510   3      
-1511   3                      case _BATT_STATUS_CAPACITY_MAX_STOP:
-1512   3                        
-1513   3                          if(GET_BATTERY_CAPACITY_HIGH_FLAG()==_FALSE)
-1514   3                          {
-1515   4                          #if(_DEBUG_MESSAGE_SysTimerEvent==ON)
-                                  GraphicsPrint(RED,"(HIGH Voltage >16.4V stop charge)");
-                                  #endif  
-1518   4                          SET_BATTERY_CAPACITY_HIGH_FLAG();   
-1519   4                          }
-1520   3                          
-1521   3                         if(GET_BATTERY_CAPACITY_LOW_FLAG()==_TRUE)
-1522   3                         {     
-1523   4                          #if(_DEBUG_MESSAGE_SysTimerEvent==ON)
-                                   GraphicsPrint(RED,"(2.Normal Voltage Charge >12V)");
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          04/22/2021 09:18:53 PAGE 26  
+1462   4                          
+1463   4                  
+1464   4                    }
+1465   3                
+1466   3                  MCUTimerActiveTimerEvent(SEC(5), _SYSTEM_TIMER_EVENT_JUDGE_AC_MODE);   //repeat on AC mode
+1467   3      
+1468   3      
+1469   3                  }
+1470   2                else
+1471   2                  {
+1472   3                  CLR_AC_PLUG();
+1473   3                  CLR_AC_MODE();  // turn off AC mode
+1474   3                  SET_AC_PLUG_OUT();
+1475   3                  CLR_BATTERY_CAPACITY_HIGH_FLAG(); 
+1476   3                  if((PWR_START_flag==ON)&&(PowerFlag==ON))
+1477   3                  MCU_SendCmdToDVR(MCU_PROTOCOL_CMD_SYSTEM_SHUTDOWN);///SET_AC_PLUG_OUT             
+1478   3                  MCUTimerActiveTimerEvent(SEC(0.5), _SYSTEM_TIMER_EVENT_BATT_NO_CHARGE);  //change battery mode          
+1479   3                  MCUTimerActiveTimerEvent(SEC(0.5), _SYSTEM_TIMER_EVENT_JUDGE_BATT_MODE);  //going to battery mode
+1480   3                  }
+1481   2      
+1482   2                CLR_AC_MODE();  
+1483   2                    //CLR_BAT_SYS();
+1484   2          break;
+1485   2                      case _SYSTEM_TIMER_EVENT_CHECK_CHARGE_STATE:
+1486   2      
+1487   2                    STAT1_temp=GET_STAT1();
+1488   2                    STAT2_temp=GET_STAT2();
+1489   2                  
+1490   2                    #if(_DEBUG_MESSAGE_SysTimerEvent==ON)
+1491   2                    GraphicsPrint(YELLOW,"(STAT1_temp=%02x)",(WORD)STAT1_temp);
+1492   2                    #endif  
+1493   2                    #if(_DEBUG_MESSAGE_SysTimerEvent==ON)
+1494   2                    GraphicsPrint(GREEN,"(STAT2_temp=%02x)",(WORD)STAT2_temp);
+1495   2                    #endif  
+1496   2                    
+1497   2                    if((STAT1_Flag!=STAT1_temp)&&(GET_NO_BATTERY()==_FALSE))
+1498   2                      {
+1499   3                      STAT1_Flag=STAT1_temp;
+1500   3                      SET_BATTERY_CHARGE_STATE(_BATT_STATUS_NONE);//reset battery state.              
+1501   3                      }
+1502   2                    
+1503   2                      if((STAT2_Flag!=STAT2_temp)&&(GET_NO_BATTERY()==_FALSE))
+1504   2                      {
+1505   3                      STAT2_Flag=STAT2_temp;
+1506   3                      SET_BATTERY_CHARGE_STATE(_BATT_STATUS_NONE);//reset battery state.              
+1507   3                      }
+1508   2            
+1509   2                #if 1
+1510   2                    if(GET_BATTERY_ABNORMAL()==_FALSE)
+1511   2                    { 
+1512   3                        if(GET_BATTERY_CAPACITY()>=BATTERY_ACD_MAX)//>17    
+1513   3                        {
+1514   4                        #if(_DEBUG_MESSAGE_SysTimerEvent==ON)
+1515   4                        GraphicsPrint(RED,"( HigH Voltage >17V shut down)");
+1516   4                        #endif
+1517   4                        SET_BATTERY_ABNORMAL();
+1518   4                        MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_JUDGE_PSW_STATE);            
+1519   4                        }
+1520   3                  
+1521   3                    }
+1522   2      
+1523   2                        switch(GET_BATTERY_STATE())
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/04/2021 17:40:40 PAGE 26  
 
+1524   2                        {
+1525   3      
+1526   3                      case _BATT_STATUS_CAPACITY_MAX_STOP:
+1527   3                        
+1528   3                          if((GET_BATTERY_CAPACITY_HIGH_FLAG()==_FALSE)/*&&(_BATT_STATUS_CAPACITY_MAX_STOP_Count>20)*/)
+1529   3                          {
+1530   4                          #if(_DEBUG_MESSAGE_SysTimerEvent==ON)
+1531   4                          GraphicsPrint(RED,"(HIGH Voltage >16.4V stop charge)");
+1532   4                          #endif  
+1533   4                          SET_BATTERY_CAPACITY_HIGH_FLAG();   
+1534   4                          }
+1535   3                          /*
+1536   3                          else
+1537   3                            {
+1538   3                            _BATT_STATUS_CAPACITY_MAX_STOP_Count++;
+1539   3                              if(_BATT_STATUS_CAPACITY_MAX_STOP_Count>200)
+1540   3                                _BATT_STATUS_CAPACITY_MAX_STOP_Count=0;
+1541   3                            }
+1542   3                          */
+1543   3                         if(GET_BATTERY_CAPACITY_LOW_FLAG()==_TRUE)
+1544   3                         {     
+1545   4                          #if(_DEBUG_MESSAGE_SysTimerEvent==ON)
+1546   4                           GraphicsPrint(RED,"(2.Normal Voltage Charge >12V)");
+1547   4                          #endif
+1548   4                         CLR_BATTERY_CAPACITY_LOW_FLAG();  
+1549   4                         SET_BATTERY_CHARGE_STATE(_BATT_STATUS_NONE);//reset battery state.  
+1550   4                          if(ReadEEP(EEP_LowBattery_Flag))
+1551   4                            WriteEEP(EEP_LowBattery_Flag,OFF);
+1552   4                         }
+1553   3                         CLR_CHARGE_START_FLAG();
+1554   3      
+1555   3                        #if 0
+                                if(bytBatteryStopCharge==_FALSE)
+                                {
+              
+                                if(bytBatteryStopChargeCount>20)
+                                  {
+                                  bytBatteryStopCharge=_TRUE;
+                                  if(ReadEEP(EEP_BatteryStopCharge)==OFF)
+                                  WriteEEP(EEP_BatteryStopCharge,ON);
+              
+                                  #if(_DEBUG_MESSAGE_Battery_Charge_Debug==ON)
+                                    GraphicsPrint(RED,"(bytBatteryStopCharge=1)");
                                   #endif
-1526   4                         CLR_BATTERY_CAPACITY_LOW_FLAG();  
-1527   4                         SET_BATTERY_CHARGE_STATE(_BATT_STATUS_NONE);//reset battery state.  
-1528   4                          if(ReadEEP(EEP_LowBattery_Flag))
-1529   4                            WriteEEP(EEP_LowBattery_Flag,OFF);
-1530   4                         }
-1531   3                         CLR_CHARGE_START_FLAG();
-1532   3                        break;
-1533   3                      case _BATT_STATUS_CAPACITY_MIN:
-1534   3                      case _BATT_STATUS_CAPACITY_NO_STARTUP:
-1535   3                          if((GET_BATTERY_CAPACITY_LOW_FLAG()==_FALSE)&&(GET_DVR_SystemReadyNotic()==_FALSE)&&(GET_AC_PLUG
+                                  }
+                                else
+                                  { 
+                                  bytBatteryStopChargeCount++;
+                                  if(bytBatteryStopChargeCount>200)
+                                    bytBatteryStopChargeCount=0;
+              
+                                  #if(_DEBUG_MESSAGE_Battery_Charge_Debug==ON)
+                                    GraphicsPrint(RED,"(bytBatteryStopChargeCount=%d)",(WORD)bytBatteryStopChargeCount);
+                                  #endif
+                                  }
+                                }
+                                  #endif  
+1581   3                        break;
+1582   3                      case _BATT_STATUS_CAPACITY_MIN:
+1583   3                      case _BATT_STATUS_CAPACITY_NO_STARTUP:
+1584   3                          if((GET_BATTERY_CAPACITY_LOW_FLAG()==_FALSE)&&(GET_DVR_SystemReadyNotic()==_FALSE)&&(GET_AC_PLUG
              -()==_FALSE))
-1536   3                          {
-1537   4                          SET_BATTERY_CAPACITY_LOW_FLAG();  
-1538   4                          
-1539   4                          if(ReadEEP(EEP_LowBattery_Flag)==OFF)
-1540   4                          WriteEEP(EEP_LowBattery_Flag,ON);
-1541   4                          
-1542   4                          #if(_DEBUG_MESSAGE_SysTimerEvent==ON)
-                                  GraphicsPrint(RED,"( Low Voltage <11.8V or < 11.6V shut down)");
-                                  #endif  
-1545   4                          MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_JUDGE_PSW_STATE);  
-1546   4                          }
-1547   3                          else  if((GET_BATTERY_STATE()==_BATT_STATUS_CAPACITY_MIN)&&(PowerFlag==ON)&&(GET_AC_PLUG()==_FALS
-             -E))
-1548   3                          {
-1549   4                          PowerFlag=OFF;
-1550   4                          WriteEEP(EEP_Powerflag,PowerFlag);
-1551   4                        
-1552   4                          if(GET_DVR_EntrySleepMode()==TRUE)
-1553   4                          CLR_DVR_EntrySleepMode();
-1554   4                          }
-1555   3      
-1556   3                          if(GET_DVR_EntrySleepMode()==_TRUE)
-1557   3                          {
-1558   4                          SET_TARGET_POWER_STATUS(_POWER_STATUS_NORMAL);
-1559   4                          #if (_DEBUG_MESSAGE_SysTimerEvent==ON)
-                                    GraphicsPrint(RED,"(MCU_SLEEP_TO_NORMAL_MODE: Low Voltage <12V)");    
-                                  #endif  
-1562   4                          }
-1563   3                          
-1564   3                          CLR_BATTERY_CAPACITY_HIGH_FLAG();       
-1565   3                          SET_CHARGE_START_FLAG();
-1566   3                        break;
-1567   3      
-1568   3                       case _BATT_STATUS_CAPACITY_LEVEL0:
-1569   3                         CLR_BATTERY_CAPACITY_HIGH_FLAG();   
-1570   3                        //  CLR_BATTERY_CAPACITY_LOW_FLAG();  
-1571   3                          if(GET_DVR_EntrySleepMode()==_TRUE)
-1572   3                          {
-1573   4                          SET_TARGET_POWER_STATUS(_POWER_STATUS_NORMAL);
-1574   4                          #if (_DEBUG_MESSAGE_SysTimerEvent==ON)
-                                    GraphicsPrint(RED,"(MCU_SLEEP_TO_NORMAL_MODE: Low Voltage <12V)");    
-                                  #endif  
-1577   4                          }
-1578   3                        break;
-1579   3                       case _BATT_STATUS_CAPACITY_LEVEL1:                 
-1580   3                       case _BATT_STATUS_CAPACITY_LEVEL2:
-1581   3                       case _BATT_STATUS_CAPACITY_LEVEL3:
-1582   3                       case _BATT_STATUS_CAPACITY_LEVEL4:
-1583   3                       case _BATT_STATUS_CAPACITY_MAX:
-1584   3      
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          04/22/2021 09:18:53 PAGE 27  
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/04/2021 17:40:40 PAGE 27  
 
-1585   3                         SET_CHARGE_START_FLAG();
-1586   3                         /*
-1587   3                         if(GET_BATTERY_CAPACITY_LOW_FLAG()==_TRUE)
-1588   3                         {     
-1589   3                          #if(_DEBUG_MESSAGE_SysTimerEvent==ON)
-1590   3                           GraphicsPrint(RED,"(Normal Voltage Charge >12V)");
-1591   3                          #endif
-1592   3                         CLR_BATTERY_CAPACITY_LOW_FLAG();  
-1593   3                         SET_BATTERY_CHARGE_STATE(_BATT_STATUS_NONE);//reset battery state.  
-1594   3                         }  
-1595   3                         */
-1596   3                         CLR_BATTERY_CAPACITY_HIGH_FLAG();   
-1597   3                          break;
-1598   3                      //case _BATT_STATUS_CAPACITY_MAX:
-1599   3                      //  CLR_CHARGE_START_FLAG();
-1600   3                        
-1601   3                        //break;
-1602   3                        }
-1603   2            #else
+1585   3                          {
+1586   4                          SET_BATTERY_CAPACITY_LOW_FLAG();  
+1587   4                          
+1588   4                          if(ReadEEP(EEP_LowBattery_Flag)==OFF)
+1589   4                          WriteEEP(EEP_LowBattery_Flag,ON);
+1590   4                          
+1591   4                          #if(_DEBUG_MESSAGE_SysTimerEvent==ON)
+1592   4                          GraphicsPrint(RED,"( Low Voltage <11.8V or < 11.6V shut down)");
+1593   4                          #endif  
+1594   4                          MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_JUDGE_PSW_STATE);  
+1595   4                          }
+1596   3                          else  if((GET_BATTERY_STATE()==_BATT_STATUS_CAPACITY_MIN)&&(PowerFlag==ON)&&(GET_AC_PLUG()==_FALS
+             -E))
+1597   3                          {
+1598   4                          PowerFlag=OFF;
+1599   4                          WriteEEP(EEP_Powerflag,PowerFlag);
+1600   4                        
+1601   4                          if(GET_DVR_EntrySleepMode()==TRUE)
+1602   4                          CLR_DVR_EntrySleepMode();
+1603   4                          }
+1604   3      
+1605   3                          if(GET_DVR_EntrySleepMode()==_TRUE)
+1606   3                          {
+1607   4                          SET_TARGET_POWER_STATUS(_POWER_STATUS_NORMAL);
+1608   4                          #if (_DEBUG_MESSAGE_SysTimerEvent==ON)
+1609   4                            GraphicsPrint(RED,"(MCU_SLEEP_TO_NORMAL_MODE: Low Voltage <12V)");    
+1610   4                          #endif  
+1611   4                          }
+1612   3                          
+1613   3                          CLR_BATTERY_CAPACITY_HIGH_FLAG();       
+1614   3                          SET_CHARGE_START_FLAG();
+1615   3                        break;
+1616   3      
+1617   3                       case _BATT_STATUS_CAPACITY_LEVEL0:
+1618   3                         CLR_BATTERY_CAPACITY_HIGH_FLAG();   
+1619   3                        //  CLR_BATTERY_CAPACITY_LOW_FLAG();  
+1620   3                          if(GET_DVR_EntrySleepMode()==_TRUE)
+1621   3                          {
+1622   4                          SET_TARGET_POWER_STATUS(_POWER_STATUS_NORMAL);
+1623   4                          #if (_DEBUG_MESSAGE_SysTimerEvent==ON)
+1624   4                            GraphicsPrint(RED,"(MCU_SLEEP_TO_NORMAL_MODE: Low Voltage <12V)");    
+1625   4                          #endif  
+1626   4                          }
+1627   3                        break;
+1628   3                       case _BATT_STATUS_CAPACITY_LEVEL1:                 
+1629   3                       case _BATT_STATUS_CAPACITY_LEVEL2:
+1630   3                       case _BATT_STATUS_CAPACITY_LEVEL3:
+1631   3                       case _BATT_STATUS_CAPACITY_LEVEL4:
+1632   3                       case _BATT_STATUS_CAPACITY_MAX:
+1633   3      
+1634   3                         SET_CHARGE_START_FLAG();
+1635   3                         /*
+1636   3                         if(GET_BATTERY_CAPACITY_LOW_FLAG()==_TRUE)
+1637   3                         {     
+1638   3                          #if(_DEBUG_MESSAGE_SysTimerEvent==ON)
+1639   3                           GraphicsPrint(RED,"(Normal Voltage Charge >12V)");
+1640   3                          #endif
+1641   3                         CLR_BATTERY_CAPACITY_LOW_FLAG();  
+1642   3                         SET_BATTERY_CHARGE_STATE(_BATT_STATUS_NONE);//reset battery state.  
+1643   3                         }  
+1644   3                         */
+1645   3                         CLR_BATTERY_CAPACITY_HIGH_FLAG();   
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/04/2021 17:40:40 PAGE 28  
+
+1646   3                          break;
+1647   3                      //case _BATT_STATUS_CAPACITY_MAX:
+1648   3                      //  CLR_CHARGE_START_FLAG();
+1649   3                        
+1650   3                        //break;
+1651   3                        }
+1652   2            #else
                             if(GET_BATTERY_CAPACITY_LOW_FLAG()==_FALSE)
                             { 
                               if(GET_BATTERY_STATE()==_BATT_STATUS_CAPACITY_MIN)//<11.6V    
@@ -1726,8 +1778,6 @@ line level    source
              -)    
                             //      CLR_BATTERY_ABNORMAL();
               
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          04/22/2021 09:18:53 PAGE 28  
-
                             if(GET_BATTERY_STATE()==_BATT_STATUS_CAPACITY_MAX)//>16.4V
                             {
                                   if(GET_BATTERY_CAPACITY_HIGH_FLAG()==_FALSE)
@@ -1740,139 +1790,141 @@ line level    source
                                   }
                                   
                             }
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/04/2021 17:40:40 PAGE 29  
+
                             else
                               CLR_BATTERY_CAPACITY_HIGH_FLAG(); 
                             
                     #endif        
-1662   2                MCUTimerActiveTimerEvent(SEC(10-5), _SYSTEM_TIMER_EVENT_CHECK_CHARGE_STATE);  //check charge
-1663   2                break;
-1664   2          case     _SYSTEM_TIMER_EVENT_JUDGE_BATT_MODE:
-1665   2            #if(_DEBUG_MESSAGE_SysTimerEvent==ON)
-                    GraphicsPrint(CYAN,"(BATT)");
-                      if(GET_STAT1()==ON)
-                        GraphicsPrint(MAGENTA,"(S1=1)");
-                      else
-                        GraphicsPrint(GREEN,"(S1=0)");
-                      
-                      if(GET_STAT2()==ON)
-                        GraphicsPrint(MAGENTA,"(S2=1)");
-                      else
-                        GraphicsPrint(GREEN,"(S2=0)");
-                    #endif
-1677   2          
-1678   2            if(Check_ADAP_IN()==_TRUE)
-1679   2              {
-1680   3      
-1681   3                if((PWR_START_flag==ON)&&(PowerFlag==OFF))
-1682   3                {
-1683   4                MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_JUDGE_PSW_STATE);
-1684   4                }
-1685   3      
-1686   3              SET_BATTERY_CHARGE_STATE(_BATT_STATUS_NONE);//reset battery state.
-1687   3              MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_JUDGE_AC_MODE);  
-1688   3              }
-1689   2            else 
-1690   2              {
-1691   3              if(GET_BAT_SYS()!=ON)
-1692   3                {
-1693   4                //SET_BAT_SYS();   // turn on  battery mode
-1694   4                //CLR_BAT_SYS();   // turn on  battery mode
-1695   4                //MCUTimerDelayXms(100);//delay 50ms          
-1696   4                CLR_AC_MODE();  // turn off AC mode
-1697   4                }
-1698   3      
-1699   3                //if((GET_BATTERY_STATE()==_BATT_STATUS_CAPACITY_LEVEL0)&&(PowerFlag==ON))
-1700   3                //MCUTimerActiveTimerEvent(SEC(0.1), _USER_TIMER_EVENT_OSD_DVR_SHUTDOWN);
-1701   3      
-1702   3                MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_BATT_NO_CHARGE);       
-1703   3      
-1704   3      
-1705   3              MCUTimerActiveTimerEvent(SEC(5), _SYSTEM_TIMER_EVENT_JUDGE_BATT_MODE);
-1706   3              }
-1707   2      
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          04/22/2021 09:18:53 PAGE 29  
+1711   2                MCUTimerActiveTimerEvent(SEC(10-5), _SYSTEM_TIMER_EVENT_CHECK_CHARGE_STATE);  //check charge
+1712   2                break;
+1713   2          case     _SYSTEM_TIMER_EVENT_JUDGE_BATT_MODE:
+1714   2            #if(_DEBUG_MESSAGE_SysTimerEvent==ON)
+1715   2            GraphicsPrint(CYAN,"(BATT)");
+1716   2              if(GET_STAT1()==ON)
+1717   2                GraphicsPrint(MAGENTA,"(S1=1)");
+1718   2              else
+1719   2                GraphicsPrint(GREEN,"(S1=0)");
+1720   2              
+1721   2              if(GET_STAT2()==ON)
+1722   2                GraphicsPrint(MAGENTA,"(S2=1)");
+1723   2              else
+1724   2                GraphicsPrint(GREEN,"(S2=0)");
+1725   2            #endif
+1726   2          
+1727   2            if(Check_ADAP_IN()==_TRUE)
+1728   2              {
+1729   3      
+1730   3                if((PWR_START_flag==ON)&&(PowerFlag==OFF))
+1731   3                {
+1732   4                MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_JUDGE_PSW_STATE);
+1733   4                }
+1734   3      
+1735   3              SET_BATTERY_CHARGE_STATE(_BATT_STATUS_NONE);//reset battery state.
+1736   3              MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_JUDGE_AC_MODE);  
+1737   3              }
+1738   2            else 
+1739   2              {
+1740   3              if(GET_BAT_SYS()!=ON)
+1741   3                {
+1742   4                //SET_BAT_SYS();   // turn on  battery mode
+1743   4                //CLR_BAT_SYS();   // turn on  battery mode
+1744   4                //MCUTimerDelayXms(100);//delay 50ms          
+1745   4                CLR_AC_MODE();  // turn off AC mode
+1746   4                }
+1747   3      
+1748   3                //if((GET_BATTERY_STATE()==_BATT_STATUS_CAPACITY_LEVEL0)&&(PowerFlag==ON))
+1749   3                //MCUTimerActiveTimerEvent(SEC(0.1), _USER_TIMER_EVENT_OSD_DVR_SHUTDOWN);
+1750   3      
+1751   3                MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_BATT_NO_CHARGE);       
+1752   3      
+1753   3      
+1754   3              MCUTimerActiveTimerEvent(SEC(5), _SYSTEM_TIMER_EVENT_JUDGE_BATT_MODE);
+1755   3              }
+1756   2      
+1757   2                CLR_AC_MODE();  
+1758   2                    //CLR_BAT_SYS();
+1759   2            break;
+1760   2      
+1761   2            case _SYSTEM_TIMER_EVENT_BATT_LOW_CHARGE: 
+1762   2              if(GET_BATTERY_CHARGE_STATE()!=_BATT_STATUS_LOW_CHARGE)
+1763   2              UserInterfaceBatteryChargeMode(_BATT_STATUS_LOW_CHARGE);
+1764   2          break;
+1765   2      
+1766   2        case  _SYSTEM_TIMER_EVENT_BATT_HIGH_CHARGE:   
+1767   2              if(GET_BATTERY_CHARGE_STATE()!=_BATT_STATUS_HIGH_CHARGE)
+1768   2              UserInterfaceBatteryChargeMode(_BATT_STATUS_HIGH_CHARGE);         
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/04/2021 17:40:40 PAGE 30  
 
-1708   2                CLR_AC_MODE();  
-1709   2                    //CLR_BAT_SYS();
-1710   2            break;
-1711   2      
-1712   2            case _SYSTEM_TIMER_EVENT_BATT_LOW_CHARGE: 
-1713   2              if(GET_BATTERY_CHARGE_STATE()!=_BATT_STATUS_LOW_CHARGE)
-1714   2              UserInterfaceBatteryChargeMode(_BATT_STATUS_LOW_CHARGE);
-1715   2          break;
-1716   2      
-1717   2        case  _SYSTEM_TIMER_EVENT_BATT_HIGH_CHARGE:   
-1718   2              if(GET_BATTERY_CHARGE_STATE()!=_BATT_STATUS_HIGH_CHARGE)
-1719   2              UserInterfaceBatteryChargeMode(_BATT_STATUS_HIGH_CHARGE);         
-1720   2              break;
-1721   2        case  _SYSTEM_TIMER_EVENT_BATT_NORMAL_CHARGE:   
-1722   2            if(GET_BATTERY_CHARGE_STATE()!=_BATT_STATUS_NORMAL_CHARGE)
-1723   2              UserInterfaceBatteryChargeMode(_BATT_STATUS_NORMAL_CHARGE);             
-1724   2            break;
-1725   2      
-1726   2        case  _SYSTEM_TIMER_EVENT_BATT_NO_CHARGE:   
-1727   2              if(GET_BATTERY_CHARGE_STATE()!=_BATT_STATUS_STOP_CHARGE)
-1728   2              UserInterfaceBatteryChargeMode(_BATT_STATUS_STOP_CHARGE);         
-1729   2            break;
-1730   2      
-1731   2      
-1732   2        case  _SYSTEM_TIMER_EVENT_NO_BATT:  
-1733   2              if(GET_BATTERY_CHARGE_STATE()!=_BATT_STATUS_NO_BATT)
-1734   2              UserInterfaceBatteryChargeMode(_BATT_STATUS_NO_BATT);         
-1735   2              break;
-1736   2            
-1737   2      
-1738   2              case _SYSTEM_TIMER_EVENT_SHOW_WORKING_TIMER:
-1739   2        
-1740   2            second+=10;
-1741   2          
-1742   2            if(second==60)
-1743   2            {
-1744   3              second=0;
-1745   3              minute++;
-1746   3            }
-1747   2        
-1748   2            if(minute==60)
-1749   2            {
-1750   3              minute=0;
-1751   3              hour++;
-1752   3            }
-1753   2        
-1754   2            if(hour==24)
-1755   2            {
-1756   3              hour=0;
-1757   3              day++;
-1758   3            } 
-1759   2      
-1760   2          ShowWorkingTimer();
-1761   2      
-1762   2          MCUTimerActiveTimerEvent(SEC(10), _SYSTEM_TIMER_EVENT_SHOW_WORKING_TIMER);
-1763   2             break;
-1764   2      #if (_POWER_DOWN_ENABLE==ON)
-1765   2          case _SYSTEM_TIMER_POWER_DOWN_MODE:
-1766   2          //SET_MCU_POWER_DOWN_MODE();
-1767   2          Power_down_mode=2;
-1768   2              
-1769   2          break;
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          04/22/2021 09:18:53 PAGE 30  
-
-1770   2      #endif
-1771   2         default:
-1772   2                  break;
-1773   2       }
-1774   1      }
-1775          
+1769   2              break;
+1770   2        case  _SYSTEM_TIMER_EVENT_BATT_NORMAL_CHARGE:   
+1771   2            if(GET_BATTERY_CHARGE_STATE()!=_BATT_STATUS_NORMAL_CHARGE)
+1772   2              UserInterfaceBatteryChargeMode(_BATT_STATUS_NORMAL_CHARGE);             
+1773   2            break;
+1774   2      
+1775   2        case  _SYSTEM_TIMER_EVENT_BATT_NO_CHARGE:   
+1776   2              if(GET_BATTERY_CHARGE_STATE()!=_BATT_STATUS_STOP_CHARGE)
+1777   2              UserInterfaceBatteryChargeMode(_BATT_STATUS_STOP_CHARGE);         
+1778   2            break;
+1779   2      
+1780   2      
+1781   2        case  _SYSTEM_TIMER_EVENT_NO_BATT:  
+1782   2              if(GET_BATTERY_CHARGE_STATE()!=_BATT_STATUS_NO_BATT)
+1783   2              UserInterfaceBatteryChargeMode(_BATT_STATUS_NO_BATT);         
+1784   2              break;
+1785   2            
+1786   2      
+1787   2              case _SYSTEM_TIMER_EVENT_SHOW_WORKING_TIMER:
+1788   2        
+1789   2            second+=10;
+1790   2          
+1791   2            if(second==60)
+1792   2            {
+1793   3              second=0;
+1794   3              minute++;
+1795   3            }
+1796   2        
+1797   2            if(minute==60)
+1798   2            {
+1799   3              minute=0;
+1800   3              hour++;
+1801   3            }
+1802   2        
+1803   2            if(hour==24)
+1804   2            {
+1805   3              hour=0;
+1806   3              day++;
+1807   3            } 
+1808   2      
+1809   2          ShowWorkingTimer();
+1810   2      
+1811   2          MCUTimerActiveTimerEvent(SEC(10), _SYSTEM_TIMER_EVENT_SHOW_WORKING_TIMER);
+1812   2             break;
+1813   2      #if (_POWER_DOWN_ENABLE==ON)
+1814   2          case _SYSTEM_TIMER_POWER_DOWN_MODE:
+1815   2          //SET_MCU_POWER_DOWN_MODE();
+1816   2          Power_down_mode=2;
+1817   2              
+1818   2          break;
+1819   2      #endif
+1820   2         default:
+1821   2                  break;
+1822   2       }
+1823   1      }
+1824          
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =   5117    ----
-   CONSTANT SIZE    =   ----    ----
-   XDATA SIZE       =     92      19
+   CODE SIZE        =   5729    ----
+   CONSTANT SIZE    =    775    ----
+   XDATA SIZE       =     93      19
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/04/2021 17:40:40 PAGE 31  
+
    PDATA SIZE       =   ----    ----
    DATA SIZE        =   ----    ----
    IDATA SIZE       =   ----    ----
-   BIT SIZE         =      1    ----
+   BIT SIZE         =      2    ----
 END OF MODULE INFORMATION.
 
 
-C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
+C51 COMPILATION COMPLETE.  1 WARNING(S),  0 ERROR(S)

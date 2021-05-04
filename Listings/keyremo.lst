@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.0.0   KEYREMO                                                           04/22/2021 09:18:52 PAGE 1   
+C51 COMPILER V9.60.0.0   KEYREMO                                                           05/04/2021 17:40:40 PAGE 1   
 
 
 C51 COMPILER V9.60.0.0, COMPILATION OF MODULE KEYREMO
@@ -23,6 +23,7 @@ line level    source
   13          #include "i2c.h"
   14          #include "cpu.h"
   15          #include "printf.h"
+*** WARNING C320 IN LINE 44 OF .\Include\printf.h: DEBUG is defined 
   16          #include "reg.h"
   17          #include "etc_eep.h"
   18          #include "HS_DVRProtocol.h"
@@ -61,9 +62,9 @@ line level    source
   51   2        else
   52   2           MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_JUDGE_PSW_STATE);
   53   2        }
-  54   1      
-C51 COMPILER V9.60.0.0   KEYREMO                                                           04/22/2021 09:18:52 PAGE 2   
+C51 COMPILER V9.60.0.0   KEYREMO                                                           05/04/2021 17:40:40 PAGE 2   
 
+  54   1      
   55   1      }
   56          
   57          //=============================================================================
@@ -101,4 +102,4 @@ MODULE INFORMATION:   STATIC OVERLAYABLE
 END OF MODULE INFORMATION.
 
 
-C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
+C51 COMPILATION COMPLETE.  1 WARNING(S),  0 ERROR(S)

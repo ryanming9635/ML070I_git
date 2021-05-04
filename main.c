@@ -34,6 +34,8 @@ BYTE	CameraVolt;
 BYTE	PWR_START_flag;
 BYTE LowBatteryFlag;
 BYTE PowerOffToOnFlag;
+BYTE bytBatteryStopCharge;
+BYTE bytBatteryStopChargeCount=0;
 BYTE DVRChangeCurrent=0;
 BYTE Power_down_mode=_DontgoingToPD;
 BYTE bytFastEncoderMode=OFF;
@@ -263,7 +265,9 @@ switch(ucType)
 		if(GET_BATTERY_LOW_TMEP_WARN()==_TRUE)
 		buf[1]|=0x40;
 
-		if(((GET_STAT1()==OFF)&&(GET_STAT2()==ON)&&(BatteryBTH>90))&&(GET_BATTERY_CAPACITY_HIGH_FLAG()==_FALSE)&&( GET_BTH_STATE()==_BATT_STATUS_TEMP_NORMAL)&&(GET_CHARGE_TMEP_ABNORMAL()==_FALSE)&&(GET_NO_BATTERY()==_FALSE))///charging
+		if(((GET_STAT1()==OFF)&&(GET_STAT2()==ON)&&(BatteryBTH>90))&&(GET_BATTERY_CAPACITY_HIGH_FLAG()==_FALSE)&&\
+			( GET_BTH_STATE()==_BATT_STATUS_TEMP_NORMAL)&&(GET_CHARGE_TMEP_ABNORMAL()==_FALSE)&&\
+			(GET_NO_BATTERY()==_FALSE)/*&&(bytBatteryStopCharge==_FALSE)*/)///charging
 		buf[1]|=0x80;
 
 		
@@ -494,6 +498,8 @@ void 	LoadEEPROM (void)
 	 PWR_START_flag= ReadEEP(EEP_DC12_PWR_START);
 	PowerOffToOnFlag= ReadEEP(EEP_PowerOffToOnflag);
 
+	bytBatteryStopCharge=ReadEEP(EEP_BatteryStopCharge);
+	
 	Encorder1= ((ReadEEP(EEP_Encorder1)>>4)*10)+(0x0f&ReadEEP(EEP_Encorder1));
 	Decimal1= ((ReadEEP(EEP_Decimal1)>>4)*10)+(0x0f&ReadEEP(EEP_Decimal1));
 

@@ -37,6 +37,9 @@
 #define	EEP_FWREV_MINOR2			0x06	//BYTE	1	F/W Rev.-minor(Hex)
 #define	EEP_DEBUGLEVEL				0x07	//BYTE	1	DebugLevel
 
+#define	EEP_HARDWARE_VER			0x08	//BYTE	1	Hardware Version
+
+#define EEP_BatteryStopCharge                   0x29
 
 DWORD GetFWRevEE(void);
 void SaveFWRevEE(void);

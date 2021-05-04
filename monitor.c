@@ -48,6 +48,7 @@ extern BYTE	PWR_START_flag;
 extern WORD BTH_Temp,Battery_Voltage_Temp;
 extern WORD BatteryBTH,BatteryVoltage;
 extern DWORD ulongRotateNumber;
+extern BYTE bytBatteryStopCharge;
 
 //void Loader(BYTE);
 
@@ -735,6 +736,8 @@ void Monitor(void)
 		Printf("\r\nPowerFlag=%02x",(WORD)ReadEEP(EEP_Powerflag));	
 		Printf("\r\nCameraVolt=%d",(WORD)ReadEEP(EEP_CameraVolt));	
 		Printf("\r\nPWR_START_flag=%02x",(WORD)ReadEEP(EEP_DC12_PWR_START));	
+		Printf("\r\nBatteryStopCharge=%02x",(WORD)ReadEEP(EEP_BatteryStopCharge));	
+	Printf("\r\nHARDWARE_VER=%02x",(WORD)ReadEEP(EEP_HARDWARE_VER));	
 	
 	Printf("\r\nEncorder1=%02x",(WORD)ReadEEP(EEP_Encorder1));	
 	Printf("\r\nDecimal1=%02x",(WORD)ReadEEP(EEP_Decimal1));	
@@ -1242,6 +1245,14 @@ else if( !stricmp( argv[1], "kgrid" ) ) {
 		Monitor_flag=_FALSE;
 		}
 	else if( !stricmp( argv[0], "Q" ) ) {
+		Monitor_flag=_FALSE;
+		}
+	else if( !stricmp( argv[0], "clear" ) ) {
+		//ClearBasicEE();
+		//LoadEEPROM();
+		WriteEEP(EEP_BatteryStopCharge,OFF);
+		bytBatteryStopCharge=ReadEEP(EEP_BatteryStopCharge);
+		Printf("(Clear bytBatteryStopCharge=0)");	
 		Monitor_flag=_FALSE;
 		}
 	else if( !stricmp( argv[0], "PWRS" ) ) {

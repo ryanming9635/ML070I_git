@@ -57,6 +57,7 @@ BYTE TEMP_STAT=0xFF;
 BYTE PWM_TEMP=0;	
 BYTE CHARGE_TEMP_ABNORMAL=0;
 BYTE CHARGE_TEMP_NORMAL=0;
+BYTE _BATT_STATUS_CAPACITY_MAX_STOP_Count=0;
 
 #if (_DEBUG_MESSAGE_Monitor==ON)
 bit Monitor_flag=OFF;
@@ -76,6 +77,8 @@ extern StructDVRInfoType g_stDVRInfo;
 extern BYTE Power_down_mode;
 extern DWORD ulongRotateNumber;
 extern BYTE bytFastEncoderMode;
+extern BYTE bytBatteryStopCharge;
+extern BYTE bytBatteryStopChargeCount;
 
 
 //--------------------------------------------------
@@ -992,6 +995,18 @@ switch(enumEventID)
 			{
 				BATERY_STAT=_BATT_STATUS_CAPACITY_LEVEL4;
 				BattDetect5_COUNT=0;
+				/*
+					if(bytBatteryStopCharge==_TRUE)
+					{
+							bytBatteryStopCharge=_FALSE;
+						if(ReadEEP(EEP_BatteryStopCharge)==ON)
+							WriteEEP(EEP_BatteryStopCharge,OFF);
+						
+					#if(_DEBUG_MESSAGE_Battery_Charge_Debug==ON)
+					 GraphicsPrint(RED,"(bytBatteryStopCharge=0)");
+					#endif
+					}
+				*/
 			}
 
 			if(BattDetectMin_COUNT==20)
@@ -1510,14 +1525,21 @@ case _SYSTEM_TIMER_EVENT_BATTERY_LOW_PWR_OFF:
 
 								case _BATT_STATUS_CAPACITY_MAX_STOP:
 									
-										if(GET_BATTERY_CAPACITY_HIGH_FLAG()==_FALSE)
+										if((GET_BATTERY_CAPACITY_HIGH_FLAG()==_FALSE)/*&&(_BATT_STATUS_CAPACITY_MAX_STOP_Count>20)*/)
 										{
 										#if(_DEBUG_MESSAGE_SysTimerEvent==ON)
 										GraphicsPrint(RED,"(HIGH Voltage >16.4V stop charge)");
 										#endif	
 										SET_BATTERY_CAPACITY_HIGH_FLAG();		
 										}
-										
+										/*
+										else
+											{
+											_BATT_STATUS_CAPACITY_MAX_STOP_Count++;
+												if(_BATT_STATUS_CAPACITY_MAX_STOP_Count>200)
+													_BATT_STATUS_CAPACITY_MAX_STOP_Count=0;
+											}
+										*/
 									 if(GET_BATTERY_CAPACITY_LOW_FLAG()==_TRUE)
 									 {		 
 										#if(_DEBUG_MESSAGE_SysTimerEvent==ON)
@@ -1529,6 +1551,33 @@ case _SYSTEM_TIMER_EVENT_BATTERY_LOW_PWR_OFF:
 											WriteEEP(EEP_LowBattery_Flag,OFF);
 									 }
 									 CLR_CHARGE_START_FLAG();
+
+									#if 0
+								 	if(bytBatteryStopCharge==_FALSE)
+								 	{
+
+									if(bytBatteryStopChargeCount>20)
+										{
+										bytBatteryStopCharge=_TRUE;
+										if(ReadEEP(EEP_BatteryStopCharge)==OFF)
+										WriteEEP(EEP_BatteryStopCharge,ON);
+
+										#if(_DEBUG_MESSAGE_Battery_Charge_Debug==ON)
+								  		GraphicsPrint(RED,"(bytBatteryStopCharge=1)");
+										#endif
+										}
+									else
+										{	
+										bytBatteryStopChargeCount++;
+										if(bytBatteryStopChargeCount>200)
+											bytBatteryStopChargeCount=0;
+
+										#if(_DEBUG_MESSAGE_Battery_Charge_Debug==ON)
+								  		GraphicsPrint(RED,"(bytBatteryStopChargeCount=%d)",(WORD)bytBatteryStopChargeCount);
+										#endif
+										}
+								 	}
+									 	#endif	
 									break;
 								case _BATT_STATUS_CAPACITY_MIN:
 								case _BATT_STATUS_CAPACITY_NO_STARTUP:

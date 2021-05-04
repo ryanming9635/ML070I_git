@@ -39,7 +39,7 @@
 #define _DEBUG_MESSAGE_BATTERY_TEST			OFF
 #define _DEBUG_MESSAGE_PWM_TEST				OFF
 #define _DEBUG_MESSAGE_Power_Supply_TEST		OFF
-
+#define _DEBUG_MESSAGE_Battery_Charge_Debug		OFF
 #else
 #warning DEBUG is defined 
 #define _DEBUG_MESSAGE_BatteryBTH                  		ON
@@ -58,6 +58,7 @@
 #define _DEBUG_MESSAGE_BATTERY_TEST			OFF
 #define _DEBUG_MESSAGE_PWM_TEST				ON
 #define _DEBUG_MESSAGE_Power_Supply_TEST		OFF
+#define _DEBUG_MESSAGE_Battery_Charge_Debug		ON
 
 #endif
 

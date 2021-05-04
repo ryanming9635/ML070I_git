@@ -29,6 +29,7 @@ extern BYTE	PowerFlag;
 extern BYTE Power_down_mode;
 extern BYTE DVRChangeCurrent;
 extern BYTE bytFastEncoderMode;
+extern BYTE bytBatteryStopCharge;
 
 
 BYTE	 year1=0,year2=0,month=0,day=0,hour=0,minute=0,second=0;
@@ -125,6 +126,14 @@ if( GetFWRevEE()!=((MCU_FW_Major<<16)|(MCU_FW_Sub0<<8)|(MCU_FW_Sub1)))
 		DebugLevel = 0xff;
 		return;
 	}
+
+if(ReadEEP(EEP_HARDWARE_VER)!=Hardware_Version)
+{
+	Printf("\r\nHARDWARE_VER ERROR");
+	ClearBasicEE();
+}
+
+	Printf("\r\nHARDWARE_VER=%d",(WORD)ReadEEP(EEP_HARDWARE_VER));
 	
 	delay(100);
 
@@ -324,6 +333,17 @@ case _CHG_CURR:  //P1_4
 			CCAPM2=0x42;	
 			Printf("(*DVRChangeCurrent=1000mA)");
 			}
+
+			/*
+			if(bytBatteryStopCharge==_TRUE)
+			{
+				#if(_DEBUG_MESSAGE_Battery_Charge_Debug==ON)			
+				GraphicsPrint(RED,"(*BatteryStopCharge=0mA)");
+				#endif
+			CCAPM2=_CHARGESTOP;	
+			P1_4=1;
+			}
+			*/
 		
 /*	
 		if(val==High_Current)

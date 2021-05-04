@@ -41,6 +41,8 @@ extern StructDVRInfoType g_stDVRInfo;
 extern BYTE PowerFlag;
 extern BYTE STAT1_Flag;
 extern BYTE STAT2_Flag;
+extern BYTE bytBatteryStopChargeCount;
+extern BYTE bytBatteryStopCharge;
 
 
 //****************************************************************************
@@ -218,7 +220,32 @@ void UserInterfaceBatteryChargeMode(EnumBatteryStatus enumSwitch)
 			}
 		else 					 
 			MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_RED_OFF);//Update LED Status
+/*
+									if((bytBatteryStopCharge==_FALSE)&&(GET_BATTERY_STATE()==_BATT_STATUS_CAPACITY_MAX_STOP))
+								 	{
 
+									if(bytBatteryStopChargeCount>20)
+										{
+										bytBatteryStopCharge=_TRUE;
+										if(ReadEEP(EEP_BatteryStopCharge)==OFF)
+										WriteEEP(EEP_BatteryStopCharge,ON);
+
+										#if(_DEBUG_MESSAGE_Battery_Charge_Debug==ON)
+								  		GraphicsPrint(RED,"(bytBatteryStopCharge=1)");
+										#endif
+										}
+									else
+										{	
+										bytBatteryStopChargeCount++;
+										if(bytBatteryStopChargeCount>200)
+											bytBatteryStopChargeCount=0;
+
+										#if(_DEBUG_MESSAGE_Battery_Charge_Debug==ON)
+								  		GraphicsPrint(RED,"(bytBatteryStopChargeCount=%d)",(WORD)bytBatteryStopChargeCount);
+										#endif
+										}
+								 	}
+*/
 					break;		
 		case  _BATT_STATUS_LOW_CHARGE:
 					SET_PWM(_CHG_CURR,_CHARGE300mA); 
@@ -318,7 +345,7 @@ void UserInterfaceBatteryChargeMode(EnumBatteryStatus enumSwitch)
 				{
 				MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_RED_OFF);//Update LED Status
 				}
-			break;
+				break;
                  case _BATT_STATUS_DVR_OFF:				 	
 				#if (_DEBUG_MESSAGE_PowerTimerEvent==ON)
 				  GraphicsPrint(MAGENTA,"(DVR_POWER_OFF)"); 

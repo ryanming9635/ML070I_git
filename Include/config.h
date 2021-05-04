@@ -13,15 +13,16 @@
 //		Firmware Version
 //-----------------------------------------------------------------------------
 #define	MCU_FW_Major			0x00	
-#define	MCU_FW_Sub0			0x00		
+#define	MCU_FW_Sub0			0x01		
 #define	MCU_FW_Sub1			0x37	
 
+#define Hardware_Version  			0x01
 //-----------------------------------------------------------------------------
 //		Compiler
 //-----------------------------------------------------------------------------
 #define KEILC						// Keil C 5.0
 
-#if 0
+#if 1
 #define HS_DEBUG                        ON
 #else
 #define HS_DEBUG                        OFF
