@@ -13,9 +13,10 @@
 //		Firmware Version
 //-----------------------------------------------------------------------------
 #define	MCU_FW_Major			0x00	
-#define	MCU_FW_Sub0			0x00		
-#define	MCU_FW_Sub1			0x30	
+#define	MCU_FW_Sub0			0x01		
+#define	MCU_FW_Sub1			0x37	
 
+#define Hardware_Version  			0x01
 //-----------------------------------------------------------------------------
 //		Compiler
 //-----------------------------------------------------------------------------
@@ -29,6 +30,7 @@
 
 #define  _2ND_DECIMAL           			ON
 #define  _POWER_DOWN_ENABLE             	ON
+#define  _1KHZ_PWM			             	OFF
 
 //-----------------------------------------------------------------------------
 //		Battery Charge Configure
@@ -42,17 +44,17 @@
 #define BATTERY_ACD_no_battery  928 
 
 
-#define BATTERY_CAPACITY_LEVEL0	 		678//688//<12V
+#define BATTERY_CAPACITY_LEVEL0	 		680//678//688//<12V
 #define BATTERY_CAPACITY_LEVEL1			763//771//12V-13.5V
 #define BATTERY_CAPACITY_LEVEL2			802//811//13.5V-14.2V
 #define BATTERY_CAPACITY_LEVEL3			848//860//14.2V-15V
 #define BATTERY_CAPACITY_LEVEL4	     		848//860//>15V
 
-#define BATTERY_CAPACITY_NO_STARTUP 	675//<11.8
+#define BATTERY_CAPACITY_NO_STARTUP 	665//675//<11.8
 
 #define BATTERY_CAPACITY_STARTUP 		700//710//>12.5v
 
-#define BATTERY_CAPACITY_MIN	 	    	662//11.6	V
+#define BATTERY_CAPACITY_MIN	 	    	650///662//11.6	V
 
 #define BATTERY_CAPACITY_HIGH	     		885//15.5V
 //#define BATTERY_CAPACITY_HIGH	     		936//885//15.5V//16.4
@@ -65,23 +67,31 @@
 //#define BATTERY_CAPACITY_HIGH_STOP        	936//16.4V stop charge
 
 //#define BATTERY_CAPACITY_HIGH_STOP        	960//16.8V stop charge
-
+ 
 #if 1  //these are sean's test tempature of result
 #define BTH_TEMP_MIN 	   		20//90
 #define BTH_TEMP_MAX 	 		1023
 
-#define BTH_TEMP_HIGH 	   		198//55//534// >55 degree
-//#define BTH_TEMP_HIGH 	   		171// >60 degree //ryan@2021/01/11
+//#define BTH_TEMP_HIGH 	   		198//55//534// >55 degree
+#define BTH_TEMP_HIGH 	   		175///194// >=60 degree //ryan@2021/01/18
 
-#define BTH_TEMP_HIGH_WARN	   	238//561//  >50 degree
+//#define BTH_TEMP_HIGH_WARN	   	238//561//  >50 degree
+//#define BTH_TEMP_HIGH_WARN	   	195///214//   >=55 degree //ryan@2021/01/18
+#define BTH_TEMP_HIGH_WARN	   	222//  >50 degree //ryan@2021/0222
+
+
 #define BTH_TEMP_LOW_WARN 		(653-18)//789//<0 degree 836//744//   <-5 degree
 #define BTH_TEMP_LOW 	   		(746-5)//868//751///<-10 degree
 
 
-#define CHARGE_TEMP_HIGH   		258//586///45 degree
+//#define CHARGE_TEMP_HIGH   		258//586///45 degree
+//#define CHARGE_TEMP_HIGH   		175///194//>=60 degree //ryan@2021/01/18
+#define CHARGE_TEMP_HIGH   		222//>=50 degree //ryan@2021/02/22
+
 //#define CHARGE_TEMP_LOW   		706//<10 degree 789//736///0 degree
 #define CHARGE_TEMP_LOW   		789///0 degree
 
+#define TempADC_Counts   				10
 #else
 
 #define BTH_TEMP_MIN 	   		20//90

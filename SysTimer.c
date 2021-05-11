@@ -57,7 +57,7 @@ BYTE TEMP_STAT=0xFF;
 BYTE PWM_TEMP=0;	
 BYTE CHARGE_TEMP_ABNORMAL=0;
 BYTE CHARGE_TEMP_NORMAL=0;
-BYTE _BATT_STATUS_CAPACITY_MAX_STOP_Count=0;
+//BYTE _BATT_STATUS_CAPACITY_MAX_STOP_Count=0;
 
 #if (_DEBUG_MESSAGE_Monitor==ON)
 bit Monitor_flag=OFF;
@@ -69,17 +69,23 @@ extern BYTE	PWR_START_flag;
 extern StructBatteryInfoType g_stBatteryInfo;
 extern BYTE EncorderCountPN;
 extern BYTE EncorderLenint;
-extern short EncorderCount;
-extern WORD EncorderLenfloaat;
+extern long EncorderCount;
+extern DWORD EncorderLenfloaat;
 extern StructPowerInfoType idata g_stPowerInfo;
 extern BYTE day,hour,minute,second;
 extern StructDVRInfoType g_stDVRInfo;
 extern BYTE Power_down_mode;
 extern DWORD ulongRotateNumber;
+extern DWORD ulongRotateNumberTELI;
+
 extern BYTE bytFastEncoderMode;
+extern long EncorderCountINT;
+#if (_BATTERY_CHARGE_STOP==ON)
 extern BYTE bytBatteryStopCharge;
 extern BYTE bytBatteryStopChargeCount;
-
+#endif
+extern WORD bytEncorderCountTemp;
+extern BYTE   bytFastEncorderCountTemp;
 
 //--------------------------------------------------
 // Definitions of Timer2
@@ -409,7 +415,7 @@ switch(ucEventID)
 			WriteEEP(EEP_RotateNumberL,0);
 			WriteEEP(EEP_RotateNumberM,0);
 			WriteEEP(EEP_RotateNumberH,0);
-			ulongRotateNumber=0;
+			ulongRotateNumberTELI=0;
 				}
 			else
 				{
@@ -451,9 +457,12 @@ switch(ucEventID)
 
 	case _USER_TIMER_EVENT_OSD_DISTANCE_RESET:
 		EncorderCount=0;
+		EncorderCountINT=0;
 		EncorderLenint=0;
 		EncorderLenfloaat=0;
 		EncorderCountPN=0;
+		bytEncorderCountTemp=0;
+		bytFastEncorderCountTemp=0;
 		#if(_DEBUG_MESSAGE_UserInterfaceTimerEvent==ON)
 		GraphicsPrint(YELLOW,"\r\n ClearEncorder ",0);
 		#endif
@@ -995,18 +1004,6 @@ switch(enumEventID)
 			{
 				BATERY_STAT=_BATT_STATUS_CAPACITY_LEVEL4;
 				BattDetect5_COUNT=0;
-				/*
-					if(bytBatteryStopCharge==_TRUE)
-					{
-							bytBatteryStopCharge=_FALSE;
-						if(ReadEEP(EEP_BatteryStopCharge)==ON)
-							WriteEEP(EEP_BatteryStopCharge,OFF);
-						
-					#if(_DEBUG_MESSAGE_Battery_Charge_Debug==ON)
-					 GraphicsPrint(RED,"(bytBatteryStopCharge=0)");
-					#endif
-					}
-				*/
 			}
 
 			if(BattDetectMin_COUNT==20)
@@ -1044,7 +1041,22 @@ switch(enumEventID)
 				BATERY_STAT_TEMP=BATERY_STAT;
 				SET_BATTERY_CHARGE_STATE(_BATT_STATUS_NONE);//reset battery state. 
 				}
-
+#if (_BATTERY_CHARGE_STOP==ON)
+			if((bytBatteryStopCharge==_TRUE)&&((BATERY_STAT<=_BATT_STATUS_CAPACITY_LEVEL0)||(BATERY_STAT==_BATT_STATUS_CAPACITY_MIN)||\
+				(BATERY_STAT==_BATT_STATUS_CAPACITY_NO_STARTUP)))
+			{
+				bytBatteryStopCharge=_FALSE;
+			
+				if(ReadEEP(EEP_BatteryStopCharge)==ON)
+				WriteEEP(EEP_BatteryStopCharge,OFF);
+									
+				#if(_DEBUG_MESSAGE_Battery_Charge_Debug==ON)
+				GraphicsPrint(RED,"(bytBatteryStopCharge=0)");
+				#endif
+						
+				SET_BATTERY_CHARGE_STATE(_BATT_STATUS_NONE);
+			}
+#endif
 			if(BattDetectStartUp_COUNT==20)
 			{	
 				if(GET_BATTERY_CAPACITY_LOW_FLAG()==_TRUE)
@@ -1482,6 +1494,25 @@ case _SYSTEM_TIMER_EVENT_BATTERY_LOW_PWR_OFF:
 					CLR_AC_MODE();	
     					//CLR_BAT_SYS();
 		break;
+//#if (_BATTERY_CHARGE_STOP==ON)
+		case _SYSTEM_TIMER_EVENT_CHECK_BATTERY_STOP_STATE:
+
+								if((GET_STAT1()==ON)&&(GET_STAT2()==ON)&&(bytBatteryStopCharge==_FALSE)&&(Check_ADAP_IN()==_TRUE)&&((GET_BATTERY_STATE()==_BATT_STATUS_CAPACITY_MAX)||\
+								(GET_BATTERY_STATE()==_BATT_STATUS_CAPACITY_MAX_STOP)))
+								{
+									bytBatteryStopCharge=_TRUE;
+									if(ReadEEP(EEP_BatteryStopCharge)==OFF)
+									WriteEEP(EEP_BatteryStopCharge,ON);
+									
+										#if(_DEBUG_MESSAGE_Battery_Charge_Debug==ON)
+								  		GraphicsPrint(RED,"(*bytBatteryStopCharge=1)");
+										#endif
+										SET_BATTERY_CHARGE_STATE(_BATT_STATUS_NONE);
+								}
+	
+									
+						break;
+//#endif
                 case _SYSTEM_TIMER_EVENT_CHECK_CHARGE_STATE:
 
 							STAT1_temp=GET_STAT1();
@@ -1505,7 +1536,37 @@ case _SYSTEM_TIMER_EVENT_BATTERY_LOW_PWR_OFF:
 								STAT2_Flag=STAT2_temp;
 								SET_BATTERY_CHARGE_STATE(_BATT_STATUS_NONE);//reset battery state.							
 								}
-			
+						#if 0			
+							if((STAT1_Flag==ON)&&(STAT2_Flag==ON)&&((GET_BATTERY_CHARGE_STATE()==_BATT_STATUS_HIGH_CHARGE)||\
+								(GET_BATTERY_CHARGE_STATE()==_BATT_STATUS_LOW_CHARGE)||(GET_BATTERY_CHARGE_STATE()==_BATT_STATUS_NORMAL_CHARGE))&&\
+								(GET_BATTERY_STATE()==_BATT_STATUS_CAPACITY_MAX))
+								{
+								if(_BATT_STATUS_CAPACITY_MAX_STOP_Count>20)
+									{
+								SET_BATTERY_STATE(_BATT_STATUS_CAPACITY_MAX_STOP);
+									bytBatteryStopCharge=_TRUE;
+									if(ReadEEP(EEP_BatteryStopCharge)==OFF)
+									WriteEEP(EEP_BatteryStopCharge,ON);
+									
+										#if(_DEBUG_MESSAGE_Battery_Charge_Debug==ON)
+								  		GraphicsPrint(RED,"(bytBatteryStopCharge=1)");
+										#endif
+										SET_BATTERY_CHARGE_STATE(_BATT_STATUS_NONE);
+									}
+								else
+									{
+
+									_BATT_STATUS_CAPACITY_MAX_STOP_Count++;
+							#if(_DEBUG_MESSAGE_Battery_Charge_Debug==ON)
+						  		GraphicsPrint(RED,"(_BATT_STATUS_CAPACITY_MAX_STOP_Count=%d)",(WORD)_BATT_STATUS_CAPACITY_MAX_STOP_Count);
+							#endif
+									
+									}
+								
+								}
+								else
+									_BATT_STATUS_CAPACITY_MAX_STOP_Count=0;
+							#endif
 					#if 1
 							if(GET_BATTERY_ABNORMAL()==_FALSE)
 							{	

@@ -9,7 +9,6 @@
 #ifndef	__TYPEDEFS__
 #define	__TYPEDEFS__
 
-#include "Config.h"
 
 #define DATA		data
 #define PDATA	pdata
@@ -60,16 +59,9 @@ typedef	unsigned long	DWORD;
 #define High_Current    0x28//0xFF
 
 //#define _CHARGE000mA    0xFF  //minimum
-#if ( _BATTERY_CHARGE_STOP==ON)
-
-#define _CHARGE000mA    0xFF//0xE0  //minimum
-
-#define _CHARGE060mA    0xFF//0xE0  //60mA
-#else
 #define _CHARGE000mA    0xE0  //minimum
 
 #define _CHARGE060mA    0xE0  //60mA
-#endif
 //#define _CHARGE060mA    0xFF  //0mA
 
 #if 1//for sean
@@ -81,9 +73,9 @@ typedef	unsigned long	DWORD;
 
 #define _CHARGE1000mA    0x00//0x18
 #define _CHARGE1100mA    0x00///maximum
-#if ( _BATTERY_CHARGE_STOP==ON)
-#define _CHARGESTOP    0xFF///maximum
-#endif
+
+#define _CHARGESTOP    0xFF// 0xFF///maximum
+
 #else
 #define _CHARGE100mA    0xF4
 #define _CHARGE300mA    0xB0
@@ -269,7 +261,7 @@ typedef enum
     _SYSTEM_TIMER_EVENT_JUDGE_BATT_MODE,
 _SYSTEM_TIMER_EVENT_CHECK_CHARGE_STATE,
    _SYSTEM_TIMER_EVENT_BATTERY_LOW_PWR_OFF,
-_SYSTEM_TIMER_EVENT_CHECK_BATTERY_STOP_STATE,
+
 //
 //    _SYSTEM_TIMER_EVENT_JUDGE_DVR_COMM,
   //  _SYSTEM_TIMER_EVENT_JUDGE_TW8836_COMM,

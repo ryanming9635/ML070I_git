@@ -14,6 +14,7 @@
 #include "HS_DVRProtocol.h"
 #include "keyremo.h"
 #include "Etc_eep.h"
+#include "reg.h"
 
 bit protocol_escape_flag;
 BYTE protocol_state=0;
@@ -34,6 +35,9 @@ extern BYTE CameraVolt;
 extern BYTE PWR_START_flag;
 extern StructBatteryInfoType g_stBatteryInfo ;
 extern BYTE DVRChangeCurrent;
+extern BYTE bytHoldOn3SPowerOff;
+extern BYTE bytFastEncoderMode;
+extern DWORD ulongRotateNumber;
 
 void DvrReceivePaser(void)
 {
@@ -88,7 +92,11 @@ if ( RS2_ready())
 				case MCU_PROTOCOL_CMD_DVR_SHUTDOWN:
 				case	MCU_PROTOCOL_PROTOCOL_CMD_ENTER_ISP:
 				case MCU_PROTOCOL_CMD_DC12V_PWR_START:	
-				case	MCU_PROTOCOL_CMD_SET_CHARGE_CURRENT:
+				case	MCU_PROTOCOL_CMD_SET_CHARGE_CURRENT:				
+				case	MCU_PROTOCOL_CMD_GET_ENCODER_COUNT:
+				case	MCU_PROTOCOL_CMD_RESET_ENCODER_COUNT:
+				case	MCU_PROTOCOL_CMD_SET_MODELE_TYPE:
+
 				      protocol_state = PROTOCOL_STATE_LENGTH;
 				      break;
 					default:
@@ -114,6 +122,9 @@ if ( RS2_ready())
 				case	MCU_PROTOCOL_PROTOCOL_CMD_ENTER_ISP:	
 				case	MCU_PROTOCOL_CMD_DC12V_PWR_START:
 				case	MCU_PROTOCOL_CMD_SET_CHARGE_CURRENT:
+					case	MCU_PROTOCOL_CMD_GET_ENCODER_COUNT:
+					case	MCU_PROTOCOL_CMD_RESET_ENCODER_COUNT:
+					case	MCU_PROTOCOL_CMD_SET_MODELE_TYPE:
 					
 						if (protocol_len == 0)
 						{
@@ -150,6 +161,9 @@ if ( RS2_ready())
 				case	MCU_PROTOCOL_PROTOCOL_CMD_ENTER_ISP:						
 					case	MCU_PROTOCOL_CMD_DC12V_PWR_START:
 					case	MCU_PROTOCOL_CMD_SET_CHARGE_CURRENT:
+						case	MCU_PROTOCOL_CMD_GET_ENCODER_COUNT:
+						case	MCU_PROTOCOL_CMD_RESET_ENCODER_COUNT:
+						case	MCU_PROTOCOL_CMD_SET_MODELE_TYPE:
 						
 
 				      protocol_data[protocol_data_count] = c;
@@ -194,7 +208,7 @@ if ( RS2_ready())
 							}
 						if(GET_DVR_WDTkickDisable()==_FALSE)
 						MCUTimerActiveTimerEvent(SEC(10), _SYSTEM_TIMER_EVENT_JUDGE_WDT_ECHO);
-						
+						P3M1=0x00|0x30;//p3.4 and P3.5 set push pull mode ryan@20210223
 						break;
 					case MCU_PROTOCOL_CMD_WATCH_DOG_KICK:
 						#if(_DEBUG_MESSAGE_UART_Protocol==ON)	
@@ -216,7 +230,7 @@ if ( RS2_ready())
 						GraphicsPrint(CYAN,"\r\n(CMD:DISTANCE_RESET)");	
 						#endif												
 						//SET_DVR_DistanceReset();					
-						MCUTimerActiveTimerEvent(SEC(1),_USER_TIMER_EVENT_OSD_DISTANCE_RESET);
+						MCUTimerActiveTimerEvent(SEC(0.1),_USER_TIMER_EVENT_OSD_DISTANCE_RESET);
 						break;
 					case MCU_PROTOCOL_CMD_ENCODER_SET: 	
 						#if(_DEBUG_MESSAGE_UART_Protocol==ON)	
@@ -242,6 +256,18 @@ if ( RS2_ready())
 						
 						Encorder4=((protocol_data[6]>>4)*10)+(0x0f&protocol_data[6]);
 						Decimal4=((protocol_data[7]>>4)*10)+(0x0f&protocol_data[7]);
+
+						WriteEEP(EEP_Encorder1,protocol_data[0]);
+						WriteEEP(EEP_Decimal1,protocol_data[1]);
+
+						WriteEEP(EEP_Encorder2,protocol_data[2]);
+						WriteEEP(EEP_Decimal2,protocol_data[3]);
+
+						WriteEEP(EEP_Encorder3,protocol_data[4]);
+						WriteEEP(EEP_Decimal3,protocol_data[5]);
+
+						WriteEEP(EEP_Encorder4,protocol_data[6]);
+						WriteEEP(EEP_Decimal4,protocol_data[7]);
 
 						MCUTimerActiveTimerEvent(SEC(1),_USER_TIMER_EVENT_OSD_ENCODER_DEVIATION_SETTING);						
 
@@ -365,12 +391,19 @@ if ( RS2_ready())
 							if((protocol_data[0]==1))
 								{
 								CLR_DVR_Shutdown();
+								bytHoldOn3SPowerOff=OFF;
+								#if(_DEBUG_MESSAGE_UART_Protocol==ON)	
+								GraphicsPrint(GREEN,"\r\n(CMD:bytHoldOn3SPowerOff=OFF)");	
+								#endif
 								}
 							else if((PowerFlag==ON)&&(protocol_data[0]==0))
 							{
 							CLR_DVR_Shutdown();
 							PowerFlag=OFF;
 							WriteEEP(EEP_Powerflag,PowerFlag);
+
+							if(GET_DVR_EntrySleepMode()==TRUE)
+							CLR_DVR_EntrySleepMode();
 							}
 							if((PowerFlag==ON)&&(protocol_data[0]==2))
 							{
@@ -383,9 +416,21 @@ if ( RS2_ready())
 							#if(_DEBUG_MESSAGE_UART_Protocol==ON)	
 							GraphicsPrint(RED,"\r\n(CMD:LOW Batt volt. shutdown)");	
 							#endif	
+							if(GET_DVR_EntrySleepMode()==TRUE)
+							CLR_DVR_EntrySleepMode();
 							}
-							
-							MCUTimerCancelTimerEvent(_USER_TIMER_EVENT_OSD_DVR_SHUTDOWN);							
+							else if((PowerFlag==ON)&&(protocol_data[0]==3))
+								{
+								bytHoldOn3SPowerOff=ON;
+								#if(_DEBUG_MESSAGE_UART_Protocol==ON)	
+								GraphicsPrint(RED,"\r\n(CMD:bytHoldOn3SPowerOff)");	
+								#endif
+								}
+
+						MCUTimerCancelTimerEvent(_USER_TIMER_EVENT_OSD_DVR_SHUTDOWN);							
+
+						if(bytHoldOn3SPowerOff==ON)						
+						MCUTimerActiveTimerEvent(SEC(15), _USER_TIMER_EVENT_OSD_DVR_SHUTDOWN);
 
 						break;
 
@@ -427,6 +472,46 @@ if ( RS2_ready())
 					SET_BATTERY_CHARGE_STATE(_BATT_STATUS_NONE);///reset charge current 
 
 
+						break;
+					case MCU_PROTOCOL_CMD_GET_ENCODER_COUNT:
+							#if(_DEBUG_MESSAGE_UART_Protocol==ON)	
+							GraphicsPrint(GREEN,"\r\n(CMD:MCU_PROTOCOL_CMD_GET_ENCODER_COUNT)");	
+							#endif
+							MCUTimerActiveTimerEvent(SEC(1),_USER_TIMER_EVENT_REPLY_ENCODER_COUNT);
+						break;
+					case MCU_PROTOCOL_CMD_RESET_ENCODER_COUNT:
+							#if(_DEBUG_MESSAGE_UART_Protocol==ON)	
+							GraphicsPrint(GREEN,"\r\n(CMD:MCU_PROTOCOL_CMD_RESET_ENCODER_COUNT)");	
+							#endif
+							MCUTimerActiveTimerEvent(SEC(1),_USER_TIMER_EVENT_RESET_ENCODER_COUNT);
+						break;
+					case MCU_PROTOCOL_CMD_SET_MODELE_TYPE:
+
+							if(protocol_data[0]==ON)										
+								bytFastEncoderMode=ON;
+							else
+								bytFastEncoderMode=OFF;
+
+							if(bytFastEncoderMode==ON)
+								{
+							ulongRotateNumber=ReadEEP(EEP_RotateNumberH);
+							ulongRotateNumber<<=8;
+							ulongRotateNumber|=ReadEEP(EEP_RotateNumberM);	
+							ulongRotateNumber<<=8;
+							ulongRotateNumber|=ReadEEP(EEP_RotateNumberL);	
+								}
+							else
+								{
+								ulongRotateNumber=ReadEEP(EEP_RotateNumberRH);
+								ulongRotateNumber<<=8;
+								ulongRotateNumber|=ReadEEP(EEP_RotateNumberRM);	
+								ulongRotateNumber<<=8;
+								ulongRotateNumber|=ReadEEP(EEP_RotateNumberRL);
+								}
+							
+							#if(_DEBUG_MESSAGE_UART_Protocol==ON)	
+							GraphicsPrint(CYAN,"\r\n(CMD:MCU_PROTOCOL_CMD_SET_MODELE_TYPE=%d)",(WORD)bytFastEncoderMode);	
+							#endif
 						break;
 					default:
 						break;

@@ -38,6 +38,9 @@ extern BYTE DVRChangeCurrent;
 extern BYTE bytHoldOn3SPowerOff;
 extern BYTE bytFastEncoderMode;
 extern DWORD ulongRotateNumber;
+extern DWORD ulongRotateNumberTELI;
+extern WORD bytEncorderCountTemp;
+extern BYTE   bytFastEncorderCountTemp;
 
 void DvrReceivePaser(void)
 {
@@ -487,28 +490,25 @@ if ( RS2_ready())
 						break;
 					case MCU_PROTOCOL_CMD_SET_MODELE_TYPE:
 
-							if(protocol_data[0]==ON)										
+							if(protocol_data[0]==ON)
+								{
 								bytFastEncoderMode=ON;
+								IP	 |= 0x01;		// INT0 high priority 				
+								IPH	 |= 0x01;		// INT0 high priority				
+								IE	 |= 0x01;		// Enable INT0
+								bytFastEncorderCountTemp=0;
+								}
 							else
+								{
 								bytFastEncoderMode=OFF;
+								IP	 &= ~(0x01);		// clear INT0 high priority 				
+								IPH	 &= ~(0x01);		// clear INT0 high priority				
+								IE	 &= ~(0x01);		// clear Enable INT0
+								bytEncorderCountTemp=0;
+								}
 
-							if(bytFastEncoderMode==ON)
-								{
-							ulongRotateNumber=ReadEEP(EEP_RotateNumberH);
-							ulongRotateNumber<<=8;
-							ulongRotateNumber|=ReadEEP(EEP_RotateNumberM);	
-							ulongRotateNumber<<=8;
-							ulongRotateNumber|=ReadEEP(EEP_RotateNumberL);	
-								}
-							else
-								{
-								ulongRotateNumber=ReadEEP(EEP_RotateNumberRH);
-								ulongRotateNumber<<=8;
-								ulongRotateNumber|=ReadEEP(EEP_RotateNumberRM);	
-								ulongRotateNumber<<=8;
-								ulongRotateNumber|=ReadEEP(EEP_RotateNumberRL);
-								}
-							
+						
+
 							#if(_DEBUG_MESSAGE_UART_Protocol==ON)	
 							GraphicsPrint(CYAN,"\r\n(CMD:MCU_PROTOCOL_CMD_SET_MODELE_TYPE=%d)",(WORD)bytFastEncoderMode);	
 							#endif

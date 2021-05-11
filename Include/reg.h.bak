@@ -242,6 +242,8 @@ sfr S2BUF  = 0x9A;
 sfr AUXR2  = 0xA6;
 sfr AUXIE  = 0xAD;
 
+sfr AUXR  = 0x8E;///timer 1 for UART2
+
 
 sfr P1M0  = 0x91;
 sfr P1M1  = 0x92;

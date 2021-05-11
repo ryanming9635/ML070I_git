@@ -25,7 +25,7 @@ extern  BYTE 	keyticSec;
 extern BYTE DVR_FACTORY_MODE;
 extern BYTE PowerFlag;
 extern BYTE  updn_reg[4];
-extern long EncorderCount;
+extern short EncorderCount;
 extern bit ChangeKey;
 extern BYTE bytHoldOn3SPowerOff;
 extern BYTE bytHoldOn3SPowerOffMode;

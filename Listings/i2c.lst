@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.0.0   I2C                                                               05/04/2021 17:40:40 PAGE 1   
+C51 COMPILER V9.60.0.0   I2C                                                               05/11/2021 17:46:09 PAGE 1   
 
 
 C51 COMPILER V9.60.0.0, COMPILATION OF MODULE I2C
@@ -25,7 +25,6 @@ line level    source
   15          #include "I2C.h"
   16          #include "main.h"
   17          #include "printf.h"
-*** WARNING C320 IN LINE 44 OF .\Include\printf.h: DEBUG is defined 
   18          #include "CPU.h"
   19          
   20          #define ID_ADDR   0xc5
@@ -62,9 +61,9 @@ line level    source
   51   1        I2CWriteData(dat);
   52   1        I2CStop();
   53   1      
-C51 COMPILER V9.60.0.0   I2C                                                               05/04/2021 17:40:40 PAGE 2   
-
   54   1        #ifdef DEBUG_EEP
+C51 COMPILER V9.60.0.0   I2C                                                               05/11/2021 17:46:09 PAGE 2   
+
                   dPrintf("Write %02xh to [Adrs(%02xh)Index(%02xh)\r\n", (WORD)dat, (WORD)addr, (WORD)index );
                 #endif
   57   1      
@@ -103,16 +102,16 @@ line level    source
   90   1      }
   91          
   92          #if (_DEBUG_MESSAGE_Monitor==ON)
-  93          
-  94          void WriteI2C(BYTE addr, BYTE index, BYTE val)
-  95          {
-  96   1        I2CStart();
-  97   1        I2CWriteData(addr);
-  98   1        I2CWriteData(index);
-  99   1        I2CWriteData(val);
- 100   1        I2CStop();
- 101   1      }
- 102          #endif
+              
+              void WriteI2C(BYTE addr, BYTE index, BYTE val)
+              {
+                I2CStart();
+                I2CWriteData(addr);
+                I2CWriteData(index);
+                I2CWriteData(val);
+                I2CStop();
+              }
+              #endif
  103          
  104          #define dd()  I2Cdelay()
  105          
@@ -126,9 +125,9 @@ line level    source
  113          
  114          void I2CStop()
  115          {
-C51 COMPILER V9.60.0.0   I2C                                                               05/04/2021 17:40:40 PAGE 3   
-
  116   1        I2C_SDA = 0;  dd();
+C51 COMPILER V9.60.0.0   I2C                                                               05/11/2021 17:46:09 PAGE 3   
+
  117   1        I2C_SCL = 1;  dd();
  118   1        I2C_SDA = 1;
  119   1      }
@@ -190,9 +189,9 @@ line level    source
  175   1        I2C_SCL=0;  I2C_SDA=(value & 0x80)? 1:0;  I2C_SCL=1;  dd();
  176   1        I2C_SCL=0;  I2C_SDA=(value & 0x40)? 1:0;  I2C_SCL=1;  dd();
  177   1        I2C_SCL=0;  I2C_SDA=(value & 0x20)? 1:0;  I2C_SCL=1;  dd();
-C51 COMPILER V9.60.0.0   I2C                                                               05/04/2021 17:40:40 PAGE 4   
-
  178   1        I2C_SCL=0;  I2C_SDA=(value & 0x10)? 1:0;  I2C_SCL=1;  dd();
+C51 COMPILER V9.60.0.0   I2C                                                               05/11/2021 17:46:09 PAGE 4   
+
  179   1      
  180   1        I2C_SCL=0;  I2C_SDA=(value & 0x08)? 1:0;  I2C_SCL=1;  dd();
  181   1        I2C_SCL=0;  I2C_SDA=(value & 0x04)? 1:0;  I2C_SCL=1;  dd();
@@ -212,36 +211,36 @@ line level    source
  195   1      
  196   1      }
  197          #if (_DEBUG_MESSAGE_Monitor==ON)
- 198          
- 199          BYTE AD5110_I2CReadData(void)
- 200          {
- 201   1        int i;
- 202   1        BYTE value=0;
- 203   1      
- 204   1        I2C_SDA = 1;  dd();
- 205   1        I2C_SCL = 0;
- 206   1        
- 207   1        for(i=0; i<8; i++) {
- 208   2          I2C_SCL = 1;
- 209   2          value <<= 1;
- 210   2          if(I2C_SDA) value |= 1;
- 211   2      //    dd();
- 212   2          I2C_SCL = 0;
- 213   2        }
- 214   1      
- 215   1        I2C_SDA = 1;  //dd();
- 216   1        
- 217   1        I2C_SCL = 1;  // HHY 3.00
- 218   1        I2C_SCL = 1;  // HHY 3.00
- 219   1        I2C_SCL = 1;
- 220   1        dd();
- 221   1        I2C_SCL = 0;
- 222   1      //  dd();
- 223   1      
- 224   1        return value;
- 225   1      
- 226   1      }
- 227          #endif
+              
+              BYTE AD5110_I2CReadData(void)
+              {
+                int i;
+                BYTE value=0;
+              
+                I2C_SDA = 1;  dd();
+                I2C_SCL = 0;
+                
+                for(i=0; i<8; i++) {
+                  I2C_SCL = 1;
+                  value <<= 1;
+                  if(I2C_SDA) value |= 1;
+              //    dd();
+                  I2C_SCL = 0;
+                }
+              
+                I2C_SDA = 1;  //dd();
+                
+                I2C_SCL = 1;  // HHY 3.00
+                I2C_SCL = 1;  // HHY 3.00
+                I2C_SCL = 1;
+                dd();
+                I2C_SCL = 0;
+              //  dd();
+              
+                return value;
+              
+              }
+              #endif
  228          
  229          void WriteAD5110(WORD index, BYTE dat)
  230          {
@@ -254,9 +253,9 @@ line level    source
  237   1        AD5110_I2CWriteData((BYTE)index);
  238   1        AD5110_I2CWriteData(dat);
  239   1        I2CStop();
-C51 COMPILER V9.60.0.0   I2C                                                               05/04/2021 17:40:40 PAGE 5   
-
  240   1      
+C51 COMPILER V9.60.0.0   I2C                                                               05/11/2021 17:46:09 PAGE 5   
+
  241   1        #ifdef DEBUG_EEP
                   dPrintf("Write %02xh to [Adrs(%02xh)Index(%02xh)\r\n", (WORD)dat, (WORD)addr, (WORD)index );
                 #endif
@@ -264,41 +263,41 @@ line level    source
  245   1        delay(2);
  246   1      }
  247          #if (_DEBUG_MESSAGE_Monitor==ON)
- 248          
- 249          BYTE ReadAD5110(WORD index)
- 250          {
- 251   1        BYTE val;
- 252   1        BYTE addr;
- 253   1      
- 254   1        addr = (AD5110I2CAddress /*| (index>>7)*/) & 0xfe;
- 255   1      
- 256   1        I2CStart();
- 257   1        AD5110_I2CWriteData(addr);
- 258   1        AD5110_I2CWriteData(index); 
- 259   1      //  AD5110_I2CWriteData(0x01);  
- 260   1        AD5110_I2CWriteData(0x00);  
- 261   1      
- 262   1        I2CStart();
- 263   1        AD5110_I2CWriteData(addr | 0x01);
- 264   1        val = AD5110_I2CReadData();
- 265   1        I2CStop();
- 266   1      
- 267   1        #ifdef DEBUG_EEP
+              
+              BYTE ReadAD5110(WORD index)
+              {
+                BYTE val;
+                BYTE addr;
+              
+                addr = (AD5110I2CAddress /*| (index>>7)*/) & 0xfe;
+              
+                I2CStart();
+                AD5110_I2CWriteData(addr);
+                AD5110_I2CWriteData(index); 
+              //  AD5110_I2CWriteData(0x01);  
+                AD5110_I2CWriteData(0x00);  
+              
+                I2CStart();
+                AD5110_I2CWriteData(addr | 0x01);
+                val = AD5110_I2CReadData();
+                I2CStop();
+              
+                #ifdef DEBUG_EEP
                   dPrintf("Read [Adrs:%02xh,Index:%02xh] %02xh\r\n", (WORD)addr, (WORD)index, (WORD)val);
                 #endif
- 270   1        delay(2);
- 271   1        return val;
- 272   1      }
- 273          
- 274          #endif
+                delay(2);
+                return val;
+              }
+              
+              #endif
  275          
  276          
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    700    ----
+   CODE SIZE        =    549    ----
    CONSTANT SIZE    =   ----    ----
-   XDATA SIZE       =   ----      12
+   XDATA SIZE       =   ----       8
    PDATA SIZE       =   ----    ----
    DATA SIZE        =   ----    ----
    IDATA SIZE       =   ----    ----
@@ -306,4 +305,4 @@ MODULE INFORMATION:   STATIC OVERLAYABLE
 END OF MODULE INFORMATION.
 
 
-C51 COMPILATION COMPLETE.  1 WARNING(S),  0 ERROR(S)
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

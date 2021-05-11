@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.0.0   PRINTF                                                            05/04/2021 17:40:40 PAGE 1   
+C51 COMPILER V9.60.0.0   PRINTF                                                            05/11/2021 17:46:10 PAGE 1   
 
 
 C51 COMPILER V9.60.0.0, COMPILATION OF MODULE PRINTF
@@ -25,7 +25,6 @@ line level    source
   15          //#include "debug.h"
   16          #include "main.h"
   17          #include "printf.h"
-*** WARNING C320 IN LINE 44 OF .\Include\printf.h: DEBUG is defined 
   18          #include <stdarg.h>
   19          
   20          CODE BYTE Hex[] = "0123456789ABCDEF";
@@ -33,8 +32,8 @@ line level    source
   22          extern  BYTE  DebugLevel;
   23          
   24          #if (_DEBUG_MESSAGE_Monitor==ON)
-  25          extern bit Monitor_flag;
-  26          #endif
+              extern bit Monitor_flag;
+              #endif
   27          
   28          static const char *_PrintColor[] = {
   29          "\033[0m",
@@ -62,9 +61,9 @@ line level    source
   51   1        char *ptr;
   52   1        #endif
   53   1      
-C51 COMPILER V9.60.0.0   PRINTF                                                            05/04/2021 17:40:40 PAGE 2   
-
   54   1        while(1) {
+C51 COMPILER V9.60.0.0   PRINTF                                                            05/11/2021 17:46:10 PAGE 2   
+
   55   2          
   56   2          //----- Find Formatter % -----
   57   2      
@@ -126,9 +125,9 @@ line level    source
  113   4      
  114   4              case 4:
  115   4                if( ch=='d' ) value = (long)va_arg( ap, long );
-C51 COMPILER V9.60.0.0   PRINTF                                                            05/04/2021 17:40:40 PAGE 3   
-
  116   4                else          value = (DWORD)va_arg( ap, DWORD );
+C51 COMPILER V9.60.0.0   PRINTF                                                            05/11/2021 17:46:10 PAGE 3   
+
  117   4                break;
  118   4              }
  119   3      
@@ -190,9 +189,9 @@ line level    source
                       #elif defined KEILC
  176   3              
  177   3              ptr = (char *)va_arg( ap, char* );
-C51 COMPILER V9.60.0.0   PRINTF                                                            05/04/2021 17:40:40 PAGE 4   
-
  178   3              while(*ptr!='\0')
+C51 COMPILER V9.60.0.0   PRINTF                                                            05/11/2021 17:46:10 PAGE 4   
+
  179   3                _outchar(*ptr++);
  180   3              continue;
  181   3      
@@ -236,13 +235,13 @@ line level    source
  219   1      
  220   1      }
  221          #if (_DEBUG_MESSAGE_Monitor==ON)
- 222          
- 223          void Puts( CODE_P char *ptr )
- 224          {
- 225   1        while(*ptr!='\0')
- 226   1          RS_tx(*ptr++);
- 227   1      }
- 228          #endif
+              
+              void Puts( CODE_P char *ptr )
+              {
+                while(*ptr!='\0')
+                  RS_tx(*ptr++);
+              }
+              #endif
  229          
  230          //===========================================================================//
  231          //                                                                           //
@@ -254,9 +253,9 @@ line level    source
                 va_list ap;
               
                 if( DebugLevel >= DEBUG_INFO ) {
-C51 COMPILER V9.60.0.0   PRINTF                                                            05/04/2021 17:40:40 PAGE 5   
-
                   va_start(ap, fmt);
+C51 COMPILER V9.60.0.0   PRINTF                                                            05/11/2021 17:46:10 PAGE 5   
+
                   DoPrint( fmt, ap );
                   va_end( ap );
                 }
@@ -299,32 +298,32 @@ line level    source
  280          void GraphicsPrint(PRINT_COLOR_e mode, const char *Message, ...)
  281          {
  282   1          #if (_DEBUG_MESSAGE_COLOR_MESSAGE==ON)
- 283   1      
- 284   1          va_list ap;
- 285   1      
- 286   1          #if (_DEBUG_MESSAGE_Monitor==ON)
- 287   1          if( Monitor_flag==_TRUE)
- 288   1          ;
- 289   1          else
- 290   1          #endif      
- 291   1            {
- 292   2      
- 293   2          DEBUG_MESSAGE( _PrintColor[mode]);
- 294   2          va_start(ap, Message);
- 295   2          DoPrint( Message, ap );
- 296   2          va_end( ap );
- 297   2          DEBUG_MESSAGE( _PrintColor[PRINT_COLOR_BLACK]);
- 298   2            }
- 299   1          #else
-                    va_list ap;
-                    va_start(ap, Message);
-C51 COMPILER V9.60.0.0   PRINTF                                                            05/04/2021 17:40:40 PAGE 6   
+              
+                  va_list ap;
+              
+                  #if (_DEBUG_MESSAGE_Monitor==ON)
+                  if( Monitor_flag==_TRUE)
+                  ;
+                  else
+                  #endif      
+                    {
+              
+                  DEBUG_MESSAGE( _PrintColor[mode]);
+                  va_start(ap, Message);
+                  DoPrint( Message, ap );
+                  va_end( ap );
+                  DEBUG_MESSAGE( _PrintColor[PRINT_COLOR_BLACK]);
+                    }
+                  #else
+ 300   1            va_list ap;
+ 301   1            va_start(ap, Message);
+ 302   1            DoPrint( Message, ap );
+C51 COMPILER V9.60.0.0   PRINTF                                                            05/11/2021 17:46:10 PAGE 6   
 
-                    DoPrint( Message, ap );
-                    va_end( ap );
-                    mode=1;
-                    
-                  #endif
+ 303   1            va_end( ap );
+ 304   1            mode=1;
+ 305   1            
+ 306   1          #endif
  307   1      }
  308          
  309          
@@ -332,9 +331,9 @@ line level    source
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =   1637    ----
+   CODE SIZE        =   1560    ----
    CONSTANT SIZE    =     78    ----
-   XDATA SIZE       =     24     163
+   XDATA SIZE       =     24     160
    PDATA SIZE       =   ----    ----
    DATA SIZE        =   ----    ----
    IDATA SIZE       =   ----    ----
@@ -342,4 +341,4 @@ MODULE INFORMATION:   STATIC OVERLAYABLE
 END OF MODULE INFORMATION.
 
 
-C51 COMPILATION COMPLETE.  1 WARNING(S),  0 ERROR(S)
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

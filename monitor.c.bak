@@ -48,13 +48,8 @@ extern BYTE	PWR_START_flag;
 extern WORD BTH_Temp,Battery_Voltage_Temp;
 extern WORD BatteryBTH,BatteryVoltage;
 extern DWORD ulongRotateNumber;
-extern long EncorderCount;
-extern DWORD ulongRotateNumberTELI;
-extern long EncorderCountINT;
-
-#if (_BATTERY_CHARGE_STOP==ON)
 extern BYTE bytBatteryStopCharge;
-#endif
+
 //void Loader(BYTE);
 
 //=============================================================================
@@ -741,12 +736,9 @@ void Monitor(void)
 		Printf("\r\nPowerFlag=%02x",(WORD)ReadEEP(EEP_Powerflag));	
 		Printf("\r\nCameraVolt=%d",(WORD)ReadEEP(EEP_CameraVolt));	
 		Printf("\r\nPWR_START_flag=%02x",(WORD)ReadEEP(EEP_DC12_PWR_START));	
-#if (_BATTERY_CHARGE_STOP==ON)
-	Printf("\r\nBatteryStopCharge=%02x",(WORD)ReadEEP(EEP_BatteryStopCharge));	
-#endif
-#if(_HARDWARE_VERSION==ON)
+		Printf("\r\nBatteryStopCharge=%02x",(WORD)ReadEEP(EEP_BatteryStopCharge));	
 	Printf("\r\nHARDWARE_VER=%02x",(WORD)ReadEEP(EEP_HARDWARE_VER));	
-#endif	
+	
 	Printf("\r\nEncorder1=%02x",(WORD)ReadEEP(EEP_Encorder1));	
 	Printf("\r\nDecimal1=%02x",(WORD)ReadEEP(EEP_Decimal1));	
 
@@ -760,7 +752,6 @@ void Monitor(void)
 	Printf("\r\nDecimal4=%02x",(WORD)ReadEEP(EEP_Decimal4));	
 
 	Printf("\r\nGetRotateNumber=%01x%04x",(WORD)(ulongRotateNumber>>16),(WORD)ulongRotateNumber);
-	Printf("\r\nGetRotateNumberTELI=%01x%04x",(WORD)(ulongRotateNumberTELI>>16),(WORD)ulongRotateNumberTELI);
 
 		
 	}
@@ -1256,7 +1247,6 @@ else if( !stricmp( argv[1], "kgrid" ) ) {
 	else if( !stricmp( argv[0], "Q" ) ) {
 		Monitor_flag=_FALSE;
 		}
-#if (_BATTERY_CHARGE_STOP==ON)
 	else if( !stricmp( argv[0], "clear" ) ) {
 		//ClearBasicEE();
 		//LoadEEPROM();
@@ -1265,14 +1255,7 @@ else if( !stricmp( argv[1], "kgrid" ) ) {
 		Printf("(Clear bytBatteryStopCharge=0)");	
 		Monitor_flag=_FALSE;
 		}
-#endif 
-		else if( !stricmp( argv[0], "CABLE" ) ) {
-		//EncorderCountINT=(Asc2Bin(argv[1])<<8)|(Asc2Bin(argv[2]));
-		EncorderCountINT=65535;
-		Printf("\r\n(EncorderCountINT=%d)", (WORD)EncorderCountINT);	
-		Monitor_flag=_FALSE;
-		}
-		else if( !stricmp( argv[0], "PWRS" ) ) {
+	else if( !stricmp( argv[0], "PWRS" ) ) {
 
 
 				if(Asc2Bin(argv[1])==1)
@@ -1290,14 +1273,6 @@ else if( !stricmp( argv[1], "kgrid" ) ) {
 				Monitor_flag=_FALSE;
 
 	}
-	/*
-	else if( !stricmp( argv[0], "CLEAR" ) ) {
-		
-		EncorderCount=0;
-		Printf("(EncorderCount=0)");
-		Monitor_flag=_FALSE;
-		}
-		*/
 	else if( !stricmp( argv[0], "PCON" ) ) {
 		
 		PCON=Asc2Bin(argv[1]);

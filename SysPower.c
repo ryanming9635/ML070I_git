@@ -41,9 +41,10 @@ extern StructDVRInfoType g_stDVRInfo;
 extern BYTE PowerFlag;
 extern BYTE STAT1_Flag;
 extern BYTE STAT2_Flag;
+#if (_BATTERY_CHARGE_STOP==ON)
 extern BYTE bytBatteryStopChargeCount;
 extern BYTE bytBatteryStopCharge;
-
+#endif
 
 //****************************************************************************
 // FUNCTION DECLARATIONS
@@ -174,7 +175,7 @@ void SysPowerHandler(void)
     SET_TARGET_POWER_STATUS(GET_POWER_STATUS());
 
 }
-
+#if (_BATTERY_CHARGE_STOP==ON)
 void UserInterfaceBatteryChargeMode(EnumBatteryStatus enumSwitch)
 {
 
@@ -220,32 +221,293 @@ void UserInterfaceBatteryChargeMode(EnumBatteryStatus enumSwitch)
 			}
 		else 					 
 			MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_RED_OFF);//Update LED Status
-/*
-									if((bytBatteryStopCharge==_FALSE)&&(GET_BATTERY_STATE()==_BATT_STATUS_CAPACITY_MAX_STOP))
-								 	{
 
-									if(bytBatteryStopChargeCount>20)
-										{
-										bytBatteryStopCharge=_TRUE;
-										if(ReadEEP(EEP_BatteryStopCharge)==OFF)
-										WriteEEP(EEP_BatteryStopCharge,ON);
+					break;		
+		case  _BATT_STATUS_LOW_CHARGE:
+	
+			if(bytBatteryStopCharge==_TRUE)
+				{
+				#if (_DEBUG_MESSAGE_BatteryVoltage==ON)
+				GraphicsPrint(MAGENTA,"(Low Current Charge_bytBatteryStopCharge=1)");	
+				#endif
+				SET_PWM(_CHG_CURR,_CHARGESTOP); 
 
+				}
+				else
+				{
+					SET_PWM(_CHG_CURR,_CHARGE300mA); 
+			#if (_DEBUG_MESSAGE_BatteryVoltage==ON)
+					GraphicsPrint(MAGENTA,"(Low Current Charge)");	
+			#endif
+				}
+				
+				SET_BATTERY_CHARGE_STATE(_BATT_STATUS_LOW_CHARGE);	
+				
+				
+			if((GET_DVR_SystemReadyNotic()==_FALSE)&&(PowerFlag==ON))
+				MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_BLINK);//power on, no charging.	
+			else if(GET_POWER_STATUS()==_POWER_STATUS_SAVING)
+				{	if((GET_AC_PLUG()==_TRUE)&&(bytBatteryStopCharge==_FALSE))
+					MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_2S_BLINK_RED_ON);//Update LED Status		
+					else
+					MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_BLINK);//Update LED Status		
+					
+				}
+			else
+				{
+					if((PowerFlag==OFF)&&(STAT1_Flag==OFF)&&(STAT2_Flag==ON)&&(bytBatteryStopCharge==_FALSE))
+					MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_OFF_RED_ON);//power off, on charging.					
+					else if((STAT1_Flag==OFF)&&(STAT2_Flag==ON)&&(bytBatteryStopCharge==_FALSE))
+					MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_RED_ON);////power on, on charging.
+					else
+						{
+					MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_ON_RED_OFF);//power off, no charging.
+
+					MCUTimerCancelTimerEvent(_SYSTEM_TIMER_EVENT_CHECK_BATTERY_STOP_STATE);
+					MCUTimerActiveTimerEvent(SEC(5), _SYSTEM_TIMER_EVENT_CHECK_BATTERY_STOP_STATE);
+
+							#if(_DEBUG_MESSAGE_Battery_Charge_Debug==ON)
+							GraphicsPrint(GREEN,"(1BATTERY_STOP_STATE)");
+							#endif
+									/*
+									if((bytBatteryStopCharge==_FALSE)&&(Check_ADAP_IN()==_TRUE)&&((GET_BATTERY_STATE()==_BATT_STATUS_CAPACITY_MAX)||(GET_BATTERY_STATE()==_BATT_STATUS_CAPACITY_MAX_STOP)))
+									{
+									bytBatteryStopCharge=_TRUE;
+									if(ReadEEP(EEP_BatteryStopCharge)==OFF)
+									WriteEEP(EEP_BatteryStopCharge,ON);
+									
 										#if(_DEBUG_MESSAGE_Battery_Charge_Debug==ON)
-								  		GraphicsPrint(RED,"(bytBatteryStopCharge=1)");
+								  		GraphicsPrint(RED,"(1bytBatteryStopCharge=1)");
 										#endif
-										}
-									else
-										{	
-										bytBatteryStopChargeCount++;
-										if(bytBatteryStopChargeCount>200)
-											bytBatteryStopChargeCount=0;
+										SET_BATTERY_CHARGE_STATE(_BATT_STATUS_NONE);
+									}
+									*/
+						}
+				}
+				
+					break;
+		case  _BATT_STATUS_HIGH_CHARGE:
+			
 
+			if(bytBatteryStopCharge==_TRUE)
+				{
+				SET_PWM(_CHG_CURR,_CHARGESTOP);	
+					#if (_DEBUG_MESSAGE_BatteryVoltage==ON)
+							GraphicsPrint(MAGENTA,"(High Current Charge_bytBatteryStopCharge=1)"); 
+					#endif
+
+				}
+				else
+				{
+					SET_PWM(_CHG_CURR,_CHARGE1000mA);	
+			#if (_DEBUG_MESSAGE_BatteryVoltage==ON)
+					GraphicsPrint(MAGENTA,"(High Current Charge)"); 
+			#endif
+				}		
+			SET_BATTERY_CHARGE_STATE(_BATT_STATUS_HIGH_CHARGE);
+
+			
+			if((GET_DVR_SystemReadyNotic()==_FALSE)&&(PowerFlag==ON))
+				MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_BLINK);
+			else if(GET_POWER_STATUS()==_POWER_STATUS_SAVING)
+				{	if((GET_AC_PLUG()==_TRUE)&&(bytBatteryStopCharge==_FALSE))
+					MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_RED_BLINK);//Update LED Status		
+					else
+					MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_BLINK);//Update LED Status			
+				}
+			else
+				{
+					if((STAT1_Flag==OFF)&&(STAT2_Flag==ON)&&(bytBatteryStopCharge==_FALSE))
+					MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_OFF_RED_ON);//Update LED Status
+					else
+						{
+					MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_RED_OFF);//Update LED Status
+
+					MCUTimerCancelTimerEvent(_SYSTEM_TIMER_EVENT_CHECK_BATTERY_STOP_STATE);
+					MCUTimerActiveTimerEvent(SEC(5), _SYSTEM_TIMER_EVENT_CHECK_BATTERY_STOP_STATE);
+
+								#if(_DEBUG_MESSAGE_Battery_Charge_Debug==ON)
+								GraphicsPrint(GREEN,"(2BATTERY_STOP_STATE)");
+								#endif
+
+								/*
+								if((bytBatteryStopCharge==_FALSE)&&(Check_ADAP_IN()==_TRUE)&&((GET_BATTERY_STATE()==_BATT_STATUS_CAPACITY_MAX)||(GET_BATTERY_STATE()==_BATT_STATUS_CAPACITY_MAX_STOP)))
+								{
+								bytBatteryStopCharge=_TRUE;
+								if(ReadEEP(EEP_BatteryStopCharge)==OFF)
+								WriteEEP(EEP_BatteryStopCharge,ON);
+									
+								#if(_DEBUG_MESSAGE_Battery_Charge_Debug==ON)
+						  		GraphicsPrint(RED,"(2bytBatteryStopCharge=1)");
+								#endif
+								SET_BATTERY_CHARGE_STATE(_BATT_STATUS_NONE);
+								}
+								*/
+						}		
+				}
+					break;
+		case  _BATT_STATUS_NORMAL_CHARGE:
+			
+			if(bytBatteryStopCharge==_TRUE)
+				{
+						SET_PWM(_CHG_CURR,_CHARGESTOP); 
+			#if (_DEBUG_MESSAGE_BatteryVoltage==ON)
+					GraphicsPrint(MAGENTA,"(Normal Current Charge__bytBatteryStopCharge=1)");	
+			#endif
+				}
+			else
+		
+				{
+					SET_PWM(_CHG_CURR,_CHARGE700mA); 
+			#if (_DEBUG_MESSAGE_BatteryVoltage==ON)
+					GraphicsPrint(MAGENTA,"(Normal Current Charge)");	
+			#endif
+				}
+
+			SET_BATTERY_CHARGE_STATE(_BATT_STATUS_NORMAL_CHARGE);	
+			
+			if((GET_DVR_SystemReadyNotic()==_FALSE)&&(PowerFlag==ON))
+				MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_BLINK);
+			else if(GET_POWER_STATUS()==_POWER_STATUS_SAVING)
+				{	
+					if((GET_AC_PLUG()==_TRUE)&&(bytBatteryStopCharge==_FALSE))
+					MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_2S_BLINK_RED_ON);//Update LED Status		
+					else
+					MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_BLINK);//Update LED Status		
+					
+				}
+			else
+				{
+					if((PowerFlag==OFF)&&(STAT1_Flag==OFF)&&(STAT2_Flag==ON)&&(bytBatteryStopCharge==_FALSE))
+					MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_OFF_RED_ON);//Update LED Status					
+					else if((STAT1_Flag==OFF)&&(STAT2_Flag==ON)&&(bytBatteryStopCharge==_FALSE))
+					MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_RED_ON);//Update LED Status
+					else
+						{
+					MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_ON_RED_OFF);//Update LED Status
+
+					MCUTimerCancelTimerEvent(_SYSTEM_TIMER_EVENT_CHECK_BATTERY_STOP_STATE);
+					MCUTimerActiveTimerEvent(SEC(5), _SYSTEM_TIMER_EVENT_CHECK_BATTERY_STOP_STATE);
+
+									#if(_DEBUG_MESSAGE_Battery_Charge_Debug==ON)
+									GraphicsPrint(GREEN,"(3BATTERY_STOP_STATE)");
+									#endif
+									/*
+									if((bytBatteryStopCharge==_FALSE)&&(Check_ADAP_IN()==_TRUE)&&((GET_BATTERY_STATE()==_BATT_STATUS_CAPACITY_MAX)||(GET_BATTERY_STATE()==_BATT_STATUS_CAPACITY_MAX_STOP)))
+									{
+									bytBatteryStopCharge=_TRUE;
+									if(ReadEEP(EEP_BatteryStopCharge)==OFF)
+									WriteEEP(EEP_BatteryStopCharge,ON);
+									
 										#if(_DEBUG_MESSAGE_Battery_Charge_Debug==ON)
-								  		GraphicsPrint(RED,"(bytBatteryStopChargeCount=%d)",(WORD)bytBatteryStopChargeCount);
+								  		GraphicsPrint(RED,"(3bytBatteryStopCharge=1)");
 										#endif
-										}
-								 	}
-*/
+										SET_BATTERY_CHARGE_STATE(_BATT_STATUS_NONE);
+									}	
+									*/
+						}
+				}
+					break;					
+		case	_BATT_STATUS_NO_BATT:
+					SET_PWM(_CHG_CURR,_CHARGE060mA);
+			#if (_DEBUG_MESSAGE_BatteryVoltage==ON)
+					GraphicsPrint(MAGENTA,"(1_NO BATT)"); 			
+			#endif
+					SET_BATTERY_CHARGE_STATE(_BATT_STATUS_NO_BATT);
+			
+			if((GET_DVR_SystemReadyNotic()==_FALSE)&&(PowerFlag==ON))
+				MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_BLINK);
+			else  if(GET_POWER_STATUS()==_POWER_STATUS_NORMAL)
+				 MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_ON_RED_OFF);//Update LED Status
+			else if(GET_POWER_STATUS()==_POWER_STATUS_SAVING)	 
+				MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_2S_BLINK);//Update LED Status
+			else	
+				{
+				MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_RED_OFF);//Update LED Status
+				}
+				break;
+                 case _BATT_STATUS_DVR_OFF:				 	
+				#if (_DEBUG_MESSAGE_PowerTimerEvent==ON)
+				  GraphicsPrint(MAGENTA,"(DVR_POWER_OFF)"); 
+				#endif
+
+					if(GET_DVR_RebootAndPower()==_TRUE)
+					UserInterfacePowerSwitch(_POWER_ACTION_NORMAL_TO_OFF);
+					else
+					CLR_PCON5V();  
+
+				MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_RED_BLINK);//Update LED Status
+						 break;
+
+                 case _BATT_STATUS_DVR_ON:
+						#if (_DEBUG_MESSAGE_PowerTimerEvent==ON)
+						 GraphicsPrint(MAGENTA,"(DVR_POWER_ON)"); 
+						#endif
+
+							if(GET_DVR_RebootAndPower()==_TRUE)
+							{
+							UserInterfacePowerSwitch(_POWER_ACTION_OFF_TO_NORMAL);
+							CLR_DVR_RebootAndPower();
+							}
+							else
+							 SET_PCON5V();	
+
+						if(GET_DVR_SystemReadyNotic()==_TRUE)
+						MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_ON_RED_OFF);//Update LED Status
+						else
+						MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_RED_BLINK);//Update LED Status
+
+						break;		
+	}
+
+}
+#else
+void UserInterfaceBatteryChargeMode(EnumBatteryStatus enumSwitch)
+{
+
+	MCUTimerCancelTimerEvent(_SYSTEM_TIMER_EVENT_GRN_BLINK);
+	MCUTimerCancelTimerEvent(_SYSTEM_TIMER_EVENT_GRN_2S_BLINK);
+	MCUTimerCancelTimerEvent( _SYSTEM_TIMER_EVENT_RED_BLINK);
+	MCUTimerCancelTimerEvent( _SYSTEM_TIMER_EVENT_GRN_RED_BLINK);
+	MCUTimerCancelTimerEvent( _SYSTEM_TIMER_EVENT_GRN_ON_RED_BLINK);
+	MCUTimerCancelTimerEvent( _SYSTEM_TIMER_EVENT_GRN_2S_BLINK_RED_ON);
+
+	switch(enumSwitch)
+	{
+	case  _BATT_STATUS_STOP_CHARGE: 
+				SET_PWM(_CHG_CURR,_CHARGE000mA);	
+			#if (_DEBUG_MESSAGE_BatteryVoltage==ON)
+					GraphicsPrint(MAGENTA,"(1_Stop Charge)");		
+			#endif
+
+			SET_BATTERY_CHARGE_STATE(_BATT_STATUS_STOP_CHARGE);
+
+		if((GET_DVR_SystemReadyNotic()==_FALSE)&&(PowerFlag==ON))
+			MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_BLINK);
+		else if(GET_POWER_STATUS()==_POWER_STATUS_SAVING)
+			{
+				if(GET_AC_PLUG()==_TRUE)
+				MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_2S_BLINK);//Update LED Status		
+				else
+					{
+						if(PowerFlag==OFF)
+						MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_RED_OFF);//Update LED Status								
+						else if(GET_BATTERY_STATE()==_BATT_STATUS_CAPACITY_LEVEL0 )
+						MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_RED_BLINK);//Update LED Status		
+						else
+						MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_2S_BLINK);//Update LED Status		
+					}
+			}
+		else	 if(GET_POWER_STATUS()==_POWER_STATUS_NORMAL)
+			{
+				if(GET_BATTERY_STATE()==_BATT_STATUS_CAPACITY_LEVEL0)
+				MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_ON_RED_BLINK);//Update LED Status			
+				 else
+				 MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_ON_RED_OFF);//Update LED Status
+			}
+		else 					 
+			MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_RED_OFF);//Update LED Status
+
 					break;		
 		case  _BATT_STATUS_LOW_CHARGE:
 					SET_PWM(_CHG_CURR,_CHARGE300mA); 
@@ -345,7 +607,7 @@ void UserInterfaceBatteryChargeMode(EnumBatteryStatus enumSwitch)
 				{
 				MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_RED_OFF);//Update LED Status
 				}
-				break;
+			break;
                  case _BATT_STATUS_DVR_OFF:				 	
 				#if (_DEBUG_MESSAGE_PowerTimerEvent==ON)
 				  GraphicsPrint(MAGENTA,"(DVR_POWER_OFF)"); 
@@ -382,6 +644,7 @@ void UserInterfaceBatteryChargeMode(EnumBatteryStatus enumSwitch)
 
 }
 
+#endif
 void UserInterfacePowerSwitch(EnumPowerAction enumSwitch)
 {
 	Printf("\r\n(PowerSwitch=%02x)",(WORD)enumSwitch);	

@@ -13,8 +13,8 @@
 //		Firmware Version
 //-----------------------------------------------------------------------------
 #define	MCU_FW_Major			0x00	
-#define	MCU_FW_Sub0			0x01		
-#define	MCU_FW_Sub1			0x37	
+#define	MCU_FW_Sub0			0x00		
+#define	MCU_FW_Sub1			0x41	
 
 #define Hardware_Version  			0x01
 //-----------------------------------------------------------------------------
@@ -22,7 +22,10 @@
 //-----------------------------------------------------------------------------
 #define KEILC						// Keil C 5.0
 
-#if 1
+#define ON 1
+#define OFF 0
+
+#if 0
 #define HS_DEBUG                        ON
 #else
 #define HS_DEBUG                        OFF
@@ -31,6 +34,8 @@
 #define  _2ND_DECIMAL           			ON
 #define  _POWER_DOWN_ENABLE             	ON
 #define  _1KHZ_PWM			             	OFF
+#define  _HARDWARE_VERSION			ON
+#define  _BATTERY_CHARGE_STOP		ON
 
 //-----------------------------------------------------------------------------
 //		Battery Charge Configure
@@ -62,12 +67,19 @@
 //#define BATTERY_CAPACITY_HIGH_STOP        	910//15.9V
 //#define BATTERY_CAPACITY_HIGH_STOP        	940//16.5V stop charge
 //#define BATTERY_CAPACITY_HIGH_STOP        	935//16.4V stop charge
+#if ( _BATTERY_CHARGE_STOP==ON)
+//#define BATTERY_CAPACITY_HIGH_STOP        	945//16.4V stop charge
+//#define BATTERY_CAPACITY_HIGH_STOP        	936//16.4V stop charge
+
+//#define BATTERY_CAPACITY_HIGH_STOP        	(927-9)//16.2V stop charge
+#define BATTERY_CAPACITY_HIGH_STOP        	(960)//16.8V stop charge
+#else
 #define BATTERY_CAPACITY_HIGH_STOP        	(927-9)//16.2V stop charge
 //#define BATTERY_CAPACITY_HIGH_STOP        	945//16.4V stop charge
 //#define BATTERY_CAPACITY_HIGH_STOP        	936//16.4V stop charge
 
 //#define BATTERY_CAPACITY_HIGH_STOP        	960//16.8V stop charge
- 
+#endif 
 #if 1  //these are sean's test tempature of result
 #define BTH_TEMP_MIN 	   		20//90
 #define BTH_TEMP_MAX 	 		1023

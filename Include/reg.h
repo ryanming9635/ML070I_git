@@ -207,6 +207,7 @@ sfr TH1   = 0x8D;
 sfr CKCON = 0x8E;		//clock control register, default =0x01
 sfr IE    = 0xA8;
 sfr IP    = 0xB8;
+sfr IPH    = 0xB7;
 sfr SCON  = 0x98;
 sfr SBUF  = 0x99;
 sfr P4 = 0xE8; //Megawin Ryan@970716

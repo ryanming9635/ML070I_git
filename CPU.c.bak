@@ -29,9 +29,9 @@ extern BYTE	PowerFlag;
 extern BYTE Power_down_mode;
 extern BYTE DVRChangeCurrent;
 extern BYTE bytFastEncoderMode;
-#if (_BATTERY_CHARGE_STOP==ON)
 extern BYTE bytBatteryStopCharge;
-#endif
+
+
 BYTE	 year1=0,year2=0,month=0,day=0,hour=0,minute=0,second=0;
 BYTE DVR_FACTORY_MODE=0;
 BYTE IE_Temp=0;
@@ -82,15 +82,10 @@ BYTE Time5ms;
 BYTE bytHoldOn3SPowerOff=0;
 BYTE bytHoldOn3SPowerOffMode=0;
 WORD LED_FLASH_COUNT,Power_Msg_Count;
-long EncorderCount=0;
-long EncorderCountINT=0;
-BYTE  bytPNFlagEncoder=0;
-	
-WORD bytEncorderCountTemp=0;
-BYTE   bytFastEncorderCountTemp=0;
+short EncorderCount=0;
 
+WORD bytEncorderCountTemp=0;
 extern DWORD ulongRotateNumber;
-extern DWORD ulongRotateNumberTELI;
 
 extern BYTE 	KeyBuffer;
 
@@ -132,27 +127,14 @@ if( GetFWRevEE()!=((MCU_FW_Major<<16)|(MCU_FW_Sub0<<8)|(MCU_FW_Sub1)))
 		return;
 	}
 
-#if (_HARDWARE_VERSION==ON)
 if(ReadEEP(EEP_HARDWARE_VER)!=Hardware_Version)
 {
 	Printf("\r\nHARDWARE_VER ERROR");
-	Printf("\r\nReset Rotate Number");
-	//ClearBasicEE();
-	WriteEEP(EEP_RotateNumberL,0);
-	WriteEEP(EEP_RotateNumberM,0);
-	WriteEEP(EEP_RotateNumberH,0);
-
-	WriteEEP(EEP_RotateNumberRL,0);
-	WriteEEP(EEP_RotateNumberRM,0);
-	WriteEEP(EEP_RotateNumberRH,0);
-
-	WriteEEP(EEP_HARDWARE_VER,Hardware_Version);	
+	ClearBasicEE();
 }
 
-
-Printf("\r\nHARDWARE_VER=%d",(WORD)ReadEEP(EEP_HARDWARE_VER));
-#endif	
-
+	Printf("\r\nHARDWARE_VER=%d",(WORD)ReadEEP(EEP_HARDWARE_VER));
+	
 	delay(100);
 
 
@@ -351,13 +333,18 @@ case _CHG_CURR:  //P1_4
 			CCAPM2=0x42;	
 			Printf("(*DVRChangeCurrent=1000mA)");
 			}
-		#if (_BATTERY_CHARGE_STOP==ON)
-			if(val==_CHARGESTOP)  
+
+			/*
+			if(bytBatteryStopCharge==_TRUE)
 			{
-			CCAPM2=0xFF;	
+				#if(_DEBUG_MESSAGE_Battery_Charge_Debug==ON)			
+				GraphicsPrint(RED,"(*BatteryStopCharge=0mA)");
+				#endif
+			CCAPM2=_CHARGESTOP;	
 			P1_4=1;
 			}
-		#endif
+			*/
+		
 /*	
 		if(val==High_Current)
 			{
@@ -427,12 +414,10 @@ BYTE TempKey;
 	tm001++;
 
     	//Timer Counter 
-
-
 	  tic02++;
 	
 
-	if(tic02>=(10))   
+	if(tic02>=10)   
 	{
 	g_usTimerCounter += 1;     ///per 103us  interrupt
 	tic02=0;
@@ -446,116 +431,69 @@ BYTE TempKey;
 			//TempKey=(( (P2&0xC0) >> 6) & 0x03);
 			TempKey=(( (P3&0x0C) >> 2) & 0x03); //ENA&ENB, P3.2, P3.3 
 			if(updn_reg[3] !=TempKey )// (( (P2&0x60) >> 5) & 0x03))	//Abel for HS SW key ......951102										
-			{	
+			{																						   
 				updn_reg[0] = updn_reg[1];																
 				updn_reg[1] = updn_reg[2];																
 				updn_reg[2] = updn_reg[3];																
 				updn_reg[3] =TempKey;// ( (P2&0x60) >> 5) & 0x03; 
-				ChangeKey=1;
-				
+				ChangeKey=1;		
 			//else			//william-v1.42-961130
 			//ChangeKey=0;	//william-v1.42-961130
 		if(bytFastEncoderMode==ON)	
-			Time5ms=0;//4;//3;//12;
+			Time5ms=12;
 		else
 			Time5ms=48;
 
-			if(bytFastEncoderMode==ON)
+			if((updn_reg[0] == 0) && (updn_reg[1] == 1) && (updn_reg[2] == 3)&& (updn_reg[3] == 2))  //UP Key					
 				{
-					if((updn_reg[0] == 0) && (updn_reg[1] == 1) && (updn_reg[2] == 3)&& (updn_reg[3] == 2))  //UP Key					
-					{
-					     bytPNFlagEncoder=0;
-					}
-				 else if((updn_reg[0] == 1) && (updn_reg[1] == 3) && (updn_reg[2] == 2)&& (updn_reg[3] == 0))  //UP Key	  
-					{
-						   bytPNFlagEncoder=0;
-					}
-				else if((updn_reg[0] == 3) && (updn_reg[1] == 2) && (updn_reg[2] == 0)&& (updn_reg[3] == 1))	//UP Key	
-				 	{
-			
-					  bytPNFlagEncoder=0;
-				 	}
-				else if((updn_reg[0] == 2) && (updn_reg[1] == 0) && (updn_reg[2] == 1)&& (updn_reg[3] == 3))  //UP Key	  
-				 	{
-				
-					bytPNFlagEncoder=0;
-				 	}
-				else if((updn_reg[0] == 0) && (updn_reg[1] == 2)&& (updn_reg[2] == 3)&& (updn_reg[3] == 1))	//DN Key	 
-					{
-			
-					   bytPNFlagEncoder=1;
-					}
-				else if((updn_reg[0] == 2) && (updn_reg[1] == 3)&& (updn_reg[2] == 1)&& (updn_reg[3] == 0))  //DN Key	  
-				 	{
-		
-					   bytPNFlagEncoder=1;
-				 	}
-				else if((updn_reg[0] == 3) && (updn_reg[1] == 1)&& (updn_reg[2] == 0)&& (updn_reg[3] == 2))	//DN Key	
-					{
-
-					   bytPNFlagEncoder=1;
-					}
-				else if((updn_reg[0] == 1) && (updn_reg[1] == 0)&& (updn_reg[2] == 2)&& (updn_reg[3] == 3))	//DN Key	
-					{
-
-					   bytPNFlagEncoder=1;
-					}	
+				   EncorderCount++; 		   
+				   bytEncorderCountTemp++;
 				}
-			else
+			if((updn_reg[0] == 1) && (updn_reg[1] == 3) && (updn_reg[2] == 2)&& (updn_reg[3] == 0))  //UP Key	  
 				{
-					if((updn_reg[0] == 0) && (updn_reg[1] == 1) && (updn_reg[2] == 3)&& (updn_reg[3] == 2))  //UP Key					
-						{
-						EncorderCount++;				
-						bytEncorderCountTemp++;
-						}
-					 if((updn_reg[0] == 1) && (updn_reg[1] == 3) && (updn_reg[2] == 2)&& (updn_reg[3] == 0))  //UP Key	  
-						{
-						 EncorderCount++;				 
-						 bytEncorderCountTemp++;
-						}
-					if((updn_reg[0] == 3) && (updn_reg[1] == 2) && (updn_reg[2] == 0)&& (updn_reg[3] == 1))	//UP Key	
-					 	{
-						  EncorderCount++;				  
-						  bytEncorderCountTemp++;
-					 	}
-					if((updn_reg[0] == 2) && (updn_reg[1] == 0) && (updn_reg[2] == 1)&& (updn_reg[3] == 3))  //UP Key	  
-					 	{
-						EncorderCount++;				
-						bytEncorderCountTemp++;
-					 	}
-					if((updn_reg[0] == 0) && (updn_reg[1] == 2)&& (updn_reg[2] == 3)&& (updn_reg[3] == 1))	//DN Key	 
-						{
-						   EncorderCount--; 			   
-						   bytEncorderCountTemp++;
-						}
-					if((updn_reg[0] == 2) && (updn_reg[1] == 3)&& (updn_reg[2] == 1)&& (updn_reg[3] == 0))  //DN Key	  
-					 	{
-						EncorderCount--;				
-						bytEncorderCountTemp++;
-					 	}
-					if((updn_reg[0] == 3) && (updn_reg[1] == 1)&& (updn_reg[2] == 0)&& (updn_reg[3] == 2))	//DN Key	
-						{
-						EncorderCount--;				
-						bytEncorderCountTemp++;
-						}
-					if((updn_reg[0] == 1) && (updn_reg[1] == 0)&& (updn_reg[2] == 2)&& (updn_reg[3] == 3))	//DN Key	
-						{
-						EncorderCount--;				
-						bytEncorderCountTemp++;
-						}
+				   EncorderCount++; 		 
+				   bytEncorderCountTemp++;
 				}
-				#if 0
+			 if((updn_reg[0] == 3) && (updn_reg[1] == 2) && (updn_reg[2] == 0)&& (updn_reg[3] == 1))	//UP Key	
+			 	{
+				  EncorderCount++;				  
+				  bytEncorderCountTemp++;
+			 	}
+			 if((updn_reg[0] == 2) && (updn_reg[1] == 0) && (updn_reg[2] == 1)&& (updn_reg[3] == 3))  //UP Key	  
+			 	{
+			   	EncorderCount++; 					
+				bytEncorderCountTemp++;
+			 	}
+			if((updn_reg[0] == 0) && (updn_reg[1] == 2)&& (updn_reg[2] == 3)&& (updn_reg[3] == 1))	//DN Key	 
+				{
+				   EncorderCount--; 	 
+				   bytEncorderCountTemp++;
+				}
+			 if((updn_reg[0] == 2) && (updn_reg[1] == 3)&& (updn_reg[2] == 1)&& (updn_reg[3] == 0))  //DN Key	  
+			 	{
+				   EncorderCount--; 						   
+				   bytEncorderCountTemp++;
+			 	}
+			if((updn_reg[0] == 3) && (updn_reg[1] == 1)&& (updn_reg[2] == 0)&& (updn_reg[3] == 2))	//DN Key	
+				{
+				   EncorderCount--;				   
+				   bytEncorderCountTemp++;
+				}
+			if((updn_reg[0] == 1) && (updn_reg[1] == 0)&& (updn_reg[2] == 2)&& (updn_reg[3] == 3))	//DN Key	
+				{
+				   EncorderCount--; 
+				   bytEncorderCountTemp++;
+				}
+
 			if(bytFastEncoderMode==ON)
 				{
 					if(bytEncorderCountTemp>=400)	
 						{
-						  ulongRotateNumberTELI++;
+						  ulongRotateNumber++;
 						  bytEncorderCountTemp=0;
 						}
 				}
 			else
-				#endif
-				if(bytFastEncoderMode==OFF)
 				{
 					if(bytEncorderCountTemp>=60)	
 					{
@@ -582,8 +520,6 @@ BYTE TempKey;
 		
 			if( tic01==100 ) 
 			{				// 1 sec
-
-			
 				
 				tic01 = 0;
 				//second++;
@@ -642,8 +578,7 @@ else
 		}
 	}
 	#else
-	
-	 if( _ReadKey() )
+ if( _ReadKey() )
 {		
 		if (keytic==50)
 		{
@@ -694,7 +629,6 @@ else
 		RepeatKey = ON;
 		keytic = 0;		
 	}	
-
 	#endif	
 #else
 	if( _ReadKey() )
@@ -982,30 +916,9 @@ case _SYSTEM_TIMER_EVENT_GRN_OFF_RED_ON:
 /*      Ext Int 1 Interrupt                                                  */
 /*****************************************************************************/
 //INTERRUPT(2, ext1_int)
-void	ext0_int(void) interrupt 0 using 1
-{
-	EX0 = 0;
-	if(bytPNFlagEncoder==0)
-	EncorderCountINT++;
-	else
-	EncorderCountINT--;
-
-	if(bytFastEncorderCountTemp>=100)			
-		{
-		ulongRotateNumberTELI++;
-		bytFastEncorderCountTemp=0;
-		}
-	else
-		bytFastEncorderCountTemp++;
-		
-      EX0 = 1;
-}
-
 void	ext1_int(void) interrupt 2 using 1
 {
 	EX1 = 0;
-	//EncorderCountINT++;
-	//EX1 = 1;
 }
 
 //****************************************************************************/

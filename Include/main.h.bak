@@ -83,8 +83,8 @@ extern void SysPowerInitial(void);
 extern void UserInterfacePowerSwitch(EnumPowerAction enumSwitch);
 extern void SET_MCU_POWER_DOWN_MODE(void);
 void EncorderHandler_TELI(void);
-DWORD GetRotateNumber(BYTE index);
-void SaveRotateNumber(void);
+DWORD GetRotateNumber(void);
+void SaveRotateNumber(DWORD val);
 
 
 #endif	// __MAIN__
