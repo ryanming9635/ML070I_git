@@ -518,6 +518,24 @@ void 	LoadEEPROM (void)
 	 PWR_START_flag= ReadEEP(EEP_DC12_PWR_START);
 	PowerOffToOnFlag= ReadEEP(EEP_PowerOffToOnflag);
 
+if(PowerFlag>=2)
+{
+	PowerFlag=ON;
+	WriteEEP(EEP_Powerflag,ON);
+}
+
+if(PWR_START_flag>=2)
+{
+	PWR_START_flag=OFF;
+	WriteEEP(EEP_DC12_PWR_START,OFF);
+}
+
+if(PowerOffToOnFlag>=2)
+{
+	PowerOffToOnFlag=ON;
+	WriteEEP(EEP_PowerOffToOnflag,ON);
+}
+	
 	Encorder1= ((ReadEEP(EEP_Encorder1)>>4)*10)+(0x0f&ReadEEP(EEP_Encorder1));
 	Decimal1= ((ReadEEP(EEP_Decimal1)>>4)*10)+(0x0f&ReadEEP(EEP_Decimal1));
 
@@ -584,6 +602,13 @@ void 	LoadEEPROM (void)
 
 #if (_BATTERY_CHARGE_STOP==ON)
 bytBatteryStopCharge=ReadEEP(EEP_BatteryStopCharge);
+
+if(bytBatteryStopCharge>=2)
+{
+	bytBatteryStopCharge=OFF;
+	WriteEEP(EEP_BatteryStopCharge,OFF);
+}
+
 #endif
 
 }

@@ -1,7 +1,15 @@
----- ClearBasicEE Matches (6 in 4 files) ----
-CPU.c:119:				ClearBasicEE();
-CPU.c:133:	ClearBasicEE();
-Etc_eep.c:67:void ClearBasicEE(void)
-Etc_eep.c:70:	Printf("\r\nClearBasicEE...");
-Etc_eep.h (include):49:void ClearBasicEE(void);
-Monitor.c:1250:		ClearBasicEE();
+---- PowerOffToOnFlag Matches (15 in 3 files) ----
+Etc_eep.c:90:	WriteEEP(EEP_PowerOffToOnflag,ON);
+Etc_eep.h (include):16:#define	EEP_PowerOffToOnflag			0x14
+Main.c:39:BYTE PowerOffToOnFlag;
+Main.c:519:	PowerOffToOnFlag= ReadEEP(EEP_PowerOffToOnflag);
+Main.c:533:if(PowerOffToOnFlag>=2)
+Main.c:535:	PowerOffToOnFlag=OFF;
+Main.c:536:	WriteEEP(EEP_PowerOffToOnflag,OFF);
+Main.c:577:		if(PowerOffToOnFlag==ON)
+Main.c:579:			WriteEEP(EEP_PowerOffToOnflag,OFF);
+Main.c:580:			PowerOffToOnFlag=OFF;
+Main.c:587:			if(PowerOffToOnFlag==ON)
+Main.c:593:			WriteEEP(EEP_PowerOffToOnflag,OFF);
+Main.c:594:			PowerOffToOnFlag=OFF;
+Main.c:1403:	WriteEEP(EEP_PowerOffToOnflag,ON);
