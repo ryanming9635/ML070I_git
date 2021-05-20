@@ -107,9 +107,21 @@ void ClearBasicEE(void)
 	WriteEEP(EEP_RotateNumberM,0);
 	WriteEEP(EEP_RotateNumberH,0);
 
-WriteEEP(EEP_RotateNumberRL,0);
-WriteEEP(EEP_RotateNumberRM,0);
-WriteEEP(EEP_RotateNumberRH,0);
+	WriteEEP(EEP_RotateNumberRL,0);
+	WriteEEP(EEP_RotateNumberRM,0);
+	WriteEEP(EEP_RotateNumberRH,0);
+
+	WriteEEP(EEP_TEncorder1,1);
+	WriteEEP(EEP_TDecimal1,0);
+
+	WriteEEP(EEP_TEncorder2,1);
+	WriteEEP(EEP_TDecimal2,0);
+
+	WriteEEP(EEP_TEncorder3,1);
+	WriteEEP(EEP_TDecimal3,0);
+
+	WriteEEP(EEP_TEncorder4,1);
+	WriteEEP(EEP_TDecimal4,0);
 
 		
 }

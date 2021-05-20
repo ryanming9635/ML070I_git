@@ -554,8 +554,7 @@ if(PowerOffToOnFlag>=2)
 	Encorder4= ((ReadEEP(EEP_Encorder4)>>4)*10)+(0x0f&ReadEEP(EEP_Encorder4));
 	Decimal4= ((ReadEEP(EEP_Decimal4)>>4)*10)+(0x0f&ReadEEP(EEP_Decimal4));
 
- 
-	if(Encorder1>=3)
+	if(Encorder1>=6)
 	{
 		Encorder1=1;
 		Decimal1=0;
@@ -563,7 +562,7 @@ if(PowerOffToOnFlag>=2)
 		WriteEEP(EEP_Decimal1,0);
 	}
 	
-	if(Encorder2>=3)
+	if(Encorder2>=6)
 	{
 		Encorder2=1;
 		Decimal2=0;
@@ -571,7 +570,7 @@ if(PowerOffToOnFlag>=2)
 		WriteEEP(EEP_Decimal2,0);
 	}
 	
-	if(Encorder3>=3)
+	if(Encorder3>=6)
 	{
 		Encorder3=1;
 		Decimal3=0;
@@ -579,12 +578,56 @@ if(PowerOffToOnFlag>=2)
 		WriteEEP(EEP_Decimal3,0);
 	}
 	 
-	if(Encorder4>=3)
+	if(Encorder4>=6)
 	{
 		Encorder4=1;
 		Decimal4=0;
 		WriteEEP(EEP_Encorder4,1);
 		WriteEEP(EEP_Decimal4,0);
+	}
+
+	TEncorder1= ((ReadEEP(EEP_TEncorder1)>>4)*10)+(0x0f&ReadEEP(EEP_TEncorder1));
+	TDecimal1= ((ReadEEP(EEP_TDecimal1)>>4)*10)+(0x0f&ReadEEP(EEP_TDecimal1));
+
+	TEncorder2= ((ReadEEP(EEP_TEncorder2)>>4)*10)+(0x0f&ReadEEP(EEP_TEncorder2));
+	TDecimal2= ((ReadEEP(EEP_TDecimal2)>>4)*10)+(0x0f&ReadEEP(EEP_TDecimal2));
+
+	TEncorder3= ((ReadEEP(EEP_TEncorder3)>>4)*10)+(0x0f&ReadEEP(EEP_TEncorder3));
+	TDecimal3= ((ReadEEP(EEP_TDecimal3)>>4)*10)+(0x0f&ReadEEP(EEP_TDecimal3));
+
+	TEncorder4= ((ReadEEP(EEP_TEncorder4)>>4)*10)+(0x0f&ReadEEP(EEP_TEncorder4));
+	TDecimal4= ((ReadEEP(EEP_TDecimal4)>>4)*10)+(0x0f&ReadEEP(EEP_TDecimal4));
+
+	if(TEncorder1>=6)
+	{
+		TEncorder1=1;
+		TDecimal1=0;
+		WriteEEP(EEP_TEncorder1,1);
+		WriteEEP(EEP_TDecimal1,0);
+	}
+	
+	if(TEncorder2>=6)
+	{
+		TEncorder2=1;
+		TDecimal2=0;
+		WriteEEP(EEP_TEncorder2,1);
+		WriteEEP(EEP_TDecimal2,0);
+	}
+	
+	if(TEncorder3>=6)
+	{
+		TEncorder3=1;
+		TDecimal3=0;
+		WriteEEP(EEP_TEncorder3,1);
+		WriteEEP(EEP_TDecimal3,0);
+	}
+	 
+	if(TEncorder4>=6)
+	{
+		TEncorder4=1;
+		TDecimal4=0;
+		WriteEEP(EEP_TEncorder4,1);
+		WriteEEP(EEP_TDecimal4,0);
 	}
 
 	ulongRotateNumberTELI=ReadEEP(EEP_RotateNumberH);

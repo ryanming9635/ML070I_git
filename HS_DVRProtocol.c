@@ -29,6 +29,8 @@ BYTE protocol_data[PROTOCOL_DATA_LENGTH];
 extern DATA  BYTE RS_out;
 extern float Encorder1,Encorder2,Encorder3,Encorder4;
 extern float Decimal1,Decimal2,Decimal3,Decimal4;
+extern float TEncorder1,TEncorder2,TEncorder3,TEncorder4;
+extern float TDecimal1,TDecimal2,TDecimal3,TDecimal4;
 extern StructDVRInfoType g_stDVRInfo;
 extern BYTE PowerFlag;
 extern BYTE CameraVolt;
@@ -236,18 +238,49 @@ if ( RS2_ready())
 						MCUTimerActiveTimerEvent(SEC(0.1),_USER_TIMER_EVENT_OSD_DISTANCE_RESET);
 						break;
 					case MCU_PROTOCOL_CMD_ENCODER_SET: 	
-						#if(_DEBUG_MESSAGE_UART_Protocol==ON)	
-						GraphicsPrint(CYAN,"\r\n (CMD:ENCODER_SET)");	
-						Printf("\r\n Encorder1=%02x",(WORD)protocol_data[0]);
-						Printf("\r\n Decimal1=%02x",(WORD)protocol_data[1]);				
-						Printf("\r\n Encorder2=%02x",(WORD)protocol_data[2]);
-						Printf("\r\n Decimal2=%02x",(WORD)protocol_data[3]);				
-						Printf("\r\n Encorder3=%02x",(WORD)protocol_data[4]);
-						Printf("\r\n Decimal3=%02x",(WORD)protocol_data[5]);				
-						Printf("\r\n Encorder4=%02x",(WORD)protocol_data[6]);
-						Printf("\r\n Decimal4=%02x",(WORD)protocol_data[7]);				
-						#endif
 
+						
+						if(bytFastEncoderMode==OFF)
+							{
+
+							#if(_DEBUG_MESSAGE_UART_Protocol==ON)	
+							GraphicsPrint(CYAN,"\r\n (CMD:ENCODER_SET REX)");	
+							Printf("\r\n Encorder1=%02x",(WORD)protocol_data[0]);
+							Printf("\r\n Decimal1=%02x",(WORD)protocol_data[1]);				
+							Printf("\r\n Encorder2=%02x",(WORD)protocol_data[2]);
+							Printf("\r\n Decimal2=%02x",(WORD)protocol_data[3]);				
+							Printf("\r\n Encorder3=%02x",(WORD)protocol_data[4]);
+							Printf("\r\n Decimal3=%02x",(WORD)protocol_data[5]);				
+							Printf("\r\n Encorder4=%02x",(WORD)protocol_data[6]);
+							Printf("\r\n Decimal4=%02x",(WORD)protocol_data[7]);				
+							#endif
+						if(((ReadEEP(EEP_Encorder1)^protocol_data[0]))||\
+							((ReadEEP(EEP_Decimal1)^protocol_data[1]))||\
+							((ReadEEP(EEP_Encorder2)^protocol_data[2]))||\
+							((ReadEEP(EEP_Decimal2)^protocol_data[3]))||\
+							((ReadEEP(EEP_Encorder3)^protocol_data[4]))||\
+							((ReadEEP(EEP_Decimal3)^protocol_data[5]))||\
+							((ReadEEP(EEP_Encorder4)^protocol_data[6]))||\
+							((ReadEEP(EEP_Decimal4)^protocol_data[7]))\
+							)
+						{
+						WriteEEP(EEP_Encorder1,protocol_data[0]);
+						WriteEEP(EEP_Decimal1,protocol_data[1]);
+						
+						WriteEEP(EEP_Encorder2,protocol_data[2]);
+						WriteEEP(EEP_Decimal2,protocol_data[3]);
+						
+						WriteEEP(EEP_Encorder3,protocol_data[4]);
+						WriteEEP(EEP_Decimal3,protocol_data[5]);
+						
+						WriteEEP(EEP_Encorder4,protocol_data[6]);
+						WriteEEP(EEP_Decimal4,protocol_data[7]);
+						
+						#if(_DEBUG_MESSAGE_UART_Protocol==ON)	
+						Printf("\r\n ENCODER_SET to EEPROM REX");	
+						#endif
+						}
+							
 						Encorder1=((protocol_data[0]>>4)*10)+(0x0f&protocol_data[0]);
 						Decimal1=((protocol_data[1]>>4)*10)+(0x0f&protocol_data[1]);
 						
@@ -259,19 +292,65 @@ if ( RS2_ready())
 						
 						Encorder4=((protocol_data[6]>>4)*10)+(0x0f&protocol_data[6]);
 						Decimal4=((protocol_data[7]>>4)*10)+(0x0f&protocol_data[7]);
+					
+							}
+						else
+							{
 
-						WriteEEP(EEP_Encorder1,protocol_data[0]);
-						WriteEEP(EEP_Decimal1,protocol_data[1]);
+						#if(_DEBUG_MESSAGE_UART_Protocol==ON)	
+						GraphicsPrint(CYAN,"\r\n (CMD:ENCODER_SET TELI)");	
+						Printf("\r\n TEncorder1=%02x",(WORD)protocol_data[0]);
+						Printf("\r\n TDecimal1=%02x",(WORD)protocol_data[1]);				
+						Printf("\r\n TEncorder2=%02x",(WORD)protocol_data[2]);
+						Printf("\r\n TDecimal2=%02x",(WORD)protocol_data[3]);				
+						Printf("\r\n TEncorder3=%02x",(WORD)protocol_data[4]);
+						Printf("\r\n TDecimal3=%02x",(WORD)protocol_data[5]);				
+						Printf("\r\n TEncorder4=%02x",(WORD)protocol_data[6]);
+						Printf("\r\n TDecimal4=%02x",(WORD)protocol_data[7]);				
+						#endif
+						
+							if(((ReadEEP(EEP_TEncorder1)^protocol_data[0]))||\
+							((ReadEEP(EEP_TDecimal1)^protocol_data[1]))||\
+							((ReadEEP(EEP_TEncorder2)^protocol_data[2]))||\
+							((ReadEEP(EEP_TDecimal2)^protocol_data[3]))||\
+							((ReadEEP(EEP_TEncorder3)^protocol_data[4]))||\
+							((ReadEEP(EEP_TDecimal3)^protocol_data[5]))||\
+							((ReadEEP(EEP_TEncorder4)^protocol_data[6]))||\
+							((ReadEEP(EEP_TDecimal4)^protocol_data[7]))\
+							)
+								{
+							WriteEEP(EEP_TEncorder1,protocol_data[0]);
+							WriteEEP(EEP_TDecimal1,protocol_data[1]);
+								
+							WriteEEP(EEP_TEncorder2,protocol_data[2]);
+							WriteEEP(EEP_TDecimal2,protocol_data[3]);
+								
+							WriteEEP(EEP_TEncorder3,protocol_data[4]);
+							WriteEEP(EEP_TDecimal3,protocol_data[5]);
+								
+							WriteEEP(EEP_TEncorder4,protocol_data[6]);
+							WriteEEP(EEP_TDecimal4,protocol_data[7]);		
 
-						WriteEEP(EEP_Encorder2,protocol_data[2]);
-						WriteEEP(EEP_Decimal2,protocol_data[3]);
+							#if(_DEBUG_MESSAGE_UART_Protocol==ON)	
+							Printf("\r\n ENCODER_SET to EEPROM TELI");	
+							#endif
+								}
+							
+							TEncorder1=((protocol_data[0]>>4)*10)+(0x0f&protocol_data[0]);
+							TDecimal1=((protocol_data[1]>>4)*10)+(0x0f&protocol_data[1]);
+							
+							TEncorder2=((protocol_data[2]>>4)*10)+(0x0f&protocol_data[2]);
+							TDecimal2=((protocol_data[3]>>4)*10)+(0x0f&protocol_data[3]);
+							
+							TEncorder3=((protocol_data[4]>>4)*10)+(0x0f&protocol_data[4]);
+							TDecimal3=((protocol_data[5]>>4)*10)+(0x0f&protocol_data[5]);
+							
+							TEncorder4=((protocol_data[6]>>4)*10)+(0x0f&protocol_data[6]);
+							TDecimal4=((protocol_data[7]>>4)*10)+(0x0f&protocol_data[7]);
+							
 
-						WriteEEP(EEP_Encorder3,protocol_data[4]);
-						WriteEEP(EEP_Decimal3,protocol_data[5]);
 
-						WriteEEP(EEP_Encorder4,protocol_data[6]);
-						WriteEEP(EEP_Decimal4,protocol_data[7]);
-
+							}
 						MCUTimerActiveTimerEvent(SEC(1),_USER_TIMER_EVENT_OSD_ENCODER_DEVIATION_SETTING);						
 
 						break;

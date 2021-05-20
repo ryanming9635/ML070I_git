@@ -24,6 +24,7 @@
 #define	EEP_Encorder4                              	0x21
 #define 	EEP_Decimal4    				0x22	
 
+
 #define	EEP_RotateNumberL                     	0x23
 #define 	EEP_RotateNumberM			0x24	
 #define 	EEP_RotateNumberH			0x25	
@@ -41,6 +42,16 @@
 //#if (_BATTERY_CHARGE_STOP==ON)
 #define EEP_BatteryStopCharge                   0x29
 //#endif
+
+#define	EEP_TEncorder1                             0x30
+#define 	EEP_TDecimal1    				0x31	
+#define	EEP_TEncorder2                             0x32
+#define 	EEP_TDecimal2    				0x33	
+#define	EEP_TEncorder3                             0x34
+#define 	EEP_TDecimal3    				0x35	
+#define	EEP_TEncorder4                             0x36
+#define 	EEP_TDecimal4    				0x37	
+
 DWORD GetFWRevEE(void);
 void SaveFWRevEE(void);
 BYTE GetProjectNameEE(void);

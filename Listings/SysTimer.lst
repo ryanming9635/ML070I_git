@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 09:18:45 PAGE 1   
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 15:51:07 PAGE 1   
 
 
 C51 COMPILER V9.60.0.0, COMPILATION OF MODULE SYSTIMER
@@ -62,7 +62,7 @@ line level    source
   52          BYTE BattDetect1_COUNT=0, BattDetect2_COUNT=0, BattDetect3_COUNT=0, BattDetect4_COUNT=0,BattDetect5_COUNT=
              -0;
   53          BYTE BattDetectMin_COUNT=0, BattDetectHigh_COUNT=0,BattDetectHighStop_COUNT=0,BattDetectNoStartUp_COUNT=0,
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 09:18:45 PAGE 2   
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 15:51:07 PAGE 2   
 
              -BattDetectStartUp_COUNT=0;
   54          BYTE  BATERY_STAT=0xFF,BATERY_STAT_TEMP=0xFE;
@@ -126,7 +126,7 @@ line level    source
  111          extern WORD GetBatteryBTH(void);
  112          extern WORD GetBatteryVoltage(void);
  113          extern void SetAD5110Step(BYTE newv) ;
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 09:18:45 PAGE 3   
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 15:51:07 PAGE 3   
 
  114          extern void UserInterfacePowerSwitch(EnumPowerAction enumSwitch);
  115          extern void SysPowerSwitch(EnumPowerAction enumSwitch);
@@ -190,7 +190,7 @@ line level    source
  173          // Description  : Clear Event Time
  174          // Input Value  : ucEventIndex --> Event which time is needed to be cleared
  175          // Output Value : None
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 09:18:45 PAGE 4   
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 15:51:07 PAGE 4   
 
  176          //--------------------------------------------------
  177          
@@ -254,7 +254,7 @@ line level    source
  234   2              // Reset Timer Event Counter
  235   2              for(ucTimerEventCnt = 0; ucTimerEventCnt < _TIMER_EVENT_COUNT; ucTimerEventCnt++)
  236   2              {
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 09:18:45 PAGE 5   
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 15:51:07 PAGE 5   
 
  237   3                  if(GET_EVENT_VALID(ucTimerEventCnt) == _TRUE)
  238   3                  {
@@ -318,7 +318,7 @@ line level    source
  296   1          for(ucEventIndex = 0; ucEventIndex < _TIMER_EVENT_COUNT; ucEventIndex++)
  297   1          {
  298   2              if(GET_EVENT_VALID(ucEventIndex) == _FALSE)
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 09:18:45 PAGE 6   
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 15:51:07 PAGE 6   
 
  299   2              {
  300   3                  SET_EVENT_VALID(ucEventIndex);
@@ -382,7 +382,7 @@ line level    source
  358   1          for(ucEventIndex = 0; ucEventIndex < _TIMER_EVENT_COUNT; ucEventIndex++)
  359   1          {
  360   2              if(GET_EVENT_VALID(ucEventIndex) == _FALSE)
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 09:18:45 PAGE 7   
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 15:51:07 PAGE 7   
 
  361   2              {
  362   3                  SET_EVENT_VALID(ucEventIndex);
@@ -446,7 +446,7 @@ line level    source
  420   3            ulongRotateNumberTELI=0;
  421   3              }
  422   2            else
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 09:18:45 PAGE 8   
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 15:51:07 PAGE 8   
 
  423   2              {
  424   3              WriteEEP(EEP_RotateNumberRL,0);
@@ -510,7 +510,7 @@ line level    source
  482   3                 UserInterfaceBatteryChargeMode(_BATT_STATUS_DVR_OFF);
  483   3                MCUTimerActiveTimerEvent(SEC(3), _USER_TIMER_EVENT_OSD_DVR_REBOOT);
  484   3      
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 09:18:45 PAGE 9   
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 15:51:07 PAGE 9   
 
  485   3                P3M1=0x00;//p3.4 and P3.5 set output ryan@20210226
  486   3                }
@@ -574,7 +574,7 @@ line level    source
  544          // Input Value  : None
  545          // Output Value : None
  546          //--------------------------------------------------
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 09:18:45 PAGE 10  
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 15:51:07 PAGE 10  
 
  547          void SysTimerHandler(void)
  548          {
@@ -638,7 +638,7 @@ line level    source
  606   2      
  607   2         case _SYSTEM_TIMER_EVENT_GRN_OFF_RED_ON: 
  608   2          PowerLED(_SYSTEM_TIMER_EVENT_GRN_OFF_RED_ON);
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 09:18:45 PAGE 11  
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 15:51:07 PAGE 11  
 
  609   2        break;
  610   2      
@@ -702,7 +702,7 @@ line level    source
  668   2        
  669   2          if(Check_ADAP_IN()==_TRUE)    
  670   2          {
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 09:18:45 PAGE 12  
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 15:51:07 PAGE 12  
 
  671   3            
  672   3                  if(GET_AC_PLUG()==_FALSE)
@@ -766,7 +766,7 @@ line level    source
  730   2        break;
  731   2        case _SYSTEM_TIMER_EVENT_POWER_OFF_ON_DELAY:
  732   2              #if(_DEBUG_MESSAGE_SysTimerEvent==ON)
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 09:18:45 PAGE 13  
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 15:51:07 PAGE 13  
 
                       GraphicsPrint(RED,"(CLR_DVR_PowerOFFDelay)");
                       #endif
@@ -830,7 +830,7 @@ line level    source
  789   2      
  790   2              SET_BTH_STATE(TEMP_STAT); 
  791   2      
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 09:18:45 PAGE 14  
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 15:51:07 PAGE 14  
 
  792   2              STAT1_temp=GET_STAT1(); 
  793   2              if(STAT1_Flag!=STAT1_temp)
@@ -894,7 +894,7 @@ line level    source
  851   2              #else
                       BatteryVoltage=GetBatteryVoltage();     
                       #endif
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 09:18:45 PAGE 15  
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 15:51:07 PAGE 15  
 
  854   2          #endif
  855   2          
@@ -958,7 +958,7 @@ line level    source
  912   4            //_BATT_STATUS_CAPACITY_LEVEL0
  913   4                  BattDetect1_COUNT++;
  914   4                  BattDetect2_COUNT=0;
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 09:18:45 PAGE 16  
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 15:51:07 PAGE 16  
 
  915   4              BattDetect3_COUNT=0;
  916   4              BattDetect4_COUNT=0;
@@ -1022,7 +1022,7 @@ line level    source
  974   4              BattDetectHighStop_COUNT=0;
  975   4              BattDetectNoStartUp_COUNT=0;
  976   4              
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 09:18:45 PAGE 17  
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 15:51:07 PAGE 17  
 
  977   4          
  978   4            }
@@ -1086,7 +1086,7 @@ line level    source
 1034   3            {
 1035   4              BATERY_STAT=_BATT_STATUS_CAPACITY_LEVEL2;
 1036   4              BattDetect3_COUNT=0;
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 09:18:45 PAGE 18  
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 15:51:07 PAGE 18  
 
 1037   4            }
 1038   3            if(BattDetect4_COUNT==20)
@@ -1150,7 +1150,7 @@ line level    source
                       #endif
 1096   4                  
 1097   4              SET_BATTERY_CHARGE_STATE(_BATT_STATUS_NONE);
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 09:18:45 PAGE 19  
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 15:51:07 PAGE 19  
 
 1098   4            }
 1099   3      #endif
@@ -1214,7 +1214,7 @@ line level    source
                     SET_BATTERY_STATE(_BATT_STATUS_CAPACITY_LEVEL3);  
                   else    
                     SET_BATTERY_STATE(_BATT_STATUS_CAPACITY_LEVEL4);//>15V
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 09:18:45 PAGE 20  
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 15:51:07 PAGE 20  
 
                     }   
               
@@ -1278,7 +1278,7 @@ line level    source
 1216   3            }
 1217   2          
 1218   2            break;
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 09:18:45 PAGE 21  
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 15:51:07 PAGE 21  
 
 1219   2      case _SYSTEM_TIMER_EVENT_BATTERY_LOW_PWR_OFF:
 1220   2           if(PowerFlag==ON)  
@@ -1342,7 +1342,7 @@ line level    source
 1277   3              TEMP_HIGH_COUNT=0;
 1278   3              TEMP_HIGH_WARN_COUNT=0;
 1279   3              }
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 09:18:45 PAGE 22  
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 15:51:07 PAGE 22  
 
 1280   2            else
 1281   2              {
@@ -1406,7 +1406,7 @@ line level    source
 1338   3            TEMP_STAT=_BATT_STATUS_TEMP_LOW;
 1339   3            TEMP_LOW_COUNT=0;
 1340   3            CLR_BATTERY_LOW_TMEP_WARN();
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 09:18:45 PAGE 23  
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 15:51:07 PAGE 23  
 
 1341   3            CLR_BATTERY_HIGH_TMEP_WARN(); 
 1342   3            CLR_NO_BATTERY();   
@@ -1470,7 +1470,7 @@ line level    source
                       }
                     else if(BatteryBTH>BTH_TEMP_LOW)  //-5~-10 warnning
                       {
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 09:18:45 PAGE 24  
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 15:51:07 PAGE 24  
 
                       SET_BTH_STATE(_BATT_STATUS_TEMP_LOW);       
                       CLR_BATTERY_LOW_TMEP_WARN();
@@ -1534,7 +1534,7 @@ line level    source
 1462   4                      STAT1_Flag=STAT1_temp;
 1463   4                      
 1464   4                      STAT2_temp=GET_STAT2(); 
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 09:18:45 PAGE 25  
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 15:51:07 PAGE 25  
 
 1465   4                      if(STAT2_Flag!=STAT2_temp)
 1466   4                      STAT2_Flag=STAT2_temp;
@@ -1598,7 +1598,7 @@ line level    source
 1521   6                        else
 1522   6                          MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_BATT_LOW_CHARGE);  
 1523   6                        }
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 09:18:45 PAGE 26  
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 15:51:07 PAGE 26  
 
 1524   5                      else if(GET_BATTERY_CHARGE_STATE()==_BATT_STATUS_NO_BATT)
 1525   5                      MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_NO_BATT); 
@@ -1662,7 +1662,7 @@ line level    source
 1582   2                    
 1583   2                    if((STAT1_Flag!=STAT1_temp)&&(GET_NO_BATTERY()==_FALSE))
 1584   2                      {
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 09:18:45 PAGE 27  
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 15:51:07 PAGE 27  
 
 1585   3                      STAT1_Flag=STAT1_temp;
 1586   3                      SET_BATTERY_CHARGE_STATE(_BATT_STATUS_NONE);//reset battery state.              
@@ -1726,7 +1726,7 @@ line level    source
 1642   3                      case _BATT_STATUS_CAPACITY_MAX_STOP:
 1643   3                        
 1644   3                          if((GET_BATTERY_CAPACITY_HIGH_FLAG()==_FALSE)/*&&(_BATT_STATUS_CAPACITY_MAX_STOP_Count>20)*/)
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 09:18:45 PAGE 28  
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 15:51:07 PAGE 28  
 
 1645   3                          {
 1646   4                          #if(_DEBUG_MESSAGE_SysTimerEvent==ON)
@@ -1790,7 +1790,7 @@ line level    source
 1703   4                          
 1704   4                          if(ReadEEP(EEP_LowBattery_Flag)==OFF)
 1705   4                          WriteEEP(EEP_LowBattery_Flag,ON);
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 09:18:45 PAGE 29  
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 15:51:07 PAGE 29  
 
 1706   4                          
 1707   4                          #if(_DEBUG_MESSAGE_SysTimerEvent==ON)
@@ -1854,7 +1854,7 @@ line level    source
 1764   3                      //  CLR_CHARGE_START_FLAG();
 1765   3                        
 1766   3                        //break;
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 09:18:45 PAGE 30  
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 15:51:07 PAGE 30  
 
 1767   3                        }
 1768   2            #else
@@ -1918,7 +1918,7 @@ line level    source
                             
                     #endif        
 1827   2                MCUTimerActiveTimerEvent(SEC(10-5), _SYSTEM_TIMER_EVENT_CHECK_CHARGE_STATE);  //check charge
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 09:18:45 PAGE 31  
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 15:51:07 PAGE 31  
 
 1828   2                break;
 1829   2          case     _SYSTEM_TIMER_EVENT_JUDGE_BATT_MODE:
@@ -1982,7 +1982,7 @@ line level    source
 1887   2            if(GET_BATTERY_CHARGE_STATE()!=_BATT_STATUS_NORMAL_CHARGE)
 1888   2              UserInterfaceBatteryChargeMode(_BATT_STATUS_NORMAL_CHARGE);             
 1889   2            break;
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 09:18:45 PAGE 32  
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 15:51:07 PAGE 32  
 
 1890   2      
 1891   2        case  _SYSTEM_TIMER_EVENT_BATT_NO_CHARGE:   
@@ -2047,7 +2047,7 @@ MODULE INFORMATION:   STATIC OVERLAYABLE
    BIT SIZE         =      1    ----
 END OF MODULE INFORMATION.
 
-C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 09:18:45 PAGE 33  
+C51 COMPILER V9.60.0.0   SYSTIMER                                                          05/20/2021 15:51:07 PAGE 33  
 
 
 C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -1,3 +1,4 @@
----- MCUTimerClrEventValid Matches (2 in 1 files) ----
-SysTimer.c:179:void MCUTimerClrEventValid(BYTE ucEventIndex)
-SysTimer.c:564:            MCUTimerClrEventValid(ucTimerEventIndex);
+---- _USER_TIMER_EVENT_OSD_ENCODER_DEVIATION_SETTING Matches (3 in 3 files) ----
+HS_DVRProtocol.c:336:						MCUTimerActiveTimerEvent(SEC(1),_USER_TIMER_EVENT_OSD_ENCODER_DEVIATION_SETTING);						
+SysTimer.c:509:	case _USER_TIMER_EVENT_OSD_ENCODER_DEVIATION_SETTING:			
+Typedefs.h (include):248:    _USER_TIMER_EVENT_OSD_ENCODER_DEVIATION_SETTING,
