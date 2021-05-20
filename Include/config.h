@@ -14,7 +14,7 @@
 //-----------------------------------------------------------------------------
 #define	MCU_FW_Major			0x00	
 #define	MCU_FW_Sub0			0x00		
-#define	MCU_FW_Sub1			0x42	
+#define	MCU_FW_Sub1			0x43	
 
 #define Hardware_Version  			0x01
 //-----------------------------------------------------------------------------
@@ -31,11 +31,12 @@
 #define HS_DEBUG                        OFF
 #endif
 
-#define  _2ND_DECIMAL           			ON
-#define  _POWER_DOWN_ENABLE             	ON
-#define  _1KHZ_PWM			             	OFF
-#define  _HARDWARE_VERSION			ON
-#define  _BATTERY_CHARGE_STOP		ON
+#define  _2ND_DECIMAL           						ON
+#define  _POWER_DOWN_ENABLE             				ON
+#define  _1KHZ_PWM			             				OFF
+#define  _HARDWARE_VERSION						OFF
+#define  _BATTERY_CHARGE_STOP					ON
+#define  _BATTERY_CHECK_WITH_NO_CHARGE		ON
 
 //-----------------------------------------------------------------------------
 //		Battery Charge Configure

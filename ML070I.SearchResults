@@ -1,15 +1,3 @@
----- PowerOffToOnFlag Matches (15 in 3 files) ----
-Etc_eep.c:90:	WriteEEP(EEP_PowerOffToOnflag,ON);
-Etc_eep.h (include):16:#define	EEP_PowerOffToOnflag			0x14
-Main.c:39:BYTE PowerOffToOnFlag;
-Main.c:519:	PowerOffToOnFlag= ReadEEP(EEP_PowerOffToOnflag);
-Main.c:533:if(PowerOffToOnFlag>=2)
-Main.c:535:	PowerOffToOnFlag=OFF;
-Main.c:536:	WriteEEP(EEP_PowerOffToOnflag,OFF);
-Main.c:577:		if(PowerOffToOnFlag==ON)
-Main.c:579:			WriteEEP(EEP_PowerOffToOnflag,OFF);
-Main.c:580:			PowerOffToOnFlag=OFF;
-Main.c:587:			if(PowerOffToOnFlag==ON)
-Main.c:593:			WriteEEP(EEP_PowerOffToOnflag,OFF);
-Main.c:594:			PowerOffToOnFlag=OFF;
-Main.c:1403:	WriteEEP(EEP_PowerOffToOnflag,ON);
+---- MCUTimerClrEventValid Matches (2 in 1 files) ----
+SysTimer.c:179:void MCUTimerClrEventValid(BYTE ucEventIndex)
+SysTimer.c:564:            MCUTimerClrEventValid(ucTimerEventIndex);

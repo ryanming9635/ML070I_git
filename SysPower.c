@@ -46,6 +46,10 @@ extern BYTE bytBatteryStopChargeCount;
 extern BYTE bytBatteryStopCharge;
 #endif
 
+#if (_BATTERY_CHECK_WITH_NO_CHARGE==ON)
+extern BYTE bytBatteryVoltageCheck;
+#endif
+
 //****************************************************************************
 // FUNCTION DECLARATIONS
 //****************************************************************************
@@ -565,7 +569,7 @@ void UserInterfaceBatteryChargeMode(EnumBatteryStatus enumSwitch)
 		case  _BATT_STATUS_NORMAL_CHARGE:
 					SET_PWM(_CHG_CURR,_CHARGE700mA); 
 			#if (_DEBUG_MESSAGE_BatteryVoltage==ON)
-					GraphicsPrint(MAGENTA,"(Normal Current Charge)");	
+					GraphicsPrint(MAGENTA,"(2Normal Current Charge)");	
 			#endif
 					SET_BATTERY_CHARGE_STATE(_BATT_STATUS_NORMAL_CHARGE);	
 			

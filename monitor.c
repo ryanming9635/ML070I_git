@@ -51,7 +51,9 @@ extern DWORD ulongRotateNumber;
 extern long EncorderCount;
 extern DWORD ulongRotateNumberTELI;
 extern long EncorderCountINT;
-
+#if (_BATTERY_CHECK_WITH_NO_CHARGE==ON)
+extern BYTE bytBatteryVoltageCheck;
+#endif
 #if (_BATTERY_CHARGE_STOP==ON)
 extern BYTE bytBatteryStopCharge;
 #endif
@@ -1223,6 +1225,11 @@ else if( !stricmp( argv[1], "kgrid" ) ) {
 			Puts("\r\nP1_4=1");
 			}
 		*/
+		#if (_BATTERY_CHECK_WITH_NO_CHARGE==ON)
+		bytBatteryVoltageCheck=ON;
+			MCUTimerCancelTimerEvent( _SYSTEM_TIMER_EVENT_BATTERY_VOLTAGE_READY_CHECK);
+			MCUTimerCancelTimerEvent( _SYSTEM_TIMER_EVENT_BATTERY_VOLTAGE_DISABLE_CHECK);
+		#endif	
 		Monitor_flag=_FALSE;
 	}
 	else if( !stricmp( argv[0], "PWM1" ) ) {

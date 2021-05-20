@@ -58,7 +58,9 @@ BYTE PWM_TEMP=0;
 BYTE CHARGE_TEMP_ABNORMAL=0;
 BYTE CHARGE_TEMP_NORMAL=0;
 //BYTE _BATT_STATUS_CAPACITY_MAX_STOP_Count=0;
-
+#if (_BATTERY_CHECK_WITH_NO_CHARGE==ON)
+BYTE bytBatteryVoltageCheck=ON;
+#endif
 #if (_DEBUG_MESSAGE_Monitor==ON)
 bit Monitor_flag=OFF;
 #endif
@@ -806,11 +808,49 @@ switch(enumEventID)
 				}
 			*/
 			break;
+#if (_BATTERY_CHECK_WITH_NO_CHARGE==ON)			
+case _SYSTEM_TIMER_EVENT_BATTERY_VOLTAGE_READY_CHECK:
+
+			#if(_DEBUG_MESSAGE_Battery_Charge_Debug==ON)
+			GraphicsPrint(GREEN,"(BATTERY_VOLTAGE_READY_CHECK)");
+			#endif
+
+		SET_PWM(_CHG_CURR,_CHARGESTOP);
+			
+		bytBatteryVoltageCheck=ON;
+		MCUTimerCancelTimerEvent(_SYSTEM_TIMER_EVENT_JUDGE_BATT_STATE);
+		MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_JUDGE_BATT_STATE);
+		MCUTimerActiveTimerEvent(SEC(4), _SYSTEM_TIMER_EVENT_BATTERY_VOLTAGE_DISABLE_CHECK);
+				break;
+case  _SYSTEM_TIMER_EVENT_BATTERY_VOLTAGE_DISABLE_CHECK:
+
+			#if(_DEBUG_MESSAGE_Battery_Charge_Debug==ON)
+			GraphicsPrint(RED,"(BATTERY_VOLTAGE_DISABLE_CHECK)");
+			#endif
+			
+		bytBatteryVoltageCheck=OFF;
+		SET_BATTERY_CHARGE_STATE(_BATT_STATUS_NONE);
+		if(Check_ADAP_IN()==_TRUE)
+			{
+		MCUTimerCancelTimerEvent( _SYSTEM_TIMER_EVENT_JUDGE_AC_MODE);  
+		MCUTimerActiveTimerEvent(SEC(1), _SYSTEM_TIMER_EVENT_JUDGE_AC_MODE);  
+			}
+		MCUTimerActiveTimerEvent(SEC(60), _SYSTEM_TIMER_EVENT_BATTERY_VOLTAGE_READY_CHECK);
+				break;
+#endif				
     case _SYSTEM_TIMER_EVENT_JUDGE_BATT_STATE:	
 
 		#if (_DEBUG_MESSAGE_BATTERY_TEST)
 		#else
+				#if (_BATTERY_CHECK_WITH_NO_CHARGE==ON)
+		if((GET_BATTERY_CHARGE_STATE()==_BATT_STATUS_STOP_CHARGE)||((GET_STAT1()==ON)&&(GET_STAT2()==ON)))
+			BatteryVoltage=GetBatteryVoltage();					
+		else if((bytBatteryVoltageCheck==ON)||(PowerFlag==OFF))
 			BatteryVoltage=GetBatteryVoltage();
+		
+				#else
+				BatteryVoltage=GetBatteryVoltage();			
+				#endif
 		#endif
 		
 			#if 1
@@ -1079,10 +1119,18 @@ switch(enumEventID)
 		//#if (_DEBUG_MESSAGE_SysTimerEvent==ON)
 		//GraphicsPrint(CYAN,">");
 		//#endif
+		#if (_BATTERY_CHECK_WITH_NO_CHARGE==ON)
+		  if((PowerFlag==OFF)||(bytBatteryVoltageCheck==ON))
+			MCUTimerActiveTimerEvent(SEC(0.1/*1*/), _SYSTEM_TIMER_EVENT_JUDGE_BATT_STATE);
+		  else
+			MCUTimerActiveTimerEvent(SEC(0.3/*1*/), _SYSTEM_TIMER_EVENT_JUDGE_BATT_STATE);
+		  #else
 			  if(PowerFlag==OFF)
-		  	MCUTimerActiveTimerEvent(SEC(0.1/*1*/), _SYSTEM_TIMER_EVENT_JUDGE_BATT_STATE);
+			MCUTimerActiveTimerEvent(SEC(0.1/*1*/), _SYSTEM_TIMER_EVENT_JUDGE_BATT_STATE);
 			  else
-		MCUTimerActiveTimerEvent(SEC(0.3/*1*/), _SYSTEM_TIMER_EVENT_JUDGE_BATT_STATE);
+			MCUTimerActiveTimerEvent(SEC(0.3/*1*/), _SYSTEM_TIMER_EVENT_JUDGE_BATT_STATE);
+		  
+		  #endif
 			#else
 			SET_BATTERY_CAPACITY(BatteryVoltage);
 	
@@ -1417,6 +1465,13 @@ case _SYSTEM_TIMER_EVENT_BATTERY_LOW_PWR_OFF:
 								if(STAT2_Flag!=STAT2_temp)
 								STAT2_Flag=STAT2_temp;
 
+							if(PowerFlag==ON)
+							{
+							MCUTimerCancelTimerEvent( _SYSTEM_TIMER_EVENT_BATTERY_VOLTAGE_READY_CHECK);
+							MCUTimerCancelTimerEvent( _SYSTEM_TIMER_EVENT_BATTERY_VOLTAGE_DISABLE_CHECK);
+							MCUTimerActiveTimerEvent(SEC(1), _SYSTEM_TIMER_EVENT_BATTERY_VOLTAGE_READY_CHECK);	
+							}
+						
 							}					
 						
 						if(GET_NO_BATTERY()==_TRUE)

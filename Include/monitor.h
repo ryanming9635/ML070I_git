@@ -25,6 +25,7 @@ void MonReadI2C(void);
 void MonWriteI2C(void);
 extern void SET_PWM(BYTE index, BYTE val);
 extern void MCUTimerReactiveTimerEvent(WORD usTime, BYTE ucEventID);
+extern void MCUTimerCancelTimerEvent(BYTE ucEventID);
 
 
 #endif

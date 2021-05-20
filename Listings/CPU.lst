@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.0.0   CPU                                                               05/12/2021 10:45:40 PAGE 1   
+C51 COMPILER V9.60.0.0   CPU                                                               05/20/2021 09:18:44 PAGE 1   
 
 
 C51 COMPILER V9.60.0.0, COMPILATION OF MODULE CPU
@@ -62,7 +62,7 @@ line level    source
   52              extern bit PWR_OFF_KEY_LOCK;
   53              DATA DWORD  SystemClock;      //00:00
   54              BYTE FormatSDCard=1;
-C51 COMPILER V9.60.0.0   CPU                                                               05/12/2021 10:45:40 PAGE 2   
+C51 COMPILER V9.60.0.0   CPU                                                               05/20/2021 09:18:44 PAGE 2   
 
   55          
   56          #ifdef SERIAL //=======================================================================
@@ -105,129 +105,132 @@ line level    source
   93          extern DWORD ulongRotateNumberTELI;
   94          
   95          extern BYTE   KeyBuffer;
-  96          
-  97          //=============================================================================
-  98          //    Main Initialize Routine
-  99          //=============================================================================
- 100          void main_init (void)
- 101          {
- 102   1        DWORD rev;
- 103   1      
- 104   1        rev = GetFWRevEE();
- 105   1      
+  96          #if (_BATTERY_CHECK_WITH_NO_CHARGE==ON)
+  97          extern BYTE bytBatteryVoltageCheck;
+  98          #endif
+  99          
+ 100          //=============================================================================
+ 101          //    Main Initialize Routine
+ 102          //=============================================================================
+ 103          void main_init (void)
+ 104          {
+ 105   1        DWORD rev;
  106   1      
- 107   1        Printf("\r\nPrev.FW:%02x%02x%02x", (WORD) ReadEEP(EEP_FWREV_MAJOR), (WORD) ReadEEP(EEP_FWREV_MINOR1), (WO
-             -RD) ReadEEP(EEP_FWREV_MINOR2));
+ 107   1        rev = GetFWRevEE();
  108   1      
- 109   1      if( GetFWRevEE()!=((MCU_FW_Major<<16)|(MCU_FW_Sub0<<8)|(MCU_FW_Sub1)))
- 110   1          {
- 111   2          Printf("\r\nCurr.FW:%02x%02x%02x",(WORD) MCU_FW_Major,(WORD) MCU_FW_Sub0,(WORD) MCU_FW_Sub1);
- 112   2          SaveFWRevEE();
- 113   2          Printf("\r\nCurr.FW:%02x%02x%02x",(WORD) ReadEEP(EEP_FWREV_MAJOR), (WORD) ReadEEP(EEP_FWREV_MINOR1), (WO
+ 109   1      
+ 110   1        Printf("\r\nPrev.FW:%02x%02x%02x", (WORD) ReadEEP(EEP_FWREV_MAJOR), (WORD) ReadEEP(EEP_FWREV_MINOR1), (WO
+             -RD) ReadEEP(EEP_FWREV_MINOR2));
+ 111   1      
+ 112   1      if( GetFWRevEE()!=((MCU_FW_Major<<16)|(MCU_FW_Sub0<<8)|(MCU_FW_Sub1)))
+ 113   1          {
+ 114   2          Printf("\r\nCurr.FW:%02x%02x%02x",(WORD) MCU_FW_Major,(WORD) MCU_FW_Sub0,(WORD) MCU_FW_Sub1);
+ 115   2          SaveFWRevEE();
+C51 COMPILER V9.60.0.0   CPU                                                               05/20/2021 09:18:44 PAGE 3   
+
+ 116   2          Printf("\r\nCurr.FW:%02x%02x%02x",(WORD) ReadEEP(EEP_FWREV_MAJOR), (WORD) ReadEEP(EEP_FWREV_MINOR1), (WO
              -RD) ReadEEP(EEP_FWREV_MINOR2));   
- 114   2          }
-C51 COMPILER V9.60.0.0   CPU                                                               05/12/2021 10:45:40 PAGE 3   
-
- 115   1      
- 116   1        //---------- if FW version is not matched, initialize EEPROM data -----------
- 117   1      
- 118   1        if(GetFWRevEE()==((MCU_FW_Major<<16)|(MCU_FW_Sub0<<8)|(MCU_FW_Sub1))) 
- 119   1        {         // exist EEPROM
- 120   2      
- 121   2          //if( rev !=((MCU_FW_Major<<16)|(MCU_FW_Sub0<<8)|(MCU_FW_Sub1)) )
- 122   2            {
- 123   3              if(GetProjectNameEE()==_FALSE)
- 124   3              ClearBasicEE();
- 125   3            }
- 126   2        }
- 127   1        else 
- 128   1        {
- 129   2          Printf("\r\nCannot access EEPROM!!!!");
- 130   2          Printf("\r\nNo initialize");
- 131   2          DebugLevel = 0xff;
- 132   2          return;
- 133   2        }
- 134   1      
- 135   1      #if (_HARDWARE_VERSION==ON)
- 136   1      if(ReadEEP(EEP_HARDWARE_VER)!=Hardware_Version)
- 137   1      {
- 138   2        Printf("\r\nHARDWARE_VER ERROR");
- 139   2        Printf("\r\nReset Rotate Number");
- 140   2        //ClearBasicEE();
- 141   2        WriteEEP(EEP_RotateNumberL,0);
- 142   2        WriteEEP(EEP_RotateNumberM,0);
- 143   2        WriteEEP(EEP_RotateNumberH,0);
- 144   2      
- 145   2        WriteEEP(EEP_RotateNumberRL,0);
- 146   2        WriteEEP(EEP_RotateNumberRM,0);
- 147   2        WriteEEP(EEP_RotateNumberRH,0);
- 148   2      
- 149   2        WriteEEP(EEP_HARDWARE_VER,Hardware_Version);  
- 150   2      }
- 151   1      
- 152   1      
- 153   1      Printf("\r\nHARDWARE_VER=%d",(WORD)ReadEEP(EEP_HARDWARE_VER));
- 154   1      #endif  
- 155   1      
- 156   1        delay(100);
- 157   1      
+ 117   2          }
+ 118   1      
+ 119   1        //---------- if FW version is not matched, initialize EEPROM data -----------
+ 120   1      
+ 121   1        if(GetFWRevEE()==((MCU_FW_Major<<16)|(MCU_FW_Sub0<<8)|(MCU_FW_Sub1))) 
+ 122   1        {         // exist EEPROM
+ 123   2      
+ 124   2          //if( rev !=((MCU_FW_Major<<16)|(MCU_FW_Sub0<<8)|(MCU_FW_Sub1)) )
+ 125   2            {
+ 126   3              if(GetProjectNameEE()==_FALSE)
+ 127   3              ClearBasicEE();
+ 128   3            }
+ 129   2        }
+ 130   1        else 
+ 131   1        {
+ 132   2          Printf("\r\nCannot access EEPROM!!!!");
+ 133   2          Printf("\r\nNo initialize");
+ 134   2          DebugLevel = 0xff;
+ 135   2          return;
+ 136   2        }
+ 137   1      
+ 138   1      #if (_HARDWARE_VERSION==ON)
+              if(ReadEEP(EEP_HARDWARE_VER)!=Hardware_Version)
+              {
+                Printf("\r\nHARDWARE_VER ERROR");
+                Printf("\r\nReset Rotate Number");
+                //ClearBasicEE();
+                WriteEEP(EEP_RotateNumberL,0);
+                WriteEEP(EEP_RotateNumberM,0);
+                WriteEEP(EEP_RotateNumberH,0);
+              
+                WriteEEP(EEP_RotateNumberRL,0);
+                WriteEEP(EEP_RotateNumberRM,0);
+                WriteEEP(EEP_RotateNumberRH,0);
+              
+                WriteEEP(EEP_HARDWARE_VER,Hardware_Version);  
+              }
+              
+              
+              Printf("\r\nHARDWARE_VER=%d",(WORD)ReadEEP(EEP_HARDWARE_VER));
+              #endif  
  158   1      
- 159   1        SET_POWER_STATUS(_POWER_STATUS_OFF);
- 160   1        SET_TARGET_POWER_STATUS(_POWER_STATUS_NORMAL);
+ 159   1        delay(100);
+ 160   1      
  161   1      
- 162   1      }
- 163          
- 164          
- 165          
+ 162   1        SET_POWER_STATUS(_POWER_STATUS_OFF);
+ 163   1        SET_TARGET_POWER_STATUS(_POWER_STATUS_NORMAL);
+ 164   1      
+ 165   1      }
  166          
- 167          //=============================================================================
- 168          //                            Initialize WINBOND CPU                                                   
- 169          //=============================================================================
- 170          void InitCPU(void)
- 171          {
- 172   1        /*----- Initialize interrupt -------------*/
- 173   1      
- 174   1      //  TH1 = 0xfD;//38400    //    SMOD = 0      SMOD =1 //andy AWT 980924         
- 175   1        TH1 = 0xf4; //9600    //    SMOD = 0      SMOD =1 //andy AWT 980924         
- 176   1                  // 0ffh :57600 bps        
-C51 COMPILER V9.60.0.0   CPU                                                               05/12/2021 10:45:40 PAGE 4   
+ 167          
+ 168          
+ 169          
+ 170          //=============================================================================
+ 171          //                            Initialize WINBOND CPU                                                   
+ 172          //=============================================================================
+ 173          void InitCPU(void)
+ 174          {
+ 175   1        /*----- Initialize interrupt -------------*/
+ 176   1      
+C51 COMPILER V9.60.0.0   CPU                                                               05/20/2021 09:18:44 PAGE 4   
 
- 177   1                  // 0fdh : 9600 bps  
- 178   1                  //0fdh :19200 bps       
- 179   1                  // 0fah : 4800 bps                
- 180   1                  // 0f4h : 2400 bps                
- 181   1                  // 0e8h : 1200 bps                
- 182   1      
- 183   1        SCON = 0x50;    // 0100 0000 mode 1 - 8 bit UART        
- 184   1                  // Enable serial reception            
- 185   1          TMOD = 0x22;    // 0010 0010 timer 0 - 8 bit auto reload    
- 186   1                  // timer 1 - baud rate generator        
- 187   1          TCON = 0x55;    // 0101 0001 timer 0,1 run            
- 188   1                  // int 0,  edge triggered           
- 189   1                  // int 1,  edge triggered           
- 190   1                  // TF1 TR1 TF0 TR0  EI1 IT1 EI0 IT0       
- 191   1      #if (_1KHZ_PWM==ON) 
+ 177   1      //  TH1 = 0xfD;//38400    //    SMOD = 0      SMOD =1 //andy AWT 980924         
+ 178   1        TH1 = 0xf4; //9600    //    SMOD = 0      SMOD =1 //andy AWT 980924         
+ 179   1                  // 0ffh :57600 bps        
+ 180   1                  // 0fdh : 9600 bps  
+ 181   1                  //0fdh :19200 bps       
+ 182   1                  // 0fah : 4800 bps                
+ 183   1                  // 0f4h : 2400 bps                
+ 184   1                  // 0e8h : 1200 bps                
+ 185   1      
+ 186   1        SCON = 0x50;    // 0100 0000 mode 1 - 8 bit UART        
+ 187   1                  // Enable serial reception            
+ 188   1          TMOD = 0x22;    // 0010 0010 timer 0 - 8 bit auto reload    
+ 189   1                  // timer 1 - baud rate generator        
+ 190   1          TCON = 0x55;    // 0101 0001 timer 0,1 run            
+ 191   1                  // int 0,  edge triggered           
+ 192   1                  // int 1,  edge triggered           
+ 193   1                  // TF1 TR1 TF0 TR0  EI1 IT1 EI0 IT0       
+ 194   1      #if (_1KHZ_PWM==ON) 
               TH0 = TL0 = (255-6);  // PWM 1Khz frequency
               
               #else
- 195   1        TH0 = TL0 = (64);   // 64=4608 Hz at 11.0592MHz
- 196   1      #endif
- 197   1        PCON = 0x80;    // 0000 0000 SMOD(double baud rate bit) = 1   
- 198   1        IP   = 0x02;    // 0000 0000 interrupt priority         
- 199   1                  // -  - PT2 PS PT1 PX1 PT0 PX0               
- 200   1      
- 201   1        #ifdef SERIAL
- 202   1        IE   = 0x92;    // 1001 0010 interrupt enable:Serial,TM0    
- 203   1                    // EA - ET2 ES ET1 EX1 ET0 EX0          
- 204   1      
- 205   1        TI   = 1;     // LJY000724 // For Starting Serial TX 
- 206   1        ES   = 1;     // LJY000724
- 207   1        #else
+ 198   1        TH0 = TL0 = (64);   // 64=4608 Hz at 11.0592MHz
+ 199   1      #endif
+ 200   1        PCON = 0x80;    // 0000 0000 SMOD(double baud rate bit) = 1   
+ 201   1        IP   = 0x02;    // 0000 0000 interrupt priority         
+ 202   1                  // -  - PT2 PS PT1 PX1 PT0 PX0               
+ 203   1      
+ 204   1        #ifdef SERIAL
+ 205   1        IE   = 0x92;    // 1001 0010 interrupt enable:Serial,TM0    
+ 206   1                    // EA - ET2 ES ET1 EX1 ET0 EX0          
+ 207   1      
+ 208   1        TI   = 1;     // LJY000724 // For Starting Serial TX 
+ 209   1        ES   = 1;     // LJY000724
+ 210   1        #else
                 IE   = 0x82;
                 #endif // SERIAL
- 210   1      
- 211   1        //------------ Timer 2 for Remocon --------------------------------
- 212   1        #if (_1KHZ_PWM==ON)
+ 213   1      
+ 214   1        //------------ Timer 2 for Remocon --------------------------------
+ 215   1        #if (_1KHZ_PWM==ON)
                 TL2=0x64-20;//0xE3;
                 TH2=0xFF;
                 RCAP2L=0x64-20;//0xE3;
@@ -240,163 +243,163 @@ line level    source
                 T2CON = 0x04;       // Timer2 run
                 AUXR |=0x80;  //Timer1 for UART2  
                 #else
- 225   1        T2CON  = 0x00;        // Timer2 Clear
- 226   1        TR2    = 0;
- 227   1        ET2    = 1;
- 228   1        #endif
- 229   1        //-----------------------------------------------------------------
- 230   1      
- 231   1        //Uart2
- 232   1        //P0M0=0x7F;
- 233   1        //P1M0=0x04;
- 234   1             S2CON=0x50;                                 //Set UART Mode 1
- 235   1             S2BRT=0xf4;                                 //Set 2UART overflow rate
- 236   1            //AUXR2=0x08;                                 //SMOD = 1,TX12 = 0 (/12)
- 237   1            //AUXR2|=0x10;                                //S2TR = 1
- 238   1        AUXR2 |= 0x18;
-C51 COMPILER V9.60.0.0   CPU                                                               05/12/2021 10:45:40 PAGE 5   
+ 228   1        T2CON  = 0x00;        // Timer2 Clear
+ 229   1        TR2    = 0;
+ 230   1        ET2    = 1;
+ 231   1        #endif
+ 232   1        //-----------------------------------------------------------------
+ 233   1      
+ 234   1        //Uart2
+ 235   1        //P0M0=0x7F;
+ 236   1        //P1M0=0x04;
+ 237   1             S2CON=0x50;                                 //Set UART Mode 1
+ 238   1             S2BRT=0xf4;                                 //Set 2UART overflow rate
+C51 COMPILER V9.60.0.0   CPU                                                               05/20/2021 09:18:44 PAGE 5   
 
- 239   1      
- 240   1        // Enable serial interrupt
- 241   1        AUXIE |= 0x10;///EX2=1
+ 239   1            //AUXR2=0x08;                                 //SMOD = 1,TX12 = 0 (/12)
+ 240   1            //AUXR2|=0x10;                                //S2TR = 1
+ 241   1        AUXR2 |= 0x18;
  242   1      
- 243   1        RS2_Xbusy=0;
- 244   1        //PCA counter..
- 245   1        CL=0; 
- 246   1        CH=0;
- 247   1        //AUXR2|=0x80;  //Fosc/12 for timer-0
- 248   1        //CMOD=0x00; // //PCA clock is Sysclk / 12   7.2KHz
- 249   1        //CMOD=0x02; // //PCA clock is Sysclk / 2   //43Khz
- 250   1        CMOD=0x04; // //PCA clock is timer0  37HZ
- 251   1        CCON|=  0x40;       //PCA Run
- 252   1        //set pwm port 1.4 & 1.5
- 253   1          //PCAPWM3 = 0x80;
- 254   1      
- 255   1        //P1M0=0x80;          //set input p1.6 
- 256   1        //P1M0=0xC0;///add ADC AIN P1.6 & P1.7  (input mode)
- 257   1          //P2M0=0x01;
- 258   1        //P2M1=0x01;
- 259   1        //P3M0=0x00;
- 260   1        //P3M1=0x20;
- 261   1        P0M0|=0x20|0x80;  //p0_5  //P0_7
- 262   1      
- 263   1        //P1M0|=0x04|0x40|0x20; ////set input p1.6 and P1.5 for adc function
- 264   1        P1M0|=(0x04|0x80|0x40);///adc p1.7,P1.6
- 265   1          
- 266   1        P2M1=0x40;    //|P2_6 set push pull mode ryan@20210312
- 267   1      
- 268   1        P3M0=0x0C;
- 269   1        P3M1=0x00;//|0x30;//p3.4 and P3.5 set push pull mode ryan@20210222
- 270   1        P4M0=0x0C;
- 271   1        P4M1=0x00;
- 272   1      
- 273   1      }
- 274          
- 275          #if (_POWER_DOWN_ENABLE==ON)
- 276          void SET_MCU_POWER_DOWN_MODE(void)
- 277          {
- 278   1      
- 279   1        Printf("(SET_MCU_POWER_DOWN_MODE) ");
- 280   1      
- 281   1         EX2 = 1;
- 282   1         IE2 = 0;  ///INT2 wakeup
- 283   1         IT2=1;
- 284   1      
- 285   1        EX3 = 1;
- 286   1        IE3= 0;  ///INT3 wakeup
- 287   1        IT3=1;
- 288   1      
- 289   1        IE_Temp=IE;
- 290   1        IE=0x80;
+ 243   1        // Enable serial interrupt
+ 244   1        AUXIE |= 0x10;///EX2=1
+ 245   1      
+ 246   1        RS2_Xbusy=0;
+ 247   1        //PCA counter..
+ 248   1        CL=0; 
+ 249   1        CH=0;
+ 250   1        //AUXR2|=0x80;  //Fosc/12 for timer-0
+ 251   1        //CMOD=0x00; // //PCA clock is Sysclk / 12   7.2KHz
+ 252   1        //CMOD=0x02; // //PCA clock is Sysclk / 2   //43Khz
+ 253   1        CMOD=0x04; // //PCA clock is timer0  37HZ
+ 254   1        CCON|=  0x40;       //PCA Run
+ 255   1        //set pwm port 1.4 & 1.5
+ 256   1          //PCAPWM3 = 0x80;
+ 257   1      
+ 258   1        //P1M0=0x80;          //set input p1.6 
+ 259   1        //P1M0=0xC0;///add ADC AIN P1.6 & P1.7  (input mode)
+ 260   1          //P2M0=0x01;
+ 261   1        //P2M1=0x01;
+ 262   1        //P3M0=0x00;
+ 263   1        //P3M1=0x20;
+ 264   1        P0M0|=0x20|0x80;  //p0_5  //P0_7
+ 265   1      
+ 266   1        //P1M0|=0x04|0x40|0x20; ////set input p1.6 and P1.5 for adc function
+ 267   1        P1M0|=(0x04|0x80|0x40);///adc p1.7,P1.6
+ 268   1          
+ 269   1        P2M1=0x40;    //|P2_6 set push pull mode ryan@20210312
+ 270   1      
+ 271   1        P3M0=0x0C;
+ 272   1        P3M1=0x00;//|0x30;//p3.4 and P3.5 set push pull mode ryan@20210222
+ 273   1        P4M0=0x0C;
+ 274   1        P4M1=0x00;
+ 275   1      
+ 276   1      }
+ 277          
+ 278          #if (_POWER_DOWN_ENABLE==ON)
+ 279          void SET_MCU_POWER_DOWN_MODE(void)
+ 280          {
+ 281   1      
+ 282   1        Printf("(SET_MCU_POWER_DOWN_MODE) ");
+ 283   1      
+ 284   1         EX2 = 1;
+ 285   1         IE2 = 0;  ///INT2 wakeup
+ 286   1         IT2=1;
+ 287   1      
+ 288   1        EX3 = 1;
+ 289   1        IE3= 0;  ///INT3 wakeup
+ 290   1        IT3=1;
  291   1      
- 292   1        Power_down_mode=1;
- 293   1        P4_0 = 1; //LED RED off
- 294   1        P4_1 = 1; //LED GREEN off
- 295   1        PCON=0x82;  //inter power down  mode
- 296   1        _nop_(); 
- 297   1        _nop_(); 
- 298   1        _nop_(); 
- 299   1      
- 300   1      //  InitCPU();
-C51 COMPILER V9.60.0.0   CPU                                                               05/12/2021 10:45:40 PAGE 6   
+ 292   1        IE_Temp=IE;
+ 293   1        IE=0x80;
+ 294   1      
+ 295   1        Power_down_mode=1;
+ 296   1        P4_0 = 1; //LED RED off
+ 297   1        P4_1 = 1; //LED GREEN off
+ 298   1        PCON=0x82;  //inter power down  mode
+ 299   1        _nop_(); 
+ 300   1        _nop_(); 
+C51 COMPILER V9.60.0.0   CPU                                                               05/20/2021 09:18:44 PAGE 6   
 
- 301   1      
- 302   1      }
- 303          #endif
- 304          
- 305          BYTE Check_ADAP_IN(void)  
- 306          {
- 307   1      
- 308   1      if((GET_ADAP_12()==_TRUE)||(P4_2==0))   
- 309   1      {
- 310   2        MCUTimerDelayXms(50);
- 311   2        
- 312   2        if((GET_ADAP_12()==_TRUE)||(P4_2==0))   
- 313   2          return _TRUE;
- 314   2        else
- 315   2          return _FALSE;
- 316   2      }
- 317   1      else
- 318   1        return _FALSE;
- 319   1      }
- 320          
- 321          void SET_PWM(BYTE index, BYTE val)
- 322          {
- 323   1      //#if (_DEBUG_MESSAGE_PWM_TEST)
- 324   1        Printf("\r\n(SET_PWM=%02x val=%02x)",(WORD)index,(WORD)val);
- 325   1      //#endif
- 326   1      switch(index)
- 327   1      {
- 328   2      case _CHG_CURR:  //P1_4
- 329   2        #if 1
- 330   2          CCAP2L=0x80;  
- 331   2          CCAP2H =255-val;  
- 332   2          CCAPM2=0x42;
- 333   2      
- 334   2            if(val==_CHARGE1100mA)
- 335   2            {
- 336   3            CCAPM2=0x00;  
- 337   3            P1_4=0;
- 338   3            }
- 339   2            
- 340   2          if(DVRChangeCurrent==0x10)  
- 341   2            {     
- 342   3            CCAP2L=0x80;  
- 343   3            CCAP2H =255-_CHARGE300mA; 
- 344   3            CCAPM2=0x42;  
- 345   3            Printf("(*DVRChangeCurrent=300mA)");
- 346   3            }
- 347   2          else if(DVRChangeCurrent==0x11) 
- 348   2            {
- 349   3            CCAP2L=0x80;  
- 350   3            CCAP2H =255-_CHARGE1000mA;  
- 351   3            CCAPM2=0x42;  
- 352   3            Printf("(*DVRChangeCurrent=1000mA)");
- 353   3            }
- 354   2          #if (_BATTERY_CHARGE_STOP==ON)
- 355   2            if(val==_CHARGESTOP)  
- 356   2            {
- 357   3            CCAPM2=0xFF;  
- 358   3            P1_4=1;
- 359   3            }
- 360   2          #endif
- 361   2      /*  
- 362   2          if(val==High_Current)
-C51 COMPILER V9.60.0.0   CPU                                                               05/12/2021 10:45:40 PAGE 7   
+ 301   1        _nop_(); 
+ 302   1      
+ 303   1      //  InitCPU();
+ 304   1      
+ 305   1      }
+ 306          #endif
+ 307          
+ 308          BYTE Check_ADAP_IN(void)  
+ 309          {
+ 310   1      
+ 311   1      if((GET_ADAP_12()==_TRUE)||(P4_2==0))   
+ 312   1      {
+ 313   2        MCUTimerDelayXms(50);
+ 314   2        
+ 315   2        if((GET_ADAP_12()==_TRUE)||(P4_2==0))   
+ 316   2          return _TRUE;
+ 317   2        else
+ 318   2          return _FALSE;
+ 319   2      }
+ 320   1      else
+ 321   1        return _FALSE;
+ 322   1      }
+ 323          
+ 324          void SET_PWM(BYTE index, BYTE val)
+ 325          {
+ 326   1      //#if (_DEBUG_MESSAGE_PWM_TEST)
+ 327   1        Printf("\r\n(SET_PWM=%02x val=%02x)",(WORD)index,(WORD)val);
+ 328   1      //#endif
+ 329   1      switch(index)
+ 330   1      {
+ 331   2      case _CHG_CURR:  //P1_4
+ 332   2        #if 1
+ 333   2          CCAP2L=0x80;  
+ 334   2          CCAP2H =255-val;  
+ 335   2          CCAPM2=0x42;
+ 336   2      
+ 337   2            if(val==_CHARGE1100mA)
+ 338   2            {
+ 339   3            CCAPM2=0x00;  
+ 340   3            P1_4=0;
+ 341   3            }
+ 342   2            
+ 343   2          if(DVRChangeCurrent==0x10)  
+ 344   2            {     
+ 345   3            CCAP2L=0x80;  
+ 346   3            CCAP2H =255-_CHARGE300mA; 
+ 347   3            CCAPM2=0x42;  
+ 348   3            Printf("(*DVRChangeCurrent=300mA)");
+ 349   3            }
+ 350   2          else if(DVRChangeCurrent==0x11) 
+ 351   2            {
+ 352   3            CCAP2L=0x80;  
+ 353   3            CCAP2H =255-_CHARGE1000mA;  
+ 354   3            CCAPM2=0x42;  
+ 355   3            Printf("(*DVRChangeCurrent=1000mA)");
+ 356   3            }
+ 357   2          #if (_BATTERY_CHARGE_STOP==ON)
+ 358   2            if(val==_CHARGESTOP)  
+ 359   2            {
+ 360   3            CCAPM2=0xFF;  
+ 361   3            P1_4=1;
+ 362   3            }
+C51 COMPILER V9.60.0.0   CPU                                                               05/20/2021 09:18:44 PAGE 7   
 
- 363   2            {
- 364   2            CCAPM2=0x00;  
- 365   2            P1_4=0;
- 366   2            }
- 367   2      
- 368   2          else
- 369   2            {
- 370   2            CCAPM2=0x00;  
- 371   2            P1_4=1;
- 372   2      
- 373   2            }
- 374   2      */
- 375   2        #else
+ 363   2          #endif
+ 364   2      /*  
+ 365   2          if(val==High_Current)
+ 366   2            {
+ 367   2            CCAPM2=0x00;  
+ 368   2            P1_4=0;
+ 369   2            }
+ 370   2      
+ 371   2          else
+ 372   2            {
+ 373   2            CCAPM2=0x00;  
+ 374   2            P1_4=1;
+ 375   2      
+ 376   2            }
+ 377   2      */
+ 378   2        #else
                   #if 0
                   if(val==High_Current)
                     P1_4=0;
@@ -414,172 +417,172 @@ line level    source
                       }
                 #endif    
                   #endif
- 393   2             break; 
- 394   2       case _BL_PWM:  //P1_5
- 395   2             CCAP3L=0x80;  
- 396   2             CCAP3H =255-val;  
- 397   2            CCAPM3=0x42;        
- 398   2             break;
- 399   2       case _RUN_PWM:
- 400   2            CCON  |=  0x40;       //RUN  PCA Counter  
- 401   2            break;
- 402   2       case _STOP_PWM:
- 403   2            CCON  &=  ~(0xBF);        //STOP PCA Counter
- 404   2                break;
- 405   2        
- 406   2      default: 
- 407   2            break;
- 408   2      }
- 409   1      
- 410   1      
- 411   1      }
- 412          
- 413          
- 414          #define _ReadKey()     ((~P4>>3)& 0x01)  //PSW P4.3
+ 396   2             break; 
+ 397   2       case _BL_PWM:  //P1_5
+ 398   2             CCAP3L=0x80;  
+ 399   2             CCAP3H =255-val;  
+ 400   2            CCAPM3=0x42;        
+ 401   2             break;
+ 402   2       case _RUN_PWM:
+ 403   2            CCON  |=  0x40;       //RUN  PCA Counter  
+ 404   2            break;
+ 405   2       case _STOP_PWM:
+ 406   2            CCON  &=  ~(0xBF);        //STOP PCA Counter
+ 407   2                break;
+ 408   2        
+ 409   2      default: 
+ 410   2            break;
+ 411   2      }
+ 412   1      
+ 413   1      
+ 414   1      }
  415          
  416          
- 417          ////////////////////////////////
+ 417          #define _ReadKey()     ((~P4>>3)& 0x01)  //PSW P4.3
  418          
- 419          //INTERRUPT(1, timer0_int)
- 420          void timer0_int(void) interrupt 1 using 1     // interrupt number1, bank register 2
- 421          {
- 422   1      
- 423   1       #if  (_1KHZ_PWM==ON)
+ 419          
+ 420          ////////////////////////////////
+ 421          
+ 422          //INTERRUPT(1, timer0_int)
+ 423          void timer0_int(void) interrupt 1 using 1     // interrupt number1, bank register 2
+ 424          {
+C51 COMPILER V9.60.0.0   CPU                                                               05/20/2021 09:18:44 PAGE 8   
+
+ 425   1      
+ 426   1       #if  (_1KHZ_PWM==ON)
                #else
-C51 COMPILER V9.60.0.0   CPU                                                               05/12/2021 10:45:40 PAGE 8   
-
- 425   1      BYTE TempKey;
- 426   1      
- 427   1        tm001++;
- 428   1      
- 429   1            //Timer Counter 
- 430   1      
+ 428   1      BYTE TempKey;
+ 429   1      
+ 430   1        tm001++;
  431   1      
- 432   1          tic02++;
- 433   1        
+ 432   1            //Timer Counter 
+ 433   1      
  434   1      
- 435   1        if(tic02>=(10))   
- 436   1        {
- 437   2        g_usTimerCounter += 1;     ///per 103us  interrupt
- 438   2        tic02=0;
- 439   2        g_bNotifyTimer0Int=_TRUE;
- 440   2        } 
- 441   1      
- 442   1          if(Time5ms)
- 443   1            Time5ms--;
- 444   1          if(Time5ms==0)
- 445   1          {
- 446   2            //TempKey=(( (P2&0xC0) >> 6) & 0x03);
- 447   2            TempKey=(( (P3&0x0C) >> 2) & 0x03); //ENA&ENB, P3.2, P3.3 
- 448   2            if(updn_reg[3] !=TempKey )// (( (P2&0x60) >> 5) & 0x03))  //Abel for HS SW key ......951102                   
- 449   2            { 
- 450   3              updn_reg[0] = updn_reg[1];                                
- 451   3              updn_reg[1] = updn_reg[2];                                
- 452   3              updn_reg[2] = updn_reg[3];                                
- 453   3              updn_reg[3] =TempKey;// ( (P2&0x60) >> 5) & 0x03; 
- 454   3              ChangeKey=1;
- 455   3              
- 456   3            //else      //william-v1.42-961130
- 457   3            //ChangeKey=0;  //william-v1.42-961130
- 458   3          if(bytFastEncoderMode==ON)  
- 459   3            Time5ms=0;//4;//3;//12;
- 460   3          else
- 461   3            Time5ms=48;
- 462   3      
- 463   3            if(bytFastEncoderMode==ON)
- 464   3              {
- 465   4                if((updn_reg[0] == 0) && (updn_reg[1] == 1) && (updn_reg[2] == 3)&& (updn_reg[3] == 2))  //UP Key       
+ 435   1          tic02++;
+ 436   1        
+ 437   1      
+ 438   1        if(tic02>=(10))   
+ 439   1        {
+ 440   2        g_usTimerCounter += 1;     ///per 103us  interrupt
+ 441   2        tic02=0;
+ 442   2        g_bNotifyTimer0Int=_TRUE;
+ 443   2        } 
+ 444   1      
+ 445   1          if(Time5ms)
+ 446   1            Time5ms--;
+ 447   1          if(Time5ms==0)
+ 448   1          {
+ 449   2            //TempKey=(( (P2&0xC0) >> 6) & 0x03);
+ 450   2            TempKey=(( (P3&0x0C) >> 2) & 0x03); //ENA&ENB, P3.2, P3.3 
+ 451   2            if(updn_reg[3] !=TempKey )// (( (P2&0x60) >> 5) & 0x03))  //Abel for HS SW key ......951102                   
+ 452   2            { 
+ 453   3              updn_reg[0] = updn_reg[1];                                
+ 454   3              updn_reg[1] = updn_reg[2];                                
+ 455   3              updn_reg[2] = updn_reg[3];                                
+ 456   3              updn_reg[3] =TempKey;// ( (P2&0x60) >> 5) & 0x03; 
+ 457   3              ChangeKey=1;
+ 458   3              
+ 459   3            //else      //william-v1.42-961130
+ 460   3            //ChangeKey=0;  //william-v1.42-961130
+ 461   3          if(bytFastEncoderMode==ON)  
+ 462   3            Time5ms=0;//4;//3;//12;
+ 463   3          else
+ 464   3            Time5ms=48;
+ 465   3      
+ 466   3            if(bytFastEncoderMode==ON)
+ 467   3              {
+ 468   4                if((updn_reg[0] == 0) && (updn_reg[1] == 1) && (updn_reg[2] == 3)&& (updn_reg[3] == 2))  //UP Key       
              -  
- 466   4                {
- 467   5                     bytPNFlagEncoder=0;
- 468   5                }
- 469   4               else if((updn_reg[0] == 1) && (updn_reg[1] == 3) && (updn_reg[2] == 2)&& (updn_reg[3] == 0))  //UP Ke
+ 469   4                {
+ 470   5                     bytPNFlagEncoder=0;
+ 471   5                }
+ 472   4               else if((updn_reg[0] == 1) && (updn_reg[1] == 3) && (updn_reg[2] == 2)&& (updn_reg[3] == 0))  //UP Ke
              -y    
- 470   4                {
- 471   5                     bytPNFlagEncoder=0;
- 472   5                }
- 473   4              else if((updn_reg[0] == 3) && (updn_reg[1] == 2) && (updn_reg[2] == 0)&& (updn_reg[3] == 1))  //UP Key  
- 474   4                {
- 475   5            
- 476   5                  bytPNFlagEncoder=0;
- 477   5                }
- 478   4              else if((updn_reg[0] == 2) && (updn_reg[1] == 0) && (updn_reg[2] == 1)&& (updn_reg[3] == 3))  //UP Key
+ 473   4                {
+ 474   5                     bytPNFlagEncoder=0;
+ 475   5                }
+ 476   4              else if((updn_reg[0] == 3) && (updn_reg[1] == 2) && (updn_reg[2] == 0)&& (updn_reg[3] == 1))  //UP Key  
+ 477   4                {
+ 478   5            
+ 479   5                  bytPNFlagEncoder=0;
+ 480   5                }
+ 481   4              else if((updn_reg[0] == 2) && (updn_reg[1] == 0) && (updn_reg[2] == 1)&& (updn_reg[3] == 3))  //UP Key
              -    
- 479   4                {
- 480   5              
- 481   5                bytPNFlagEncoder=0;
- 482   5                }
- 483   4              else if((updn_reg[0] == 0) && (updn_reg[1] == 2)&& (updn_reg[2] == 3)&& (updn_reg[3] == 1)) //DN Key   
-C51 COMPILER V9.60.0.0   CPU                                                               05/12/2021 10:45:40 PAGE 9   
+ 482   4                {
+ 483   5              
+C51 COMPILER V9.60.0.0   CPU                                                               05/20/2021 09:18:44 PAGE 9   
 
- 484   4                {
- 485   5            
- 486   5                   bytPNFlagEncoder=1;
- 487   5                }
- 488   4              else if((updn_reg[0] == 2) && (updn_reg[1] == 3)&& (updn_reg[2] == 1)&& (updn_reg[3] == 0))  //DN Key 
+ 484   5                bytPNFlagEncoder=0;
+ 485   5                }
+ 486   4              else if((updn_reg[0] == 0) && (updn_reg[1] == 2)&& (updn_reg[2] == 3)&& (updn_reg[3] == 1)) //DN Key   
+ 487   4                {
+ 488   5            
+ 489   5                   bytPNFlagEncoder=1;
+ 490   5                }
+ 491   4              else if((updn_reg[0] == 2) && (updn_reg[1] == 3)&& (updn_reg[2] == 1)&& (updn_reg[3] == 0))  //DN Key 
              -  
- 489   4                {
- 490   5          
- 491   5                   bytPNFlagEncoder=1;
- 492   5                }
- 493   4              else if((updn_reg[0] == 3) && (updn_reg[1] == 1)&& (updn_reg[2] == 0)&& (updn_reg[3] == 2)) //DN Key  
- 494   4                {
- 495   5      
- 496   5                   bytPNFlagEncoder=1;
- 497   5                }
- 498   4              else if((updn_reg[0] == 1) && (updn_reg[1] == 0)&& (updn_reg[2] == 2)&& (updn_reg[3] == 3)) //DN Key  
- 499   4                {
- 500   5      
- 501   5                   bytPNFlagEncoder=1;
- 502   5                } 
- 503   4              }
- 504   3            else
- 505   3              {
- 506   4                if((updn_reg[0] == 0) && (updn_reg[1] == 1) && (updn_reg[2] == 3)&& (updn_reg[3] == 2))  //UP Key       
+ 492   4                {
+ 493   5          
+ 494   5                   bytPNFlagEncoder=1;
+ 495   5                }
+ 496   4              else if((updn_reg[0] == 3) && (updn_reg[1] == 1)&& (updn_reg[2] == 0)&& (updn_reg[3] == 2)) //DN Key  
+ 497   4                {
+ 498   5      
+ 499   5                   bytPNFlagEncoder=1;
+ 500   5                }
+ 501   4              else if((updn_reg[0] == 1) && (updn_reg[1] == 0)&& (updn_reg[2] == 2)&& (updn_reg[3] == 3)) //DN Key  
+ 502   4                {
+ 503   5      
+ 504   5                   bytPNFlagEncoder=1;
+ 505   5                } 
+ 506   4              }
+ 507   3            else
+ 508   3              {
+ 509   4                if((updn_reg[0] == 0) && (updn_reg[1] == 1) && (updn_reg[2] == 3)&& (updn_reg[3] == 2))  //UP Key       
              -  
- 507   4                  {
- 508   5                  EncorderCount++;        
- 509   5                  bytEncorderCountTemp++;
- 510   5                  }
- 511   4                 if((updn_reg[0] == 1) && (updn_reg[1] == 3) && (updn_reg[2] == 2)&& (updn_reg[3] == 0))  //UP Key    
- 512   4                  {
- 513   5                   EncorderCount++;        
- 514   5                   bytEncorderCountTemp++;
- 515   5                  }
- 516   4                if((updn_reg[0] == 3) && (updn_reg[1] == 2) && (updn_reg[2] == 0)&& (updn_reg[3] == 1)) //UP Key  
- 517   4                  {
- 518   5                    EncorderCount++;          
- 519   5                    bytEncorderCountTemp++;
- 520   5                  }
- 521   4                if((updn_reg[0] == 2) && (updn_reg[1] == 0) && (updn_reg[2] == 1)&& (updn_reg[3] == 3))  //UP Key   
- 522   4                  {
- 523   5                  EncorderCount++;        
- 524   5                  bytEncorderCountTemp++;
- 525   5                  }
- 526   4                if((updn_reg[0] == 0) && (updn_reg[1] == 2)&& (updn_reg[2] == 3)&& (updn_reg[3] == 1))  //DN Key   
- 527   4                  {
- 528   5                     EncorderCount--;          
- 529   5                     bytEncorderCountTemp++;
- 530   5                  }
- 531   4                if((updn_reg[0] == 2) && (updn_reg[1] == 3)&& (updn_reg[2] == 1)&& (updn_reg[3] == 0))  //DN Key    
- 532   4                  {
- 533   5                  EncorderCount--;        
- 534   5                  bytEncorderCountTemp++;
- 535   5                  }
- 536   4                if((updn_reg[0] == 3) && (updn_reg[1] == 1)&& (updn_reg[2] == 0)&& (updn_reg[3] == 2))  //DN Key  
- 537   4                  {
- 538   5                  EncorderCount--;        
- 539   5                  bytEncorderCountTemp++;
- 540   5                  }
- 541   4                if((updn_reg[0] == 1) && (updn_reg[1] == 0)&& (updn_reg[2] == 2)&& (updn_reg[3] == 3))  //DN Key  
- 542   4                  {
- 543   5                  EncorderCount--;        
-C51 COMPILER V9.60.0.0   CPU                                                               05/12/2021 10:45:40 PAGE 10  
+ 510   4                  {
+ 511   5                  EncorderCount++;        
+ 512   5                  bytEncorderCountTemp++;
+ 513   5                  }
+ 514   4                 if((updn_reg[0] == 1) && (updn_reg[1] == 3) && (updn_reg[2] == 2)&& (updn_reg[3] == 0))  //UP Key    
+ 515   4                  {
+ 516   5                   EncorderCount++;        
+ 517   5                   bytEncorderCountTemp++;
+ 518   5                  }
+ 519   4                if((updn_reg[0] == 3) && (updn_reg[1] == 2) && (updn_reg[2] == 0)&& (updn_reg[3] == 1)) //UP Key  
+ 520   4                  {
+ 521   5                    EncorderCount++;          
+ 522   5                    bytEncorderCountTemp++;
+ 523   5                  }
+ 524   4                if((updn_reg[0] == 2) && (updn_reg[1] == 0) && (updn_reg[2] == 1)&& (updn_reg[3] == 3))  //UP Key   
+ 525   4                  {
+ 526   5                  EncorderCount++;        
+ 527   5                  bytEncorderCountTemp++;
+ 528   5                  }
+ 529   4                if((updn_reg[0] == 0) && (updn_reg[1] == 2)&& (updn_reg[2] == 3)&& (updn_reg[3] == 1))  //DN Key   
+ 530   4                  {
+ 531   5                     EncorderCount--;          
+ 532   5                     bytEncorderCountTemp++;
+ 533   5                  }
+ 534   4                if((updn_reg[0] == 2) && (updn_reg[1] == 3)&& (updn_reg[2] == 1)&& (updn_reg[3] == 0))  //DN Key    
+ 535   4                  {
+ 536   5                  EncorderCount--;        
+ 537   5                  bytEncorderCountTemp++;
+ 538   5                  }
+ 539   4                if((updn_reg[0] == 3) && (updn_reg[1] == 1)&& (updn_reg[2] == 0)&& (updn_reg[3] == 2))  //DN Key  
+ 540   4                  {
+ 541   5                  EncorderCount--;        
+ 542   5                  bytEncorderCountTemp++;
+ 543   5                  }
+C51 COMPILER V9.60.0.0   CPU                                                               05/20/2021 09:18:44 PAGE 10  
 
- 544   5                  bytEncorderCountTemp++;
- 545   5                  }
- 546   4              }
- 547   3              #if 0
+ 544   4                if((updn_reg[0] == 1) && (updn_reg[1] == 0)&& (updn_reg[2] == 2)&& (updn_reg[3] == 3))  //DN Key  
+ 545   4                  {
+ 546   5                  EncorderCount--;        
+ 547   5                  bytEncorderCountTemp++;
+ 548   5                  }
+ 549   4              }
+ 550   3              #if 0
                     if(bytFastEncoderMode==ON)
                       {
                         if(bytEncorderCountTemp>=400) 
@@ -590,59 +593,59 @@ line level    source
                       }
                     else
                       #endif
- 558   3              if(bytFastEncoderMode==OFF)
- 559   3              {
- 560   4                if(bytEncorderCountTemp>=60)  
- 561   4                {
- 562   5                  ulongRotateNumber++;
- 563   5                  bytEncorderCountTemp=0;
- 564   5                }
- 565   4              }
- 566   3            }
- 567   2          }
- 568   1      
- 569   1          //Kane @HS 2007 0814 Ver1.31<<<<
- 570   1          
- 571   1          //---------- 0.01 sec timer ------------
- 572   1          
- 573   1        #ifdef CLOCK_11M
+ 561   3              if(bytFastEncoderMode==OFF)
+ 562   3              {
+ 563   4                if(bytEncorderCountTemp>=60)  
+ 564   4                {
+ 565   5                  ulongRotateNumber++;
+ 566   5                  bytEncorderCountTemp=0;
+ 567   5                }
+ 568   4              }
+ 569   3            }
+ 570   2          }
+ 571   1      
+ 572   1          //Kane @HS 2007 0814 Ver1.31<<<<
+ 573   1          
+ 574   1          //---------- 0.01 sec timer ------------
+ 575   1          
+ 576   1        #ifdef CLOCK_11M
                   if( tm001 > 48 ) {      // LJY001220 0.01sec
                 #elif defined CLOCK_22M
- 576   1          if( tm001 > ((48*2)) ) {    // LJY001220 0.01sec
- 577   2        #endif
- 578   2        
- 579   2            stopWatch++;
- 580   2            tm001 = 0;
- 581   2            tic01++;
- 582   2          
- 583   2            if( tic01==100 ) 
- 584   2            {       // 1 sec
- 585   3      
- 586   3            
- 587   3              
- 588   3              tic01 = 0;
- 589   3              //second++;
+ 579   1          if( tm001 > ((48*2)) ) {    // LJY001220 0.01sec
+ 580   2        #endif
+ 581   2        
+ 582   2            stopWatch++;
+ 583   2            tm001 = 0;
+ 584   2            tic01++;
+ 585   2          
+ 586   2            if( tic01==100 ) 
+ 587   2            {       // 1 sec
+ 588   3      
+ 589   3            
  590   3              
- 591   3            if(Key)
- 592   3              keyticSec++;
- 593   3            else
- 594   3              keyticSec=0;
- 595   3        
- 596   3            }
- 597   2            if( tic_pc!=0xffff ) 
- 598   2              tic_pc++;
- 599   2        
- 600   2        
- 601   2        if(tic_Init_time)
- 602   2          tic_Init_time--;
- 603   2        if(Power_Msg_Count)
- 604   2          Power_Msg_Count--;
- 605   2      
-C51 COMPILER V9.60.0.0   CPU                                                               05/12/2021 10:45:40 PAGE 11  
+ 591   3              tic01 = 0;
+ 592   3              //second++;
+ 593   3              
+ 594   3            if(Key)
+ 595   3              keyticSec++;
+ 596   3            else
+ 597   3              keyticSec=0;
+ 598   3        
+ 599   3            }
+ 600   2            if( tic_pc!=0xffff ) 
+ 601   2              tic_pc++;
+ 602   2        
+ 603   2        
+ 604   2        if(tic_Init_time)
+ 605   2          tic_Init_time--;
+C51 COMPILER V9.60.0.0   CPU                                                               05/20/2021 09:18:44 PAGE 11  
 
- 606   2        /////////////////////////////////////////// 
- 607   2      #if 1
- 608   2        #if 0
+ 606   2        if(Power_Msg_Count)
+ 607   2          Power_Msg_Count--;
+ 608   2      
+ 609   2        /////////////////////////////////////////// 
+ 610   2      #if 1
+ 611   2        #if 0
               if( _ReadKey() )
               {   if (keytic==50)
                   {
@@ -679,64 +682,64 @@ line level    source
                   }
                 }
                 #else
- 645   2        
- 646   2         if( _ReadKey() )
- 647   2      {   
- 648   3          if (keytic==50)
- 649   3          {
- 650   4            if((PowerFlag==OFF)||(GET_POWER_STATUS()==_POWER_STATUS_SAVING))
- 651   4            {
- 652   5            Key = ON;
- 653   5            RepeatKey=OFF;  
- 654   5            KeyReady = ON;
- 655   5            }
- 656   4          }
- 657   3          else if( (keytic==300)&& (bytHoldOn3SPowerOff==ON)&&(PowerFlag==ON))///hold on the switch for 3S that po
+ 648   2        
+ 649   2         if( _ReadKey() )
+ 650   2      {   
+ 651   3          if (keytic==50)
+ 652   3          {
+ 653   4            if((PowerFlag==OFF)||(GET_POWER_STATUS()==_POWER_STATUS_SAVING))
+ 654   4            {
+ 655   5            Key = ON;
+ 656   5            RepeatKey=OFF;  
+ 657   5            KeyReady = ON;
+ 658   5            }
+ 659   4          }
+ 660   3          else if( (keytic==300)&& (bytHoldOn3SPowerOff==ON)&&(PowerFlag==ON))///hold on the switch for 3S that po
              -wer off
- 658   3            {
- 659   4              if(RepeatKey==ON)
- 660   4              {
- 661   5              Key = ON;
- 662   5              KeyReady = ON;  
- 663   5              bytHoldOn3SPowerOffMode=ON;
- 664   5              RepeatKey=OFF;  
- 665   5              }
- 666   4            }
-C51 COMPILER V9.60.0.0   CPU                                                               05/12/2021 10:45:40 PAGE 12  
+ 661   3            {
+ 662   4              if(RepeatKey==ON)
+ 663   4              {
+ 664   5              Key = ON;
+ 665   5              KeyReady = ON;  
+ 666   5              bytHoldOn3SPowerOffMode=ON;
+C51 COMPILER V9.60.0.0   CPU                                                               05/20/2021 09:18:44 PAGE 12  
 
- 667   3          else if( keytic==800 ) {//8sec into DVR factory mode  
- 668   4      
- 669   4            if(RepeatKey==ON)
- 670   4            {
- 671   5            Key = ON;
- 672   5            KeyReady = ON;      
- 673   5            DVR_FACTORY_MODE=ON;
- 674   5            RepeatKey=OFF;  
- 675   5            }
- 676   4              
- 677   4          keytic = 51;///51;
- 678   4          }
- 679   3          
- 680   3        keytic++;
- 681   3      }
- 682   2      else 
- 683   2        {
- 684   3          if( (keytic>=50)&&(PowerFlag==ON)&&(RepeatKey==ON)) {  //0.5sec push
- 685   4          Key = ON;
- 686   4          KeyReady = ON;
- 687   4          }
- 688   3          else
- 689   3          {
- 690   4          Key=OFF;
- 691   4          KeyReady = OFF;
- 692   4          }
- 693   3          
- 694   3          RepeatKey = ON;
- 695   3          keytic = 0;   
- 696   3        } 
- 697   2      
- 698   2        #endif  
- 699   2      #else
+ 667   5              RepeatKey=OFF;  
+ 668   5              }
+ 669   4            }
+ 670   3          else if( keytic==800 ) {//8sec into DVR factory mode  
+ 671   4      
+ 672   4            if(RepeatKey==ON)
+ 673   4            {
+ 674   5            Key = ON;
+ 675   5            KeyReady = ON;      
+ 676   5            DVR_FACTORY_MODE=ON;
+ 677   5            RepeatKey=OFF;  
+ 678   5            }
+ 679   4              
+ 680   4          keytic = 51;///51;
+ 681   4          }
+ 682   3          
+ 683   3        keytic++;
+ 684   3      }
+ 685   2      else 
+ 686   2        {
+ 687   3          if( (keytic>=50)&&(PowerFlag==ON)&&(RepeatKey==ON)) {  //0.5sec push
+ 688   4          Key = ON;
+ 689   4          KeyReady = ON;
+ 690   4          }
+ 691   3          else
+ 692   3          {
+ 693   4          Key=OFF;
+ 694   4          KeyReady = OFF;
+ 695   4          }
+ 696   3          
+ 697   3          RepeatKey = ON;
+ 698   3          keytic = 0;   
+ 699   3        } 
+ 700   2      
+ 701   2        #endif  
+ 702   2      #else
                 if( _ReadKey() )
                 {
                     if( keytic==800 ) {//8sec into DVR factory mode
@@ -763,143 +766,143 @@ line level    source
                     Key=OFF;
                     }
                   }
-              #endif  
- 727   2        /////////////////////////////////////////// 
- 728   2        }
-C51 COMPILER V9.60.0.0   CPU                                                               05/12/2021 10:45:40 PAGE 13  
+C51 COMPILER V9.60.0.0   CPU                                                               05/20/2021 09:18:44 PAGE 13  
 
- 729   1        #endif  
- 730   1      }
- 731          
- 732          //=============================================================================//
- 733          //                     ShowWorkTimer                                                                    //
- 734          //=============================================================================//
- 735          void ShowWorkingTimer(void)
- 736          {
- 737   1      WORD val;
- 738   1      
- 739   1        GraphicsPrint(RED,"\r\n==================================");
- 740   1      
- 741   1        if(day)
- 742   1        {
- 743   2        GraphicsPrint(YELLOW,"\r\nSystem has been working for %d days, %d hours, %d minutes and %d seconds",(WORD
+              #endif  
+ 730   2        /////////////////////////////////////////// 
+ 731   2        }
+ 732   1        #endif  
+ 733   1      }
+ 734          
+ 735          //=============================================================================//
+ 736          //                     ShowWorkTimer                                                                    //
+ 737          //=============================================================================//
+ 738          void ShowWorkingTimer(void)
+ 739          {
+ 740   1      WORD val;
+ 741   1      
+ 742   1        GraphicsPrint(RED,"\r\n==================================");
+ 743   1      
+ 744   1        if(day)
+ 745   1        {
+ 746   2        GraphicsPrint(YELLOW,"\r\nSystem has been working for %d days, %d hours, %d minutes and %d seconds",(WORD
              -)day,(WORD)hour,(WORD)minute,(WORD)second);
- 744   2        }
- 745   1        else if(hour)
- 746   1        {
- 747   2        GraphicsPrint(YELLOW,"\r\nSystem has been working for %d hours, %d minutes and %d seconds",(WORD)hour,(WO
+ 747   2        }
+ 748   1        else if(hour)
+ 749   1        {
+ 750   2        GraphicsPrint(YELLOW,"\r\nSystem has been working for %d hours, %d minutes and %d seconds",(WORD)hour,(WO
              -RD)minute,(WORD)second);
- 748   2        }
- 749   1        else if(minute)
- 750   1          {
- 751   2          GraphicsPrint(YELLOW,"\r\nSystem has been working for %d minutes and %d seconds",(WORD)minute,(WORD)seco
+ 751   2        }
+ 752   1        else if(minute)
+ 753   1          {
+ 754   2          GraphicsPrint(YELLOW,"\r\nSystem has been working for %d minutes and %d seconds",(WORD)minute,(WORD)seco
              -nd);
- 752   2          }
- 753   1        else
- 754   1          {
- 755   2          GraphicsPrint(YELLOW,"\r\nSystem has been working for %d seconds",(WORD)second);
- 756   2          }
- 757   1      
- 758   1        
- 759   1      
- 760   1        GraphicsPrint(GREEN,"\r\n(BatteryBTH=%d(%d.%dV))",(WORD)BatteryBTH\
- 761   1            ,(WORD)((BatteryBTH*32)/10000)\
- 762   1          ,(WORD)((BatteryBTH*32)%10000));
- 763   1      
- 764   1        if(GET_BTH_STATE()==_BATT_STATUS_TEMP_HIGH)
- 765   1          GraphicsPrint(RED,"(TEMP_HIGH)");
- 766   1        else if(GET_BATTERY_HIGH_TMEP_WARN() ==_TRUE)
- 767   1          GraphicsPrint(YELLOW,"(HIGH_TMEP_WARN)"); 
- 768   1      /// else if((GET_BTH_STATE()==_BATT_STATUS_TEMP_LOW)||(BatteryBTH>=1010))
- 769   1        else if((GET_BTH_STATE()==_BATT_STATUS_TEMP_LOW))
- 770   1          GraphicsPrint(BLUE,"(TEMP_LOW)");
- 771   1        else if(GET_BATTERY_LOW_TMEP_WARN() ==_TRUE)
- 772   1          GraphicsPrint(YELLOW,"(LOW_TMEP_WARN)");  
- 773   1        else 
- 774   1          GraphicsPrint(GREEN,"(TEMP_NORMAL)");
- 775   1        #if 0 
+ 755   2          }
+ 756   1        else
+ 757   1          {
+ 758   2          GraphicsPrint(YELLOW,"\r\nSystem has been working for %d seconds",(WORD)second);
+ 759   2          }
+ 760   1      
+ 761   1        
+ 762   1      
+ 763   1        GraphicsPrint(GREEN,"\r\n(BatteryBTH=%d(%d.%dV))",(WORD)BatteryBTH\
+ 764   1            ,(WORD)((BatteryBTH*32)/10000)\
+ 765   1          ,(WORD)((BatteryBTH*32)%10000));
+ 766   1      
+ 767   1        if(GET_BTH_STATE()==_BATT_STATUS_TEMP_HIGH)
+ 768   1          GraphicsPrint(RED,"(TEMP_HIGH)");
+ 769   1        else if(GET_BATTERY_HIGH_TMEP_WARN() ==_TRUE)
+ 770   1          GraphicsPrint(YELLOW,"(HIGH_TMEP_WARN)"); 
+ 771   1      /// else if((GET_BTH_STATE()==_BATT_STATUS_TEMP_LOW)||(BatteryBTH>=1010))
+ 772   1        else if((GET_BTH_STATE()==_BATT_STATUS_TEMP_LOW))
+ 773   1          GraphicsPrint(BLUE,"(TEMP_LOW)");
+ 774   1        else if(GET_BATTERY_LOW_TMEP_WARN() ==_TRUE)
+ 775   1          GraphicsPrint(YELLOW,"(LOW_TMEP_WARN)");  
+ 776   1        else 
+ 777   1          GraphicsPrint(GREEN,"(TEMP_NORMAL)");
+ 778   1        #if 0 
               GraphicsPrint(MAGENTA,"\r\n(BatteryCAP=%d(%d.%dV))",(WORD)GET_BATTERY_CAPACITY()\
                   ,(WORD)((GET_BATTERY_CAPACITY()*(32-1))/10000)\
                   ,(WORD)((GET_BATTERY_CAPACITY()*(32-1))%10000));
               #else
- 780   1        if(GET_BATTERY_CHARGE_STATE()==_BATT_STATUS_NO_BATT)   
- 781   1        {
- 782   2        val=((((GET_BATTERY_CAPACITY()*32)-150)/10000)*100)+((((GET_BATTERY_CAPACITY()*32)-150)%10000)/100);
- 783   2        val=(val*(54+1))/100;
- 784   2        
- 785   2        }
- 786   1        else
- 787   1        {
-C51 COMPILER V9.60.0.0   CPU                                                               05/12/2021 10:45:40 PAGE 14  
+ 783   1        if(GET_BATTERY_CHARGE_STATE()==_BATT_STATUS_NO_BATT)   
+ 784   1        {
+ 785   2        val=((((GET_BATTERY_CAPACITY()*32)-150)/10000)*100)+((((GET_BATTERY_CAPACITY()*32)-150)%10000)/100);
+ 786   2        val=(val*(54+1))/100;
+ 787   2        
+C51 COMPILER V9.60.0.0   CPU                                                               05/20/2021 09:18:44 PAGE 14  
 
- 788   2        //val=((((GET_BATTERY_CAPACITY()*32)/*-800*/)/10000)*100)+((((GET_BATTERY_CAPACITY()*32)/*-800*/)%10000)/
+ 788   2        }
+ 789   1        else
+ 790   1        {
+ 791   2        //val=((((GET_BATTERY_CAPACITY()*32)/*-800*/)/10000)*100)+((((GET_BATTERY_CAPACITY()*32)/*-800*/)%10000)/
              -100);
- 789   2        //val=(val*(54+1))/100;
- 790   2      
- 791   2        val=((((GET_BATTERY_CAPACITY()*59)/*-800*/)/100))+((((GET_BATTERY_CAPACITY()*59)/*-800*/)/100))+((((GET_B
+ 792   2        //val=(val*(54+1))/100;
+ 793   2      
+ 794   2        val=((((GET_BATTERY_CAPACITY()*59)/*-800*/)/100))+((((GET_BATTERY_CAPACITY()*59)/*-800*/)/100))+((((GET_B
              -ATTERY_CAPACITY()*59)/*-800*/)/100));
- 792   2      
- 793   2          if((val/1000))
- 794   2          val=(val/10)+1;
- 795   2          else 
- 796   2          val=(val/10);
- 797   2          
- 798   2        //val=(GET_BATTERY_CAPACITY()*176/10000);
- 799   2        //val=GET_BATTERY_CAPACITY();
- 800   2        }
- 801   1      
- 802   1        GraphicsPrint(MAGENTA,"\r\n(BatteryCAP=%d(%d.%04dV))(%dV)",(WORD)GET_BATTERY_CAPACITY()\
- 803   1            ,(WORD)((GET_BATTERY_CAPACITY()*(32+1))/10000)\
- 804   1            ,(WORD)(((GET_BATTERY_CAPACITY()*(32+1))/*-200*/)%10000),(WORD)val);
- 805   1      #endif
- 806   1      
- 807   1        if(GET_BATTERY_CHARGE_STATE()==_BATT_STATUS_HIGH_CHARGE)
- 808   1          GraphicsPrint(GREEN,"(HIGH_CHARGE)"); 
- 809   1        else if(GET_BATTERY_CHARGE_STATE()==_BATT_STATUS_LOW_CHARGE)  
- 810   1          GraphicsPrint(YELLOW,"(LOW_CHARGE)"); 
- 811   1        else if(GET_BATTERY_CHARGE_STATE()==_BATT_STATUS_NORMAL_CHARGE) 
- 812   1          GraphicsPrint(MAGENTA,"(NORMAL_CHARGE)"); 
- 813   1        else if(GET_BATTERY_CHARGE_STATE()==_BATT_STATUS_STOP_CHARGE) 
- 814   1          GraphicsPrint(RED,"(STOP_CHARGE)"); 
- 815   1        else if(GET_BATTERY_CHARGE_STATE()==_BATT_STATUS_NO_BATT) 
- 816   1          GraphicsPrint(RED,"(CHARGE_NO_BATT)"); 
- 817   1      
- 818   1         if(GET_BATTERY_STATE()==_BATT_STATUS_CAPACITY_LEVEL0)
- 819   1        GraphicsPrint(GREEN,"(_BATT_STATUS_CAPACITY_LEVEL0)");  
- 820   1      else if(GET_BATTERY_STATE()==_BATT_STATUS_CAPACITY_LEVEL1)
- 821   1        GraphicsPrint(GREEN,"(_BATT_STATUS_CAPACITY_LEVEL1)");  
- 822   1      else if(GET_BATTERY_STATE()==_BATT_STATUS_CAPACITY_LEVEL2)
- 823   1        GraphicsPrint(GREEN,"(_BATT_STATUS_CAPACITY_LEVEL2)");  
- 824   1      else if(GET_BATTERY_STATE()==_BATT_STATUS_CAPACITY_LEVEL3)
- 825   1        GraphicsPrint(GREEN,"(_BATT_STATUS_CAPACITY_LEVEL3)");  
- 826   1      else   if(GET_BATTERY_STATE()==_BATT_STATUS_CAPACITY_LEVEL4)  
- 827   1        GraphicsPrint(GREEN,"(_BATT_STATUS_CAPACITY_LEVEL4)");  
- 828   1      else if(GET_BATTERY_STATE()==_BATT_STATUS_CAPACITY_MIN)
- 829   1        GraphicsPrint(BLUE,"(_BATT_STATUS_CAPACITY_MIN)");  
- 830   1      else if(GET_BATTERY_STATE()==_BATT_STATUS_CAPACITY_MAX)
- 831   1        GraphicsPrint(CYAN,"(_BATT_STATUS_CAPACITY_MAX)");  
- 832   1      else if(GET_BATTERY_STATE()==_BATT_STATUS_CAPACITY_MAX_STOP)
- 833   1        GraphicsPrint(MAGENTA,"(_BATT_STATUS_CAPACITY_MAX_STOP)");  
- 834   1      else if(GET_BATTERY_STATE()==_BATT_STATUS_CAPACITY_NO_STARTUP)
- 835   1        GraphicsPrint(MAGENTA,"(BATTERY_CAPACITY_NO_STARTUP)"); 
- 836   1      else   if(GET_BATTERY_STATE()==_BATT_STATUS_NO_BATT)  
- 837   1        GraphicsPrint(RED,"(_BATT_STATUS_NO_BATT)");  
- 838   1      
- 839   1        if(GET_CHARGE_TMEP_ABNORMAL()==_TRUE)
- 840   1          GraphicsPrint(RED,"(CHARGE_TMEP_ABNORMAL)");  
+ 795   2      
+ 796   2          if((val/1000))
+ 797   2          val=(val/10)+1;
+ 798   2          else 
+ 799   2          val=(val/10);
+ 800   2          
+ 801   2        //val=(GET_BATTERY_CAPACITY()*176/10000);
+ 802   2        //val=GET_BATTERY_CAPACITY();
+ 803   2        }
+ 804   1      
+ 805   1        GraphicsPrint(MAGENTA,"\r\n(BatteryCAP=%d(%d.%04dV))(%dV)",(WORD)GET_BATTERY_CAPACITY()\
+ 806   1            ,(WORD)((GET_BATTERY_CAPACITY()*(32+1))/10000)\
+ 807   1            ,(WORD)(((GET_BATTERY_CAPACITY()*(32+1))/*-200*/)%10000),(WORD)val);
+ 808   1      #endif
+ 809   1      
+ 810   1        if(GET_BATTERY_CHARGE_STATE()==_BATT_STATUS_HIGH_CHARGE)
+ 811   1          GraphicsPrint(GREEN,"(HIGH_CHARGE)"); 
+ 812   1        else if(GET_BATTERY_CHARGE_STATE()==_BATT_STATUS_LOW_CHARGE)  
+ 813   1          GraphicsPrint(YELLOW,"(LOW_CHARGE)"); 
+ 814   1        else if(GET_BATTERY_CHARGE_STATE()==_BATT_STATUS_NORMAL_CHARGE) 
+ 815   1          GraphicsPrint(MAGENTA,"(NORMAL_CHARGE)"); 
+ 816   1        else if(GET_BATTERY_CHARGE_STATE()==_BATT_STATUS_STOP_CHARGE) 
+ 817   1          GraphicsPrint(RED,"(STOP_CHARGE)"); 
+ 818   1        else if(GET_BATTERY_CHARGE_STATE()==_BATT_STATUS_NO_BATT) 
+ 819   1          GraphicsPrint(RED,"(CHARGE_NO_BATT)"); 
+ 820   1      
+ 821   1         if(GET_BATTERY_STATE()==_BATT_STATUS_CAPACITY_LEVEL0)
+ 822   1        GraphicsPrint(GREEN,"(_BATT_STATUS_CAPACITY_LEVEL0)");  
+ 823   1      else if(GET_BATTERY_STATE()==_BATT_STATUS_CAPACITY_LEVEL1)
+ 824   1        GraphicsPrint(GREEN,"(_BATT_STATUS_CAPACITY_LEVEL1)");  
+ 825   1      else if(GET_BATTERY_STATE()==_BATT_STATUS_CAPACITY_LEVEL2)
+ 826   1        GraphicsPrint(GREEN,"(_BATT_STATUS_CAPACITY_LEVEL2)");  
+ 827   1      else if(GET_BATTERY_STATE()==_BATT_STATUS_CAPACITY_LEVEL3)
+ 828   1        GraphicsPrint(GREEN,"(_BATT_STATUS_CAPACITY_LEVEL3)");  
+ 829   1      else   if(GET_BATTERY_STATE()==_BATT_STATUS_CAPACITY_LEVEL4)  
+ 830   1        GraphicsPrint(GREEN,"(_BATT_STATUS_CAPACITY_LEVEL4)");  
+ 831   1      else if(GET_BATTERY_STATE()==_BATT_STATUS_CAPACITY_MIN)
+ 832   1        GraphicsPrint(BLUE,"(_BATT_STATUS_CAPACITY_MIN)");  
+ 833   1      else if(GET_BATTERY_STATE()==_BATT_STATUS_CAPACITY_MAX)
+ 834   1        GraphicsPrint(CYAN,"(_BATT_STATUS_CAPACITY_MAX)");  
+ 835   1      else if(GET_BATTERY_STATE()==_BATT_STATUS_CAPACITY_MAX_STOP)
+ 836   1        GraphicsPrint(MAGENTA,"(_BATT_STATUS_CAPACITY_MAX_STOP)");  
+ 837   1      else if(GET_BATTERY_STATE()==_BATT_STATUS_CAPACITY_NO_STARTUP)
+ 838   1        GraphicsPrint(MAGENTA,"(BATTERY_CAPACITY_NO_STARTUP)"); 
+ 839   1      else   if(GET_BATTERY_STATE()==_BATT_STATUS_NO_BATT)  
+ 840   1        GraphicsPrint(RED,"(_BATT_STATUS_NO_BATT)");  
  841   1      
- 842   1      if(GET_POWER_STATUS()==7) 
- 843   1        GraphicsPrint(CYAN,"\r\n(_POWER_STATUS_SAVING)");
- 844   1      else if(GET_POWER_STATUS()==1)  
- 845   1        GraphicsPrint(CYAN,"\r\n(_POWER_STATUS_OFF)");
- 846   1      else if(GET_POWER_STATUS()==2)  
- 847   1        GraphicsPrint(CYAN,"\r\n(_POWER_STATUS_NORMAL)");
-C51 COMPILER V9.60.0.0   CPU                                                               05/12/2021 10:45:40 PAGE 15  
+ 842   1        if(GET_CHARGE_TMEP_ABNORMAL()==_TRUE)
+ 843   1          GraphicsPrint(RED,"(CHARGE_TMEP_ABNORMAL)");  
+ 844   1      
+ 845   1      if(GET_POWER_STATUS()==7) 
+ 846   1        GraphicsPrint(CYAN,"\r\n(_POWER_STATUS_SAVING)");
+ 847   1      else if(GET_POWER_STATUS()==1)  
+C51 COMPILER V9.60.0.0   CPU                                                               05/20/2021 09:18:44 PAGE 15  
 
- 848   1      else
- 849   1      GraphicsPrint(CYAN,"\r\n(POWER_STATUS=%d)",(WORD)GET_POWER_STATUS());
- 850   1      
- 851   1      #if 0
+ 848   1        GraphicsPrint(CYAN,"\r\n(_POWER_STATUS_OFF)");
+ 849   1      else if(GET_POWER_STATUS()==2)  
+ 850   1        GraphicsPrint(CYAN,"\r\n(_POWER_STATUS_NORMAL)");
+ 851   1      else
+ 852   1      GraphicsPrint(CYAN,"\r\n(POWER_STATUS=%d)",(WORD)GET_POWER_STATUS());
+ 853   1      
+ 854   1      #if 0
               if(GET_BATTERY_CHARGE_STATE()==_BATT_STATUS_NO_BATT)   
               {
               val=((((GET_BATTERY_CAPACITY()*32)-150)/10000)*100)+((((GET_BATTERY_CAPACITY()*32)-150)%10000)/100);
@@ -913,245 +916,245 @@ line level    source
               val=(val*(54+1))/100;
               }
               #endif
- 864   1      //GraphicsPrint(MAGENTA,"\r\n(BatteryCAP=%d(%dV))",(WORD)GET_BATTERY_CAPACITY(),(WORD)val);
- 865   1      
- 866   1      
- 867   1      GraphicsPrint(RED,"\r\n==================================");
+ 867   1      //GraphicsPrint(MAGENTA,"\r\n(bytBatteryVoltageCheck=%d)",(WORD)bytBatteryVoltageCheck);
  868   1      
- 869   1      }
- 870          
- 871          
- 872          
+ 869   1      
+ 870   1      GraphicsPrint(RED,"\r\n==================================");
+ 871   1      
+ 872   1      }
  873          
- 874          //------------------------------------------------------------------
- 875          // void InitVars(void) - variable initialize
- 876          //------------------------------------------------------------------
- 877          void  InitVars(void)
- 878          {
- 879   1      BYTE j;
- 880   1      for(j=0;j<29;j++)
- 881   1          DVR_buf[j] = 0 ;  
- 882   1      
- 883   1      }
- 884          
- 885          
- 886          //=============================================================================
- 887          //                            Power LED ON / OFF                                                   
- 888          //=============================================================================
- 889          void PowerLED(EnumSystemTimerEventID flag)
- 890          {
- 891   1         
- 892   1       switch(flag)
- 893   1         { 
- 894   2      case   _SYSTEM_TIMER_EVENT_GRN_RED_OFF:
- 895   2        CLR_RED();
- 896   2        CLR_GREEN();
- 897   2        break;
- 898   2      case _SYSTEM_TIMER_EVENT_GRN_OFF_RED_ON:
+ 874          
+ 875          
+ 876          
+ 877          //------------------------------------------------------------------
+ 878          // void InitVars(void) - variable initialize
+ 879          //------------------------------------------------------------------
+ 880          void  InitVars(void)
+ 881          {
+ 882   1      BYTE j;
+ 883   1      for(j=0;j<29;j++)
+ 884   1          DVR_buf[j] = 0 ;  
+ 885   1      
+ 886   1      }
+ 887          
+ 888          
+ 889          //=============================================================================
+ 890          //                            Power LED ON / OFF                                                   
+ 891          //=============================================================================
+ 892          void PowerLED(EnumSystemTimerEventID flag)
+ 893          {
+ 894   1         
+ 895   1       switch(flag)
+ 896   1         { 
+ 897   2      case   _SYSTEM_TIMER_EVENT_GRN_RED_OFF:
+ 898   2        CLR_RED();
  899   2        CLR_GREEN();
- 900   2        SET_RED();
- 901   2        break;
- 902   2         case _SYSTEM_TIMER_EVENT_GRN_ON_RED_OFF:
- 903   2           SET_GREEN();
- 904   2           CLR_RED();
- 905   2        break;
- 906   2         case _SYSTEM_TIMER_EVENT_GRN_RED_ON:
- 907   2          SET_GREEN();
- 908   2          SET_RED();
-C51 COMPILER V9.60.0.0   CPU                                                               05/12/2021 10:45:40 PAGE 16  
+ 900   2        break;
+ 901   2      case _SYSTEM_TIMER_EVENT_GRN_OFF_RED_ON:
+ 902   2        CLR_GREEN();
+ 903   2        SET_RED();
+ 904   2        break;
+ 905   2         case _SYSTEM_TIMER_EVENT_GRN_ON_RED_OFF:
+ 906   2           SET_GREEN();
+ 907   2           CLR_RED();
+ 908   2        break;
+C51 COMPILER V9.60.0.0   CPU                                                               05/20/2021 09:18:44 PAGE 16  
 
- 909   2          break;
- 910   2         case _SYSTEM_TIMER_EVENT_GRN_BLINK:
- 911   2                    if(GET_GREEN())     
- 912   2            {
- 913   3          SET_GREEN();
- 914   3          CLR_RED();
- 915   3            }
- 916   2          else
- 917   2          {
- 918   3          CLR_GREEN();
- 919   3          CLR_RED();
- 920   3          }
- 921   2          break;
- 922   2         case _SYSTEM_TIMER_EVENT_RED_BLINK:    
- 923   2             if(GET_RED())
- 924   2            {
- 925   3           SET_RED();
- 926   3           CLR_GREEN();
- 927   3            }
- 928   2          else
- 929   2          {
- 930   3          CLR_GREEN();
- 931   3          CLR_RED();
- 932   3          }
- 933   2          break;  
- 934   2        case _SYSTEM_TIMER_EVENT_GRN_RED_BLINK:
- 935   2                      if(GET_GREEN())     
- 936   2            {
- 937   3          SET_GREEN();
- 938   3          SET_RED();
- 939   3            }
- 940   2          else
- 941   2          {
- 942   3          CLR_GREEN();
- 943   3          CLR_RED();
- 944   3          }
- 945   2         break;  
- 946   2         case _SYSTEM_TIMER_EVENT_GRN_ON_RED_BLINK:
- 947   2          if(GET_RED())
- 948   2            {
- 949   3          SET_RED();
- 950   3            }
- 951   2            else
- 952   2            {
- 953   3            CLR_RED();
- 954   3            }
- 955   2          
- 956   2            SET_GREEN();
- 957   2      
- 958   2         break;   
- 959   2        case _SYSTEM_TIMER_EVENT_GRN_2S_BLINK_RED_ON:
- 960   2          if(GET_GREEN())
- 961   2            {
- 962   3          SET_GREEN();
- 963   3            }
- 964   2            else
- 965   2            {
- 966   3            CLR_GREEN();
- 967   3            }
- 968   2          
- 969   2            SET_RED();
- 970   2      
-C51 COMPILER V9.60.0.0   CPU                                                               05/12/2021 10:45:40 PAGE 17  
+ 909   2         case _SYSTEM_TIMER_EVENT_GRN_RED_ON:
+ 910   2          SET_GREEN();
+ 911   2          SET_RED();
+ 912   2          break;
+ 913   2         case _SYSTEM_TIMER_EVENT_GRN_BLINK:
+ 914   2                    if(GET_GREEN())     
+ 915   2            {
+ 916   3          SET_GREEN();
+ 917   3          CLR_RED();
+ 918   3            }
+ 919   2          else
+ 920   2          {
+ 921   3          CLR_GREEN();
+ 922   3          CLR_RED();
+ 923   3          }
+ 924   2          break;
+ 925   2         case _SYSTEM_TIMER_EVENT_RED_BLINK:    
+ 926   2             if(GET_RED())
+ 927   2            {
+ 928   3           SET_RED();
+ 929   3           CLR_GREEN();
+ 930   3            }
+ 931   2          else
+ 932   2          {
+ 933   3          CLR_GREEN();
+ 934   3          CLR_RED();
+ 935   3          }
+ 936   2          break;  
+ 937   2        case _SYSTEM_TIMER_EVENT_GRN_RED_BLINK:
+ 938   2                      if(GET_GREEN())     
+ 939   2            {
+ 940   3          SET_GREEN();
+ 941   3          SET_RED();
+ 942   3            }
+ 943   2          else
+ 944   2          {
+ 945   3          CLR_GREEN();
+ 946   3          CLR_RED();
+ 947   3          }
+ 948   2         break;  
+ 949   2         case _SYSTEM_TIMER_EVENT_GRN_ON_RED_BLINK:
+ 950   2          if(GET_RED())
+ 951   2            {
+ 952   3          SET_RED();
+ 953   3            }
+ 954   2            else
+ 955   2            {
+ 956   3            CLR_RED();
+ 957   3            }
+ 958   2          
+ 959   2            SET_GREEN();
+ 960   2      
+ 961   2         break;   
+ 962   2        case _SYSTEM_TIMER_EVENT_GRN_2S_BLINK_RED_ON:
+ 963   2          if(GET_GREEN())
+ 964   2            {
+ 965   3          SET_GREEN();
+ 966   3            }
+ 967   2            else
+ 968   2            {
+ 969   3            CLR_GREEN();
+ 970   3            }
+C51 COMPILER V9.60.0.0   CPU                                                               05/20/2021 09:18:44 PAGE 17  
 
  971   2          
- 972   2          break;
- 973   2         default:
- 974   2                  break;
- 975   2       }  
- 976   1      }
- 977          
- 978          
- 979          //------------------------ common routines with interrupts --------------------
+ 972   2            SET_RED();
+ 973   2      
+ 974   2          
+ 975   2          break;
+ 976   2         default:
+ 977   2                  break;
+ 978   2       }  
+ 979   1      }
  980          
- 981          /*****************************************************************************/
- 982          /*      Ext Int 1 Interrupt                                                  */
- 983          /*****************************************************************************/
- 984          //INTERRUPT(2, ext1_int)
- 985          void  ext0_int(void) interrupt 0 using 1
- 986          {
- 987   1        EX0 = 0;
- 988   1        if(bytPNFlagEncoder==0)
- 989   1        EncorderCountINT++;
- 990   1        else
- 991   1        EncorderCountINT--;
- 992   1      
- 993   1        if(bytFastEncorderCountTemp>=100)     
- 994   1          {
- 995   2          ulongRotateNumberTELI++;
- 996   2          bytFastEncorderCountTemp=0;
- 997   2          }
- 998   1        else
- 999   1          bytFastEncorderCountTemp++;
-1000   1          
-1001   1            EX0 = 1;
-1002   1      }
-1003          
-1004          void  ext1_int(void) interrupt 2 using 1
-1005          {
-1006   1        EX1 = 0;
-1007   1        //EncorderCountINT++;
-1008   1        //EX1 = 1;
-1009   1      }
-1010          
-1011          //****************************************************************************/
-1012          //      Timer 0 Interrupt                                                  
-1013          //      If TL0 overflow,
-1014          //       .Invoke this interrupt
-1015          //       .TL0 <- TH0
-1016          //      TL0 is incremented every machine cycle
-1017          //      Every machine cycle is 12*Tosc(11.0592MHz)
-1018          //
-1019          //      Every machine cycle = 1.085us
-1020          //      Interrupt interval = 208us ( 1.085*(256-64(TH0)) )
-1021          //      When tm001==48, it's 0.01sec.  48*208us
-1022          //              
-1023          //****************************************************************************/
-1024          
-1025          
-1026          //*****************************************************************************
-1027          //      Serial Interrupt                                                   
-1028          //*****************************************************************************
-1029          #ifdef SERIAL
-1030          
-1031          //INTERRUPT(4, serial_int)
-1032          void serial_int(void) interrupt 4 using 1   // register bank 1
-C51 COMPILER V9.60.0.0   CPU                                                               05/12/2021 10:45:40 PAGE 18  
+ 981          
+ 982          //------------------------ common routines with interrupts --------------------
+ 983          
+ 984          /*****************************************************************************/
+ 985          /*      Ext Int 1 Interrupt                                                  */
+ 986          /*****************************************************************************/
+ 987          //INTERRUPT(2, ext1_int)
+ 988          void  ext0_int(void) interrupt 0 using 1
+ 989          {
+ 990   1        EX0 = 0;
+ 991   1        if(bytPNFlagEncoder==0)
+ 992   1        EncorderCountINT++;
+ 993   1        else
+ 994   1        EncorderCountINT--;
+ 995   1      
+ 996   1        if(bytFastEncorderCountTemp>=100)     
+ 997   1          {
+ 998   2          ulongRotateNumberTELI++;
+ 999   2          bytFastEncorderCountTemp=0;
+1000   2          }
+1001   1        else
+1002   1          bytFastEncorderCountTemp++;
+1003   1          
+1004   1            EX0 = 1;
+1005   1      }
+1006          
+1007          void  ext1_int(void) interrupt 2 using 1
+1008          {
+1009   1        EX1 = 0;
+1010   1        //EncorderCountINT++;
+1011   1        //EX1 = 1;
+1012   1      }
+1013          
+1014          //****************************************************************************/
+1015          //      Timer 0 Interrupt                                                  
+1016          //      If TL0 overflow,
+1017          //       .Invoke this interrupt
+1018          //       .TL0 <- TH0
+1019          //      TL0 is incremented every machine cycle
+1020          //      Every machine cycle is 12*Tosc(11.0592MHz)
+1021          //
+1022          //      Every machine cycle = 1.085us
+1023          //      Interrupt interval = 208us ( 1.085*(256-64(TH0)) )
+1024          //      When tm001==48, it's 0.01sec.  48*208us
+1025          //              
+1026          //****************************************************************************/
+1027          
+1028          
+1029          //*****************************************************************************
+1030          //      Serial Interrupt                                                   
+1031          //*****************************************************************************
+1032          #ifdef SERIAL
+C51 COMPILER V9.60.0.0   CPU                                                               05/20/2021 09:18:44 PAGE 18  
 
-1033          {
-1034   1        
-1035   1        //day++;
-1036   1        //year2=RI;
-1037   1        //year1=TI;
-1038   1        if( RI ) {          //--- Receive interrupt ----
-1039   2          #if 0///def Hs_debug
+1033          
+1034          //INTERRUPT(4, serial_int)
+1035          void serial_int(void) interrupt 4 using 1   // register bank 1
+1036          {
+1037   1        
+1038   1        //day++;
+1039   1        //year2=RI;
+1040   1        //year1=TI;
+1041   1        if( RI ) {          //--- Receive interrupt ----
+1042   2          #if 0///def Hs_debug
                     RS_buf[RS_in]=SBUF;
                     RS_in++;
                     if( RS_in>=BUF_MAX) RS_in = 0;
                   #else
-1044   2          
-1045   2            #ifdef USE_HI3521_UART2
+1047   2          
+1048   2            #ifdef USE_HI3521_UART2
                     #else
-1047   2            RS_buf[RS_in]= SBUF;//andy awt 980928
-1048   2                RS_in++;
-1049   2            if( RS_in>=DVR_BUF_MAX) RS_in = 0;
-1050   2            #endif  
-1051   2          
-1052   2          #endif
-1053   2          RI = 0;
-1054   2          //month++;
-1055   2        }
-1056   1      
-1057   1        if( TI ) {          //--- Transmit interrupt ----
-1058   2          TI = 0;
-1059   2          RS_Xbusy=0;
-1060   2        }
-1061   1      }
-1062          
-1063          #if 1
-1064          //INTERRUPT(12, serial2_int)
-1065          void serial2_int(void) interrupt 12 using 1   
-1066          {
-1067   1        //--- Receive interrupt ----
-1068   1        //day++;
-1069   1        //year2=S2CON&0x0f;
-1070   1        if ((S2CON & 0x01) == 0x01)
-1071   1          {         
-1072   2          // Clear reception flag
-1073   2          S2CON = S2CON&0xfe;
-1074   2          //#ifdef USE_HI3521_UART2
-1075   2          DVR_buf[RS2_in] = S2BUF;
-1076   2          //#endif
-1077   2          //month++;
-1078   2            RS2_in++;
-1079   2          if( RS2_in>=/*BUF_MAX*/DVR_BUF_MAX) RS2_in = 0;
-1080   2        }
-1081   1        
-1082   1        if ((S2CON & 0x02) == 0x02)
-1083   1        {
-1084   2          S2CON = S2CON&0xfd;
-1085   2          RS2_Xbusy = 0;
-1086   2        }
-1087   1      }
-1088          
-1089          #endif
-1090          
-1091          //=============================================================================
-1092          //    Serial RX Check                            
-1093          //=============================================================================
-1094          #if (_DEBUG_MESSAGE_Monitor==ON)
-C51 COMPILER V9.60.0.0   CPU                                                               05/12/2021 10:45:40 PAGE 19  
+1050   2            RS_buf[RS_in]= SBUF;//andy awt 980928
+1051   2                RS_in++;
+1052   2            if( RS_in>=DVR_BUF_MAX) RS_in = 0;
+1053   2            #endif  
+1054   2          
+1055   2          #endif
+1056   2          RI = 0;
+1057   2          //month++;
+1058   2        }
+1059   1      
+1060   1        if( TI ) {          //--- Transmit interrupt ----
+1061   2          TI = 0;
+1062   2          RS_Xbusy=0;
+1063   2        }
+1064   1      }
+1065          
+1066          #if 1
+1067          //INTERRUPT(12, serial2_int)
+1068          void serial2_int(void) interrupt 12 using 1   
+1069          {
+1070   1        //--- Receive interrupt ----
+1071   1        //day++;
+1072   1        //year2=S2CON&0x0f;
+1073   1        if ((S2CON & 0x01) == 0x01)
+1074   1          {         
+1075   2          // Clear reception flag
+1076   2          S2CON = S2CON&0xfe;
+1077   2          //#ifdef USE_HI3521_UART2
+1078   2          DVR_buf[RS2_in] = S2BUF;
+1079   2          //#endif
+1080   2          //month++;
+1081   2            RS2_in++;
+1082   2          if( RS2_in>=/*BUF_MAX*/DVR_BUF_MAX) RS2_in = 0;
+1083   2        }
+1084   1        
+1085   1        if ((S2CON & 0x02) == 0x02)
+1086   1        {
+1087   2          S2CON = S2CON&0xfd;
+1088   2          RS2_Xbusy = 0;
+1089   2        }
+1090   1      }
+1091          
+1092          #endif
+1093          
+1094          //=============================================================================
+C51 COMPILER V9.60.0.0   CPU                                                               05/20/2021 09:18:44 PAGE 19  
 
+1095          //    Serial RX Check                            
+1096          //=============================================================================
+1097          #if (_DEBUG_MESSAGE_Monitor==ON)
               
               BYTE RS_ready(void)
               {
@@ -1176,110 +1179,110 @@ line level    source
                 return ret;
               }
               #endif
-1119          
-1120          //=============================================================================
-1121          //    Serial RX2 Check                           
-1122          //=============================================================================
-1123          BYTE RS2_ready(void)
-1124          {
-1125   1        if( RS2_in == RS2_out ) return 0;
-1126   1        else return 1;
-1127   1      }
-1128          //=============================================================================
-1129          //    Serial RX2                               
-1130          //=============================================================================
-1131          BYTE RS2_rx(void)
-1132          {
-1133   1        BYTE  ret;
-1134   1          
-1135   1        AUXIE&=0xEF;  //ES2=0
-1136   1        ret = DVR_buf[RS2_out];
-1137   1        RS2_out++;
-1138   1          if(RS2_out >= DVR_BUF_MAX) 
-1139   1          RS2_out = 0;
-1140   1        AUXIE|=0x10;  //ES2=1
-1141   1      
-1142   1        return ret;
-1143   1      }
-1144          
-1145          //=============================================================================
-1146          //    Serial TX                              
-1147          //=============================================================================
-1148          #if (_DEBUG_MESSAGE_Monitor==ON)
+1122          
+1123          //=============================================================================
+1124          //    Serial RX2 Check                           
+1125          //=============================================================================
+1126          BYTE RS2_ready(void)
+1127          {
+1128   1        if( RS2_in == RS2_out ) return 0;
+1129   1        else return 1;
+1130   1      }
+1131          //=============================================================================
+1132          //    Serial RX2                               
+1133          //=============================================================================
+1134          BYTE RS2_rx(void)
+1135          {
+1136   1        BYTE  ret;
+1137   1          
+1138   1        AUXIE&=0xEF;  //ES2=0
+1139   1        ret = DVR_buf[RS2_out];
+1140   1        RS2_out++;
+1141   1          if(RS2_out >= DVR_BUF_MAX) 
+1142   1          RS2_out = 0;
+1143   1        AUXIE|=0x10;  //ES2=1
+1144   1      
+1145   1        return ret;
+1146   1      }
+1147          
+1148          //=============================================================================
+1149          //    Serial TX                              
+1150          //=============================================================================
+1151          #if (_DEBUG_MESSAGE_Monitor==ON)
               void RS_tx(BYTE tx_buf)
               {
                 while(RS_Xbusy);
                 SBUF = tx_buf;
                 RS_Xbusy=1;
+C51 COMPILER V9.60.0.0   CPU                                                               05/20/2021 09:18:44 PAGE 20  
+
               }
               #endif
-1156          //=============================================================================
-C51 COMPILER V9.60.0.0   CPU                                                               05/12/2021 10:45:40 PAGE 20  
-
-1157          //    Serial2 TX                               
-1158          //=============================================================================
-1159          
-1160          void RS2_tx(BYTE tx_buf)
-1161          {
-1162   1      
-1163   1        while(RS2_Xbusy); 
-1164   1          S2BUF=tx_buf;
-1165   1          RS2_Xbusy=1;
-1166   1      }
-1167          
-1168          
-1169          #endif  // SERIAL
+1159          //=============================================================================
+1160          //    Serial2 TX                               
+1161          //=============================================================================
+1162          
+1163          void RS2_tx(BYTE tx_buf)
+1164          {
+1165   1      
+1166   1        while(RS2_Xbusy); 
+1167   1          S2BUF=tx_buf;
+1168   1          RS2_Xbusy=1;
+1169   1      }
 1170          
 1171          
-1172          
-1173          //****************************************************************************/
-1174          //      Timer 2 Interrupt                                                  
-1175          //      If TH2 and TL2 are overflowed,
-1176          //       .Invoke this interrupt
-1177          //       .TH2 <- RCAP2H
-1178          //       .TL2 <- RCAP2L
-1179          //      TL2 is incremented every machine cycle
-1180          //      Every machine cycle is 12*Tosc(11.0592MHz)
-1181          //
-1182          //      Every machine cycle = 1.085us
-1183          //      Interrupt interval  
-1184          //        1) REMO_RC5 
-1185          //          221.34us  ( 1.085*204 )   // (256-52) (0x10000-0xff34)
-1186          //
-1187          //          data length: 14bit (2sync bits, 1 control bit, 11 data bits) 24,889ms
-1188          //
-1189          //                +----+
-1190          //          1 is coded:      |    |
-1191          //                   +----+   
-1192          //                  T    T
-1193          //
-1194          //                   +----+
-1195          //          0 is coded: |    |
-1196          //                      +----+    
-1197          //                  T    T          T = 889us
-1198          //
-1199          //          *) DongYang
-1200          //            209.62  ( 1.085*193 ) // (256-63) (0x10000-0xff3f)
-1201          //-----------------------------------------------------------------------------
-1202          //        2) REMO_NEC
-1203          //          187.714us ( 1.085*173 )     // (256-83) (0x10000-0xff53)
-1204          //              
-1205          //****************************************************************************/
-1206          //INTERRUPT(5, timer2_int)
-1207          void timer2_int(void) interrupt 5 using 1     // using register block 3
-1208          {
-1209   1        #if  (_1KHZ_PWM==ON)
+1172          #endif  // SERIAL
+1173          
+1174          
+1175          
+1176          //****************************************************************************/
+1177          //      Timer 2 Interrupt                                                  
+1178          //      If TH2 and TL2 are overflowed,
+1179          //       .Invoke this interrupt
+1180          //       .TH2 <- RCAP2H
+1181          //       .TL2 <- RCAP2L
+1182          //      TL2 is incremented every machine cycle
+1183          //      Every machine cycle is 12*Tosc(11.0592MHz)
+1184          //
+1185          //      Every machine cycle = 1.085us
+1186          //      Interrupt interval  
+1187          //        1) REMO_RC5 
+1188          //          221.34us  ( 1.085*204 )   // (256-52) (0x10000-0xff34)
+1189          //
+1190          //          data length: 14bit (2sync bits, 1 control bit, 11 data bits) 24,889ms
+1191          //
+1192          //                +----+
+1193          //          1 is coded:      |    |
+1194          //                   +----+   
+1195          //                  T    T
+1196          //
+1197          //                   +----+
+1198          //          0 is coded: |    |
+1199          //                      +----+    
+1200          //                  T    T          T = 889us
+1201          //
+1202          //          *) DongYang
+1203          //            209.62  ( 1.085*193 ) // (256-63) (0x10000-0xff3f)
+1204          //-----------------------------------------------------------------------------
+1205          //        2) REMO_NEC
+1206          //          187.714us ( 1.085*173 )     // (256-83) (0x10000-0xff53)
+1207          //              
+1208          //****************************************************************************/
+1209          //INTERRUPT(5, timer2_int)
+1210          void timer2_int(void) interrupt 5 using 1     // using register block 3
+1211          {
+1212   1        #if  (_1KHZ_PWM==ON)
                 BYTE TempKey;
               
                 TF2 = 0;          // clear overflow
                       ET2=0;
               #if 1
                   tm001++;
+C51 COMPILER V9.60.0.0   CPU                                                               05/20/2021 09:18:44 PAGE 21  
+
                 
                     //Timer Counter 
                     tic02++;
-C51 COMPILER V9.60.0.0   CPU                                                               05/12/2021 10:45:40 PAGE 21  
-
                 
                 //  if(tic02>=(10*22))   
                     if(tic02>=(10))  
@@ -1339,11 +1342,11 @@ line level    source
               #if 1
                 //---------- 0.01 sec timer ------------
                   
+C51 COMPILER V9.60.0.0   CPU                                                               05/20/2021 09:18:44 PAGE 22  
+
                 #ifdef CLOCK_11M
                   if( tm001 > 48 ) {      // LJY001220 0.01sec
                 #elif defined CLOCK_22M
-C51 COMPILER V9.60.0.0   CPU                                                               05/12/2021 10:45:40 PAGE 22  
-
               //    if( tm001 > ((48*2)*22) ) {   // LJY001220 0.01sec
                   if( tm001 > ((48*2)) ) {  // LJY001220 0.01sec
                 #endif
@@ -1403,11 +1406,11 @@ line level    source
                 keytic++;
               }
               else 
+C51 COMPILER V9.60.0.0   CPU                                                               05/20/2021 09:18:44 PAGE 23  
+
                 {
                   if( (keytic>=50)&&(PowerFlag==ON)&&(RepeatKey==ON)) {  //0.5sec push
                   Key = ON;
-C51 COMPILER V9.60.0.0   CPU                                                               05/12/2021 10:45:40 PAGE 23  
-
                   KeyReady = ON;
                   }
                   else
@@ -1431,51 +1434,48 @@ line level    source
               
               ET2=1;  
                 #else
-1366   1        TF2 = 0;          // clear overflow
-1367   1      
-1368   1        tm01++;
-1369   1        #endif
-1370   1      }
-1371          
-1372          void delay(BYTE cnt)
-1373          {
-1374   1        WORD ttic01;
-1375   1      
-1376   1        ttic01 =  ( tic01 + cnt ) % 100;
-1377   1        do {
-1378   2          ;
-1379   2        } while( tic01 != ttic01 );
-1380   1      }
-1381          
-1382          #if (_POWER_DOWN_ENABLE==ON)
-1383          
-1384          void int2_int(void) interrupt 6 using 1     // using register block 3
-1385          {
-1386   1        EX2=0;
-1387   1        IE2=0;
-1388   1        PCON=0x80;
-1389   1        IE=IE_Temp;
-1390   1        Power_down_mode=OFF;
-1391   1      }
-1392          
-1393          void int3_int(void) interrupt 7 using 1     // using register block 3
-1394          {
-1395   1        EX3=0;
-1396   1        IE3=0;
-1397   1        PCON=0x80;
-1398   1        IE=IE_Temp;
-1399   1        Power_down_mode=OFF;
-1400   1      }
-1401          
-1402          
-1403          
+1369   1        TF2 = 0;          // clear overflow
+1370   1      
+1371   1        tm01++;
+1372   1        #endif
+1373   1      }
+1374          
+1375          void delay(BYTE cnt)
+1376          {
+1377   1        WORD ttic01;
+1378   1      
+1379   1        ttic01 =  ( tic01 + cnt ) % 100;
+1380   1        do {
+1381   2          ;
+1382   2        } while( tic01 != ttic01 );
+1383   1      }
+1384          
+1385          #if (_POWER_DOWN_ENABLE==ON)
+1386          
+1387          void int2_int(void) interrupt 6 using 1     // using register block 3
+1388          {
+1389   1        EX2=0;
+1390   1        IE2=0;
+1391   1        PCON=0x80;
+1392   1        IE=IE_Temp;
+1393   1        Power_down_mode=OFF;
+1394   1      }
+1395          
+1396          void int3_int(void) interrupt 7 using 1     // using register block 3
+1397          {
+1398   1        EX3=0;
+1399   1        IE3=0;
+1400   1        PCON=0x80;
+1401   1        IE=IE_Temp;
+1402   1        Power_down_mode=OFF;
+1403   1      }
 1404          
-C51 COMPILER V9.60.0.0   CPU                                                               05/12/2021 10:45:40 PAGE 24  
+C51 COMPILER V9.60.0.0   CPU                                                               05/20/2021 09:18:44 PAGE 24  
 
-1405          #endif
+1405          
 1406          
 1407          
-1408          
+1408          #endif
 1409          
 1410          
 1411          
@@ -1484,11 +1484,14 @@ line level    source
 1414          
 1415          
 1416          
+1417          
+1418          
+1419          
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =   3644    ----
-   CONSTANT SIZE    =   1146    ----
+   CODE SIZE        =   3533    ----
+   CONSTANT SIZE    =   1085    ----
    XDATA SIZE       =     36       8
    PDATA SIZE       =   ----    ----
    DATA SIZE        =     88    ----

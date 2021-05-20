@@ -93,6 +93,9 @@ extern DWORD ulongRotateNumber;
 extern DWORD ulongRotateNumberTELI;
 
 extern BYTE 	KeyBuffer;
+#if (_BATTERY_CHECK_WITH_NO_CHARGE==ON)
+extern BYTE bytBatteryVoltageCheck;
+#endif
 
 //=============================================================================
 //    Main Initialize Routine
@@ -861,7 +864,7 @@ val=((((GET_BATTERY_CAPACITY()*32)/*-800*/)/10000)*100)+((((GET_BATTERY_CAPACITY
 val=(val*(54+1))/100;
 }
 #endif
-//GraphicsPrint(MAGENTA,"\r\n(BatteryCAP=%d(%dV))",(WORD)GET_BATTERY_CAPACITY(),(WORD)val);
+//GraphicsPrint(MAGENTA,"\r\n(bytBatteryVoltageCheck=%d)",(WORD)bytBatteryVoltageCheck);
 
 
 GraphicsPrint(RED,"\r\n==================================");

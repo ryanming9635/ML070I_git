@@ -83,6 +83,9 @@ extern bit RepeatKey;
 extern BYTE IE_Temp;
 extern BYTE bytHoldOn3SPowerOff;
 extern long EncorderCountINT;
+#if (_BATTERY_CHECK_WITH_NO_CHARGE==ON)
+extern BYTE bytBatteryVoltageCheck;
+#endif
 
 struct RegisterInfo UserRange={0,40,21};
 struct RegisterInfo AD5110Range={0,40,21};
@@ -358,7 +361,10 @@ void InitialTimerEvent(void)
 	MCUTimerActiveTimerEvent(1, _SYSTEM_TIMER_EVENT_GRN_BLINK);
 	MCUTimerActiveTimerEvent(1, _SYSTEM_TIMER_EVENT_JUDGE_CHECK_AC_CABLE);
 	MCUTimerActiveTimerEvent(SEC(10), _SYSTEM_TIMER_EVENT_REPLAY_REGULAR_DATA);
-	MCUTimerActiveTimerEvent(SEC(10), _SYSTEM_TIMER_EVENT_CHECK_CHARGE_STATE);	//check charge
+	MCUTimerActiveTimerEvent(SEC(10-5), _SYSTEM_TIMER_EVENT_CHECK_CHARGE_STATE);	//check charge
+	#if (_BATTERY_CHECK_WITH_NO_CHARGE==ON)
+	MCUTimerActiveTimerEvent(SEC(5+2), _SYSTEM_TIMER_EVENT_BATTERY_VOLTAGE_READY_CHECK);
+	#endif
 	SET_AC_PLUG();
 
 #if(_DEBUG_MESSAGE_WORKING_TIME == ON)
@@ -548,6 +554,38 @@ if(PowerOffToOnFlag>=2)
 	Encorder4= ((ReadEEP(EEP_Encorder4)>>4)*10)+(0x0f&ReadEEP(EEP_Encorder4));
 	Decimal4= ((ReadEEP(EEP_Decimal4)>>4)*10)+(0x0f&ReadEEP(EEP_Decimal4));
 
+ 
+	if(Encorder1>=3)
+	{
+		Encorder1=1;
+		Decimal1=0;
+		WriteEEP(EEP_Encorder1,1);
+		WriteEEP(EEP_Decimal1,0);
+	}
+	
+	if(Encorder2>=3)
+	{
+		Encorder2=1;
+		Decimal2=0;
+		WriteEEP(EEP_Encorder2,1);
+		WriteEEP(EEP_Decimal2,0);
+	}
+	
+	if(Encorder3>=3)
+	{
+		Encorder3=1;
+		Decimal3=0;
+		WriteEEP(EEP_Encorder3,1);
+		WriteEEP(EEP_Decimal3,0);
+	}
+	 
+	if(Encorder4>=3)
+	{
+		Encorder4=1;
+		Decimal4=0;
+		WriteEEP(EEP_Encorder4,1);
+		WriteEEP(EEP_Decimal4,0);
+	}
 
 	ulongRotateNumberTELI=ReadEEP(EEP_RotateNumberH);
 	ulongRotateNumberTELI<<=8;
@@ -555,12 +593,33 @@ if(PowerOffToOnFlag>=2)
 	ulongRotateNumberTELI<<=8;
 	ulongRotateNumberTELI|=ReadEEP(EEP_RotateNumberL);	
 
+if(ulongRotateNumberTELI>=1000000)
+{
+	ulongRotateNumberTELI=0;
+	WriteEEP(EEP_RotateNumberL,0);
+	WriteEEP(EEP_RotateNumberM,0);
+	WriteEEP(EEP_RotateNumberH,0);
+	#if(_DEBUG_EncorderHandler==ON)
+	Printf("\r\nTELI_NUM>999999");
+	#endif
+}
+
 		ulongRotateNumber=ReadEEP(EEP_RotateNumberRH);
 		ulongRotateNumber<<=8;
 		ulongRotateNumber|=ReadEEP(EEP_RotateNumberRM);	
 		ulongRotateNumber<<=8;
 		ulongRotateNumber|=ReadEEP(EEP_RotateNumberRL);
 
+	if(ulongRotateNumber>=1000000)
+	{
+		ulongRotateNumber=0;
+		WriteEEP(EEP_RotateNumberRL,0);
+		WriteEEP(EEP_RotateNumberRM,0);
+		WriteEEP(EEP_RotateNumberRH,0);
+	#if(_DEBUG_EncorderHandler==ON)
+	Printf("\r\nREX_NUM>999999");
+	#endif
+	}		
 
 	
 	if(ReadEEP(EEP_LowBattery_Flag))
@@ -1355,6 +1414,12 @@ void WaitPowerOn(void)
 	MCUTimerCancelTimerEvent( _SYSTEM_TIMER_EVENT_JUDGE_WDT_ECHO);		
 	CLR_DVR_Shutdown();
 	MCUTimerCancelTimerEvent( _USER_TIMER_EVENT_OSD_DVR_SHUTDOWN);
+	
+#if (_BATTERY_CHECK_WITH_NO_CHARGE==ON)
+	bytBatteryVoltageCheck=ON;
+	MCUTimerCancelTimerEvent( _SYSTEM_TIMER_EVENT_BATTERY_VOLTAGE_READY_CHECK);
+	MCUTimerCancelTimerEvent( _SYSTEM_TIMER_EVENT_BATTERY_VOLTAGE_DISABLE_CHECK);
+#endif				
 
 	//CLR_BATTERY_CAPACITY_HIGH_FLAG();
 	Power_down_mode=_DontgoingToPD;
