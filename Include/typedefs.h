@@ -74,10 +74,10 @@ typedef	unsigned long	DWORD;
 
 #if 1//for sean
 #define _CHARGE100mA    0xF4
-#define _CHARGE300mA    (0x80+25)//0xB0
+#define _CHARGE300mA    (0x80+25)//99 (300A)//0xB0
 
-#define _CHARGE500mA    0x93
-#define _CHARGE700mA    (0x80+25)//0xB0//0x5B///0x63
+#define _CHARGE500mA    0x93//(500)
+#define _CHARGE700mA    (0x80+25)//0xB0(390)//0x5B(719)///0x63(700)
 
 #define _CHARGE1000mA    0x00//0x18
 #define _CHARGE1100mA    0x00///maximum

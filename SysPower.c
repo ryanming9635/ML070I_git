@@ -254,7 +254,7 @@ void UserInterfaceBatteryChargeMode(EnumBatteryStatus enumSwitch)
 				{	if((GET_AC_PLUG()==_TRUE)&&(bytBatteryStopCharge==_FALSE))
 					MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_2S_BLINK_RED_ON);//Update LED Status		
 					else
-					MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_BLINK);//Update LED Status		
+					MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_2S_BLINK);//Update LED Status		
 					
 				}
 			else
@@ -317,7 +317,7 @@ void UserInterfaceBatteryChargeMode(EnumBatteryStatus enumSwitch)
 				{	if((GET_AC_PLUG()==_TRUE)&&(bytBatteryStopCharge==_FALSE))
 					MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_RED_BLINK);//Update LED Status		
 					else
-					MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_BLINK);//Update LED Status			
+					MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_2S_BLINK);//Update LED Status			
 				}
 			else
 				{
@@ -377,7 +377,7 @@ void UserInterfaceBatteryChargeMode(EnumBatteryStatus enumSwitch)
 					if((GET_AC_PLUG()==_TRUE)&&(bytBatteryStopCharge==_FALSE))
 					MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_2S_BLINK_RED_ON);//Update LED Status		
 					else
-					MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_BLINK);//Update LED Status		
+					MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_2S_BLINK);//Update LED Status		
 					
 				}
 			else

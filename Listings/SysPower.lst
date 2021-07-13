@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.0.0   SYSPOWER                                                          05/20/2021 15:51:07 PAGE 1   
+C51 COMPILER V9.60.0.0   SYSPOWER                                                          07/13/2021 08:56:39 PAGE 1   
 
 
 C51 COMPILER V9.60.0.0, COMPILATION OF MODULE SYSPOWER
@@ -62,7 +62,7 @@ line level    source
   52          
   53          //****************************************************************************
   54          // FUNCTION DECLARATIONS
-C51 COMPILER V9.60.0.0   SYSPOWER                                                          05/20/2021 15:51:07 PAGE 2   
+C51 COMPILER V9.60.0.0   SYSPOWER                                                          07/13/2021 08:56:39 PAGE 2   
 
   55          //****************************************************************************
   56          void SysPowerInitial(void);
@@ -126,7 +126,7 @@ line level    source
  114   3                      case _POWER_STATUS_SAVING:
  115   3                          SysPowerSwitch(_POWER_ACTION_PS_TO_NORMAL);
  116   3                          break;
-C51 COMPILER V9.60.0.0   SYSPOWER                                                          05/20/2021 15:51:07 PAGE 3   
+C51 COMPILER V9.60.0.0   SYSPOWER                                                          07/13/2021 08:56:39 PAGE 3   
 
  117   3      
  118   3                      case _POWER_STATUS_AC_ON:
@@ -190,7 +190,7 @@ line level    source
  176   2          }
  177   1      
  178   1          // Clear power action to avoid repeat calls in next circle.
-C51 COMPILER V9.60.0.0   SYSPOWER                                                          05/20/2021 15:51:07 PAGE 4   
+C51 COMPILER V9.60.0.0   SYSPOWER                                                          07/13/2021 08:56:39 PAGE 4   
 
  179   1          SET_TARGET_POWER_STATUS(GET_POWER_STATUS());
  180   1      
@@ -254,7 +254,7 @@ line level    source
  238   3      
  239   3              }
  240   2              else
-C51 COMPILER V9.60.0.0   SYSPOWER                                                          05/20/2021 15:51:07 PAGE 5   
+C51 COMPILER V9.60.0.0   SYSPOWER                                                          07/13/2021 08:56:39 PAGE 5   
 
  241   2              {
  242   3                SET_PWM(_CHG_CURR,_CHARGE300mA); 
@@ -272,7 +272,7 @@ line level    source
  254   2              { if((GET_AC_PLUG()==_TRUE)&&(bytBatteryStopCharge==_FALSE))
  255   3                MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_2S_BLINK_RED_ON);//Update LED Status   
  256   3                else
- 257   3                MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_BLINK);//Update LED Status   
+ 257   3                MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_2S_BLINK);//Update LED Status    
  258   3                
  259   3              }
  260   2            else
@@ -318,7 +318,7 @@ line level    source
  299   3                #if (_DEBUG_MESSAGE_BatteryVoltage==ON)
                             GraphicsPrint(MAGENTA,"(High Current Charge_bytBatteryStopCharge=1)"); 
                         #endif
-C51 COMPILER V9.60.0.0   SYSPOWER                                                          05/20/2021 15:51:07 PAGE 6   
+C51 COMPILER V9.60.0.0   SYSPOWER                                                          07/13/2021 08:56:39 PAGE 6   
 
  302   3      
  303   3              }
@@ -338,7 +338,7 @@ line level    source
  317   2              { if((GET_AC_PLUG()==_TRUE)&&(bytBatteryStopCharge==_FALSE))
  318   3                MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_RED_BLINK);//Update LED Status   
  319   3                else
- 320   3                MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_BLINK);//Update LED Status     
+ 320   3                MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_2S_BLINK);//Update LED Status      
  321   3              }
  322   2            else
  323   2              {
@@ -382,7 +382,7 @@ line level    source
                     #endif
  361   3              }
  362   2            else
-C51 COMPILER V9.60.0.0   SYSPOWER                                                          05/20/2021 15:51:07 PAGE 7   
+C51 COMPILER V9.60.0.0   SYSPOWER                                                          07/13/2021 08:56:39 PAGE 7   
 
  363   2          
  364   2              {
@@ -401,7 +401,7 @@ line level    source
  377   3                if((GET_AC_PLUG()==_TRUE)&&(bytBatteryStopCharge==_FALSE))
  378   3                MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_2S_BLINK_RED_ON);//Update LED Status   
  379   3                else
- 380   3                MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_BLINK);//Update LED Status   
+ 380   3                MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_2S_BLINK);//Update LED Status    
  381   3                
  382   3              }
  383   2            else
@@ -446,7 +446,7 @@ line level    source
  421   2            
  422   2            if((GET_DVR_SystemReadyNotic()==_FALSE)&&(PowerFlag==ON))
  423   2              MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_BLINK);
-C51 COMPILER V9.60.0.0   SYSPOWER                                                          05/20/2021 15:51:07 PAGE 8   
+C51 COMPILER V9.60.0.0   SYSPOWER                                                          07/13/2021 08:56:39 PAGE 8   
 
  424   2            else  if(GET_POWER_STATUS()==_POWER_STATUS_NORMAL)
  425   2               MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_ON_RED_OFF);//Update LED Status
@@ -510,7 +510,7 @@ line level    source
                     #if (_DEBUG_MESSAGE_BatteryVoltage==ON)
                         GraphicsPrint(MAGENTA,"(1_Stop Charge)");   
                     #endif
-C51 COMPILER V9.60.0.0   SYSPOWER                                                          05/20/2021 15:51:07 PAGE 9   
+C51 COMPILER V9.60.0.0   SYSPOWER                                                          07/13/2021 08:56:39 PAGE 9   
 
               
                     SET_BATTERY_CHARGE_STATE(_BATT_STATUS_STOP_CHARGE);
@@ -574,7 +574,7 @@ line level    source
                     #if (_DEBUG_MESSAGE_BatteryVoltage==ON)
                         GraphicsPrint(MAGENTA,"(High Current Charge)"); 
                     #endif
-C51 COMPILER V9.60.0.0   SYSPOWER                                                          05/20/2021 15:51:07 PAGE 10  
+C51 COMPILER V9.60.0.0   SYSPOWER                                                          07/13/2021 08:56:39 PAGE 10  
 
                   
                     SET_BATTERY_CHARGE_STATE(_BATT_STATUS_HIGH_CHARGE);
@@ -638,7 +638,7 @@ line level    source
                        MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_ON_RED_OFF);//Update LED Status
                     else if(GET_POWER_STATUS()==_POWER_STATUS_SAVING)  
                       MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_2S_BLINK);//Update LED Status
-C51 COMPILER V9.60.0.0   SYSPOWER                                                          05/20/2021 15:51:07 PAGE 11  
+C51 COMPILER V9.60.0.0   SYSPOWER                                                          07/13/2021 08:56:39 PAGE 11  
 
                     else  
                       {
@@ -702,7 +702,7 @@ line level    source
  669   2            SET_PCON3V3_TW();
  670   2            MCUTimerDelayXms(20);//delay 20ms Power-On Sequence of Panel    
  671   2            CLR_TW8836_RST();
-C51 COMPILER V9.60.0.0   SYSPOWER                                                          05/20/2021 15:51:07 PAGE 12  
+C51 COMPILER V9.60.0.0   SYSPOWER                                                          07/13/2021 08:56:39 PAGE 12  
 
  672   2            
  673   2        MCUTimerActiveTimerEvent(SEC(0.5), _SYSTEM_TIMER_EVENT_JUDGE_FIRST_GET_BATT_BTH_STATE);
@@ -766,7 +766,7 @@ line level    source
  731   2      
  732   2          SET_DVR_PowerOFFDelay();
  733   2          MCUTimerActiveTimerEvent( SEC(3),_SYSTEM_TIMER_EVENT_POWER_OFF_ON_DELAY);
-C51 COMPILER V9.60.0.0   SYSPOWER                                                          05/20/2021 15:51:07 PAGE 13  
+C51 COMPILER V9.60.0.0   SYSPOWER                                                          07/13/2021 08:56:39 PAGE 13  
 
  734   2                  break;
  735   2      
@@ -830,7 +830,7 @@ line level    source
  793   2        case _POWER_ACTION_DVR_POWER_ON:
  794   2        case  _POWER_ACTION_PANEL_POWER_ON:
  795   2          // User Power Process
-C51 COMPILER V9.60.0.0   SYSPOWER                                                          05/20/2021 15:51:07 PAGE 14  
+C51 COMPILER V9.60.0.0   SYSPOWER                                                          07/13/2021 08:56:39 PAGE 14  
 
  796   2                      UserInterfacePowerSwitch(enumSwitch);        
  797   2                break;
@@ -846,7 +846,7 @@ line level    source
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =   1216    ----
+   CODE SIZE        =   1217    ----
    CONSTANT SIZE    =     45    ----
    XDATA SIZE       =   ----       3
    PDATA SIZE       =   ----    ----

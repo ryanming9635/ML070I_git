@@ -1,4 +1,27 @@
----- _USER_TIMER_EVENT_OSD_ENCODER_DEVIATION_SETTING Matches (3 in 3 files) ----
-HS_DVRProtocol.c:336:						MCUTimerActiveTimerEvent(SEC(1),_USER_TIMER_EVENT_OSD_ENCODER_DEVIATION_SETTING);						
-SysTimer.c:509:	case _USER_TIMER_EVENT_OSD_ENCODER_DEVIATION_SETTING:			
-Typedefs.h (include):248:    _USER_TIMER_EVENT_OSD_ENCODER_DEVIATION_SETTING,
+---- _SYSTEM_TIMER_EVENT_GRN_BLINK Matches (26 in 6 files) ----
+CPU.c:913:   case _SYSTEM_TIMER_EVENT_GRN_BLINK:
+HS_DVRProtocol.c:442:							MCUTimerCancelTimerEvent(_SYSTEM_TIMER_EVENT_GRN_BLINK);
+Main.c:361:	MCUTimerActiveTimerEvent(1, _SYSTEM_TIMER_EVENT_GRN_BLINK);
+SysPower.c:186:	MCUTimerCancelTimerEvent(_SYSTEM_TIMER_EVENT_GRN_BLINK);
+SysPower.c:204:			MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_BLINK);
+SysPower.c:252:				MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_BLINK);//power on, no charging.	
+SysPower.c:257:					MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_BLINK);//Update LED Status		
+SysPower.c:315:				MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_BLINK);
+SysPower.c:320:					MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_BLINK);//Update LED Status			
+SysPower.c:374:				MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_BLINK);
+SysPower.c:380:					MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_BLINK);//Update LED Status		
+SysPower.c:423:				MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_BLINK);
+SysPower.c:472:	MCUTimerCancelTimerEvent(_SYSTEM_TIMER_EVENT_GRN_BLINK);
+SysPower.c:490:			MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_BLINK);
+SysPower.c:524:				MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_BLINK);
+SysPower.c:529:					MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_BLINK);//Update LED Status		
+SysPower.c:553:				MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_BLINK);
+SysPower.c:558:					MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_BLINK);//Update LED Status			
+SysPower.c:577:				MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_BLINK);
+SysPower.c:583:					MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_BLINK);//Update LED Status		
+SysPower.c:605:				MCUTimerActiveTimerEvent(SEC(0.1), _SYSTEM_TIMER_EVENT_GRN_BLINK);
+SysTimer.c:615:   case _SYSTEM_TIMER_EVENT_GRN_BLINK:
+SysTimer.c:616:	   PowerLED(_SYSTEM_TIMER_EVENT_GRN_BLINK);
+SysTimer.c:617:     MCUTimerActiveTimerEvent(SEC(0.25), _SYSTEM_TIMER_EVENT_GRN_BLINK);
+SysTimer.c:621:     PowerLED(_SYSTEM_TIMER_EVENT_GRN_BLINK);
+Typedefs.h (include):281:    _SYSTEM_TIMER_EVENT_GRN_BLINK,    
