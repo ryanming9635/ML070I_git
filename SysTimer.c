@@ -1185,7 +1185,7 @@ case  _SYSTEM_TIMER_EVENT_BATTERY_VOLTAGE_DISABLE_CHECK:
 			WriteEEP(EEP_Powerflag,PowerFlag);
 				}
 			#else
-			else if(PowerFlag==ON)		
+			else if((PowerFlag==ON)&&(GET_DVR_SystemReadyNotic()==_TRUE))		
 			MCUTimerActiveTimerEvent(SEC(0.1), _USER_TIMER_EVENT_OSD_DVR_SHUTDOWN);
 			#endif
 			else

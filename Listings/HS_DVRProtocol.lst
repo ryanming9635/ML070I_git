@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.0.0   HS_DVRPROTOCOL                                                    07/13/2021 08:56:38 PAGE 1   
+C51 COMPILER V9.60.0.0   HS_DVRPROTOCOL                                                    08/24/2021 10:37:19 PAGE 1   
 
 
 C51 COMPILER V9.60.0.0, COMPILATION OF MODULE HS_DVRPROTOCOL
@@ -62,7 +62,7 @@ line level    source
   52   2          BYTE c= RS2_rx();
   53   2          
   54   2          if (c == 0x7E)
-C51 COMPILER V9.60.0.0   HS_DVRPROTOCOL                                                    07/13/2021 08:56:38 PAGE 2   
+C51 COMPILER V9.60.0.0   HS_DVRPROTOCOL                                                    08/24/2021 10:37:19 PAGE 2   
 
   55   2          { 
   56   3            #if(_DEBUG_MESSAGE_UART_Protocol==ON)
@@ -126,7 +126,7 @@ line level    source
  114   3              protocol_len = c;
  115   3              switch (protocol_type)
  116   3              {
-C51 COMPILER V9.60.0.0   HS_DVRPROTOCOL                                                    07/13/2021 08:56:38 PAGE 3   
+C51 COMPILER V9.60.0.0   HS_DVRPROTOCOL                                                    08/24/2021 10:37:19 PAGE 3   
 
  117   4                case MCU_PROTOCOL_CMD_SYS_READY_NOTICE:
  118   4                case MCU_PROTOCOL_CMD_WATCH_DOG_KICK:
@@ -190,7 +190,7 @@ line level    source
  176   4                   if (protocol_data_count == protocol_len) {
  177   5                    protocol_state = PROTOCOL_STATE_CHECKSUM;
  178   5                    #if(_DEBUG_MESSAGE_UART_Protocol==ON) 
-C51 COMPILER V9.60.0.0   HS_DVRPROTOCOL                                                    07/13/2021 08:56:38 PAGE 4   
+C51 COMPILER V9.60.0.0   HS_DVRPROTOCOL                                                    08/24/2021 10:37:19 PAGE 4   
 
                                GraphicsPrint(CYAN,"(2)");
                             #endif
@@ -254,7 +254,7 @@ line level    source
  238   5                  MCUTimerActiveTimerEvent(SEC(0.1),_USER_TIMER_EVENT_OSD_DISTANCE_RESET);
  239   5                  break;
  240   5                case MCU_PROTOCOL_CMD_ENCODER_SET:  
-C51 COMPILER V9.60.0.0   HS_DVRPROTOCOL                                                    07/13/2021 08:56:38 PAGE 5   
+C51 COMPILER V9.60.0.0   HS_DVRPROTOCOL                                                    08/24/2021 10:37:19 PAGE 5   
 
  241   5      
  242   5                  
@@ -318,7 +318,7 @@ line level    source
  300   6                  #if(_DEBUG_MESSAGE_UART_Protocol==ON) 
                           GraphicsPrint(CYAN,"\r\n (CMD:ENCODER_SET TELI)");  
                           Printf("\r\n TEncorder1=%02x",(WORD)protocol_data[0]);
-C51 COMPILER V9.60.0.0   HS_DVRPROTOCOL                                                    07/13/2021 08:56:38 PAGE 6   
+C51 COMPILER V9.60.0.0   HS_DVRPROTOCOL                                                    08/24/2021 10:37:19 PAGE 6   
 
                           Printf("\r\n TDecimal1=%02x",(WORD)protocol_data[1]);       
                           Printf("\r\n TEncorder2=%02x",(WORD)protocol_data[2]);
@@ -382,7 +382,7 @@ line level    source
  362   5      
  363   5                  #if 1
  364   5                  if(protocol_data[0]<5)
-C51 COMPILER V9.60.0.0   HS_DVRPROTOCOL                                                    07/13/2021 08:56:38 PAGE 7   
+C51 COMPILER V9.60.0.0   HS_DVRPROTOCOL                                                    08/24/2021 10:37:19 PAGE 7   
 
  365   5                  protocol_data[0]=5;
  366   5                  
@@ -446,7 +446,7 @@ line level    source
  424   5                case MCU_PROTOCOL_CMD_GET_MCU_FW:           
  425   5                  #if(_DEBUG_MESSAGE_UART_Protocol==ON) 
                           GraphicsPrint(CYAN,"\r\n(CMD:GET_MCU_FW)"); 
-C51 COMPILER V9.60.0.0   HS_DVRPROTOCOL                                                    07/13/2021 08:56:38 PAGE 8   
+C51 COMPILER V9.60.0.0   HS_DVRPROTOCOL                                                    08/24/2021 10:37:19 PAGE 8   
 
                           #endif                        
  428   5                  MCUTimerActiveTimerEvent(SEC(1),_USER_TIMER_EVENT_OSD_GET_MCU_VERSION);
@@ -510,7 +510,7 @@ line level    source
  486   6      
  487   6                    if(GET_DVR_EntrySleepMode()==TRUE)
  488   6                    CLR_DVR_EntrySleepMode();
-C51 COMPILER V9.60.0.0   HS_DVRPROTOCOL                                                    07/13/2021 08:56:38 PAGE 9   
+C51 COMPILER V9.60.0.0   HS_DVRPROTOCOL                                                    08/24/2021 10:37:19 PAGE 9   
 
  489   6                    }
  490   5                    if((PowerFlag==ON)&&(protocol_data[0]==2))
@@ -574,7 +574,7 @@ line level    source
  548   5                    else
  549   5                      DVRChangeCurrent=0x10;
  550   5      
-C51 COMPILER V9.60.0.0   HS_DVRPROTOCOL                                                    07/13/2021 08:56:38 PAGE 10  
+C51 COMPILER V9.60.0.0   HS_DVRPROTOCOL                                                    08/24/2021 10:37:19 PAGE 10  
 
  551   5                #if(_DEBUG_MESSAGE_UART_Protocol==ON) 
                         GraphicsPrint(GREEN,"\r\n(CMD:SET_CHARGE_CURRENT=%02x)",(WORD)DVRChangeCurrent);  
@@ -638,7 +638,7 @@ line level    source
  610   3          }
  611   2        }
  612   1      
-C51 COMPILER V9.60.0.0   HS_DVRPROTOCOL                                                    07/13/2021 08:56:38 PAGE 11  
+C51 COMPILER V9.60.0.0   HS_DVRPROTOCOL                                                    08/24/2021 10:37:19 PAGE 11  
 
  613   1      
  614   1      }
